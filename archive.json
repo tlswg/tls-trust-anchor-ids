@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-03-11T01:54:10.920512+00:00",
+  "timestamp": "2025-03-13T01:54:51.160970+00:00",
   "repo": "tlswg/tls-trust-anchor-ids",
   "labels": [
     {
@@ -517,12 +517,11 @@
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [
-        "enhancement",
-        "trust-anchor-ids"
+        "enhancement"
       ],
       "body": "This is better figured out post-adoption, but if we could do the retry in-handshake, rather than on a new connection, it would be easier for clients to deploy because the retry could be done inside the TLS stack.\r\n\r\nPossible directions:\r\n\r\n1. Add a new message, somewhere after the ServerHello, to trigger an extra roundtrip under handshake encryption.\r\n2. Use HelloRetryRequest. The challenge is that ECH did not opt to encrypt HelloRetryRequest, so that might leak information about the target service. We could potentially define some way to start encrypting that.",
       "createdAt": "2024-07-25T20:10:58Z",
-      "updatedAt": "2024-07-25T23:07:45Z",
+      "updatedAt": "2025-03-12T16:49:15Z",
       "closedAt": null,
       "comments": []
     },
@@ -536,12 +535,11 @@
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [
-        "enhancement",
-        "trust-anchor-ids"
+        "enhancement"
       ],
       "body": "Sometimes X.509 credentials are accompanied with SCTs in the `signed_certificate_timestamp` extension. This isn't widely deployed, but being able to negotiate SCTs would be valuable for much the same reasons. Future credential types may also have a need for separately negotiable sub-parts.\r\n\r\nA brief sketch:\r\n\r\nFirst, allocate a trust anchor ID for each CT log.\r\n\r\nNext, define a `signed_certificate_timestamp` certificate property. It contains something like this. (Replace structure names with something more sensible.)\r\n\r\n```\r\nenum {\r\n    signed_certificate_timestamps(TBD), (2^16-1)\r\n} CertificatePropertyType;\r\n\r\nopaque SerializedSCT<1..2^16-1>;  // From RFC 6962\r\n\r\nstruct {\r\n    SerializedSCT sct;\r\n    TrustAnchorIdentifier trust_anchor;\r\n} SCTTrustAnchorPair;\r\n\r\nSCTTrustAnchorPair SCTTrustAnchorPairList<1..2^16-1>;\r\n```\r\n\r\nNext, we make the trust anchors extension slightly richer. The client can send something like \"I want one of these, two of these, one of these\", etc. The server's advertisement should also be more structured (list of lists of trust anchors), because it needs to communicate \"I have one credential with proofs from A, B, C, another credential with proofs from C, D, E, and another with proofs from D, E, F\".\r\n\r\n\r\n```\r\n// The client's half:\r\nstruct {\r\n    // Semantics: please give me some request_count of trust_anchors\r\n    uint8 request_count;\r\n    TrustAnchorIdentifier trust_anchors<1..2^16-1>;\r\n} TrustAnchorRequest;\r\n\r\n// Semantics: please satisfy *all* of these requests\r\nTrustAnchorRequest TrustAnchorRequestList<1..2^16-1>;\r\n\r\n// The server's half:\r\nstruct {\r\n    // Semantics: I have a credential with associated proofs from each of these trust anchors.\r\n    TrustAnchorIdentifier trust_anchors<1..2^8-1>;\r\n} AvailableCredential;\r\n\r\n// Semantics: I have each of these credentials available.\r\nAvailableCredential AvailableCredentialList<1..2^16-1>;\r\n```\r\n\r\nWe can also go with a more bespoke SCT design, but the nice thing about this it enables other credential types (X.509 is very bad at it) to also have separately negotiable sub-parts.",
       "createdAt": "2024-07-25T20:27:14Z",
-      "updatedAt": "2024-09-27T19:54:55Z",
+      "updatedAt": "2025-03-12T16:49:16Z",
       "closedAt": null,
       "comments": [
         {
@@ -584,12 +582,11 @@
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [
-        "enhancement",
-        "trust-anchor-ids"
+        "enhancement"
       ],
       "body": "See the discussion beginning https://github.com/davidben/merkle-tree-certs/issues/80#issuecomment-2252439958. In looking at rebasing MTCs atop this, we realized that MTCs, since it induces many many individual trust anchors, will effectively only be deployable with the DNS mechanism.\r\n\r\nI think this isn't the end of the world, as MTCs are sufficiently long term that we may have gotten the DNS bits to work. But the original design sketch in MTCs had an extra component. Every certificate had not just an actual trust anchor ID but also a list of trust anchor aliases that also matched it.\r\n\r\nEssentially we were saying that [as long as the certificate isn't expired], any relying party that trusts this other ID can also be assumed to trust this ID. This is kind of a weird scenario for X.509 CAs, but it exactly fits the invariant for MTCs: a client that knows batch number 42 can be assumed to also know batch number 41, 40, etc., down to whatever batches have since expired.\r\n\r\nWe also don't have to do this in this draft and can instead introduce it in the MTCs draft. But it is a little tidier if we do it in the main one.\r\n\r\n(Design history: These aliases eventually grew into trust stores in trust expressions, but got those a lot more complicated to accommodate trust stores changing over time. The trust anchor IDs design tries to avoid that with the retry + DNS dance.)",
       "createdAt": "2024-07-26T16:47:13Z",
-      "updatedAt": "2024-12-14T19:25:14Z",
+      "updatedAt": "2025-03-12T16:49:17Z",
       "closedAt": null,
       "comments": [
         {
@@ -617,12 +614,10 @@
       "author": "bwesterb",
       "authorAssociation": "NONE",
       "assignees": [],
-      "labels": [
-        "trust-anchor-ids"
-      ],
+      "labels": [],
       "body": "> If no certification paths satisfy either extension, the subscriber MAY return a `handshake_failure` alert\r\n\r\nAn alternative would be to mandate that the subscriber always needs to respond with some certificate and its trust anchors as described in \u00a74.3. What is the advantage of the former? There is a clear disadvantage: a client might actually support a trust anchor that the subscriber has available, but it might not have sent it, due to size or privacy constraints.",
       "createdAt": "2024-07-29T09:40:28Z",
-      "updatedAt": "2024-12-14T19:11:39Z",
+      "updatedAt": "2025-03-12T16:49:17Z",
       "closedAt": null,
       "comments": [
         {
@@ -657,12 +652,10 @@
       "author": "bwesterb",
       "authorAssociation": "NONE",
       "assignees": [],
-      "labels": [
-        "trust-anchor-ids"
-      ],
+      "labels": [],
       "body": "I do not think clients should send a lot of trust anchors. Nor do I think we should complicate the standard with a compression mechanism like this. It's good to think about though.\r\n\r\n### Coding subsets of integers\r\n\r\n#### Theoretical limit\r\nFor the moment, let's simplify and assume trust anchors are numbers instead of OIDs. Say there are k=200 anchors with maximum value N=62,203 (number of PENs today). There are N *choose* k possible subsets of anchors to communicate. Thus, we cannot expect to code every subset with less than lg N choose k bits. We can approximate this well using [Stirling's approximation](https://en.wikipedia.org/wiki/Stirling%27s_approximation): 243 bytes.\r\n\r\n#### Rice coding\r\nWe can get quite close to this limit using a very simple method: [Rice coding](https://en.wikipedia.org/wiki/Golomb_coding) of differences. For each delta we compute *q = floor(d / 2^b)* and *r = d mod 2^b*, where *b = round(-lg(-lg(1-k/N))) = 8*. *q* is encoded in unary and *r* in binary, so 600 would be encoded as `0b11001011000`. The `110` encodes *q=2*; the remainder is the remainder *r*. The average size using Rice coding for random subsets is about 244.3 bytes with a 95th percentile of 244.8 bytes.\r\n\r\nRice coding doesn't take advantage of big gaps. If we want to code *{N-200, N-199, ..., N-1}* that takes 255.25 bytes.\r\n\r\n#### Huffman bitlength\r\nA different approach is to write each delta in two parts: first code its bitlength, and then to write the delta (without its most significant bit). For the bitlengths we can use a Huffman code, which can be compressed efficiently using canonical trees and delta coding of the code lengths as in bzip2. (Here is [an implementation](https://github.com/bwesterb/go-ncrlite).)\r\n\r\nFor random subsets this performs worse than Rice coding: 253 bytes on average with a 95th percentile of 255 bytes. However, it encodes *{N-200, N-199, ..., N-1}* in only 50 bytes, and there is room for improvement.\r\n\r\n\r\n\r\n",
       "createdAt": "2024-07-29T10:43:49Z",
-      "updatedAt": "2024-12-17T14:32:42Z",
+      "updatedAt": "2025-03-12T16:49:18Z",
       "closedAt": null,
       "comments": [
         {
@@ -825,12 +818,10 @@
       "author": "bob-beck",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
-      "labels": [
-        "trust-anchor-ids"
-      ],
+      "labels": [],
       "body": "\nCurrently if the client examines a list of TAI's for a server (either via DNS SVCB, previous Encrypted Extensions, or any yet to be determined means) we do not say what the client should do as a result. \n\nIf the client decides it does not have a common intersection with this list it is free to:\n\nA) send an empty TAI extension, and hope the other end sends it updated information where it might now have an option\nB) send no TAI extension, to force the other end to do their legacy behaviour, relying on being able to path build it's way to an ubiquitious trust anchor from what the server sends it in the fallback case. \n\nIf a *server* decides for whatever reason to not advertise a full list of trust anchors, It can not rely on the client retrying if the client decides to fall back to the legacy behaviour. \n\nNot sure if this is fine, or not. ",
       "createdAt": "2025-02-10T19:07:07Z",
-      "updatedAt": "2025-02-23T16:06:19Z",
+      "updatedAt": "2025-03-12T16:49:19Z",
       "closedAt": null,
       "comments": [
         {
@@ -854,16 +845,62 @@
       "id": "I_kwDOKigz-s6q4uAp",
       "title": "s/trust anchor identifier/trust anchor ID/g",
       "url": "https://github.com/tlswg/tls-trust-anchor-ids/issues/92",
+      "state": "CLOSED",
+      "author": "davidben",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "I suspect \"identifier\" came out of preemptive adherence to the style preference to expand acronyms, but surely ID is a well known enough acronym. (Or we can call it \"trust anchor identifier (trust anchor ID)\" the first time and move on.\n\nMostly I would like to have an \"official\" short-ish phrase so we stop being tempted to use \"TAI\" in more formal contexts like API names.",
+      "createdAt": "2025-02-20T18:44:32Z",
+      "updatedAt": "2025-03-12T17:01:23Z",
+      "closedAt": "2025-03-12T17:01:23Z",
+      "comments": []
+    },
+    {
+      "number": 97,
+      "id": "I_kwDOKigz-s6tuRhd",
+      "title": "EncryptedExtensions trust anchor list should be filtered by connection properties",
+      "url": "https://github.com/tlswg/tls-trust-anchor-ids/issues/97",
       "state": "OPEN",
       "author": "davidben",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
-      "labels": [
-        "trust-anchor-ids"
-      ],
-      "body": "I suspect \"identifier\" came out of preemptive adherence to the style preference to expand acronyms, but surely ID is a well known enough acronym. (Or we can call it \"trust anchor identifier (trust anchor ID)\" the first time and move on.\n\nMostly I would like to have an \"official\" short-ish phrase so we stop being tempted to use \"TAI\" in more formal contexts like API names.",
-      "createdAt": "2025-02-20T18:44:32Z",
-      "updatedAt": "2025-02-20T18:44:51Z",
+      "labels": [],
+      "body": "The original intent was that the server's EncryptedExtensions list would still be filtered by trust anchors that were suitable for the connection (e.g. sigalgs) and there's even text alluding to this here:\n\nhttps://tlswg.org/tls-trust-anchor-ids/draft-ietf-tls-trust-anchor-ids.html#section-8.2-2:~:text=If%2C%20for%20example%2C%20a%20server%20uses%20the%20server_name%20extension%20to%20select%20services%2C%20the%20addition%20to%20EncryptedExtensions%20in%20Section%204.3%20is%20expected%20to%20be%20filtered%20by%20server_name.\n\nBut I don't see it in Section 4, so I think we may have forgotten to write that. Filtering the server list helps avoid mishaps on the retry.",
+      "createdAt": "2025-03-12T16:51:38Z",
+      "updatedAt": "2025-03-12T16:51:38Z",
+      "closedAt": null,
+      "comments": []
+    },
+    {
+      "number": 98,
+      "id": "I_kwDOKigz-s6tuXKn",
+      "title": "Work through interaction with ECH",
+      "url": "https://github.com/tlswg/tls-trust-anchor-ids/issues/98",
+      "state": "OPEN",
+      "author": "davidben",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "By its nature, ECH inherently doubles up the parameter space of TLS, and this draft is no exception to that.\n\nThere is some subtlety here that we should probably write down more explictly:\n* If you're just unconditionally sending trust anchors (i.e. you're treating this like CAs), you probably want to send in both inner and outer.\n* If you get trust anchor hints in DNS and use them to tailor the request, it really only applies to the inner name and you probably don't want to send in outer.\n* If you do an EncryptedExtensions retry based on an inner handshake, it should update your inner list\n* If you do an EncryptedExtensions retry based on an outer handshake, it should update your outer list",
+      "createdAt": "2025-03-12T17:01:07Z",
+      "updatedAt": "2025-03-12T17:01:07Z",
+      "closedAt": null,
+      "comments": []
+    },
+    {
+      "number": 99,
+      "id": "I_kwDOKigz-s6tvp1T",
+      "title": "Give more/better guidance on how the client picks what to send in the ClientHello",
+      "url": "https://github.com/tlswg/tls-trust-anchor-ids/issues/99",
+      "state": "OPEN",
+      "author": "davidben",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "See https://mailarchive.ietf.org/arch/msg/tls/_KRqUkXizTjMLE0wMAR1tkxQORQ/ and  https://mailarchive.ietf.org/arch/msg/tls/gNdOdljj6c_Kc_b0MJQqUhz2LkE/",
+      "createdAt": "2025-03-12T19:22:13Z",
+      "updatedAt": "2025-03-12T19:22:29Z",
       "closedAt": null,
       "comments": []
     }
@@ -5334,26 +5371,42 @@
       "id": "PR_kwDOKigz-s6NhRqP",
       "title": "Prefer \"trust anchor ID\" over \"trust anchor identifier\"",
       "url": "https://github.com/tlswg/tls-trust-anchor-ids/pull/96",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "davidben",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [],
       "body": "In deference to Section 3.6 of RFC 7322, the section headings and first instance say \"identifier\" but from then on, just say ID.\r\n\r\nCloses #92.",
       "createdAt": "2025-03-05T18:54:24Z",
-      "updatedAt": "2025-03-05T18:54:24Z",
+      "updatedAt": "2025-03-12T17:01:25Z",
       "baseRepository": "tlswg/tls-trust-anchor-ids",
       "baseRefName": "main",
       "baseRefOid": "b153ede3b8428bc5189dd7e6fe0ce1f8a98094cf",
       "headRepository": "davidben/tls-trust-anchor-ids",
       "headRefName": "abbrev-ids",
       "headRefOid": "eca241fc140ea05dbc3dc552c4b8e4589a15c830",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "closedAt": "2025-03-12T17:01:22Z",
+      "mergedAt": "2025-03-12T17:01:22Z",
+      "mergedBy": "davidben",
+      "mergeCommit": {
+        "oid": "bce0152dff885a580edb281c647b77670f566aa8"
+      },
       "comments": [],
-      "reviews": []
+      "reviews": [
+        {
+          "id": "PRR_kwDOKigz-s6fsZc_",
+          "commit": {
+            "abbreviatedOid": "eca241f"
+          },
+          "author": "bob-beck",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2025-03-12T16:50:40Z",
+          "updatedAt": "2025-03-12T16:50:40Z",
+          "comments": []
+        }
+      ]
     }
   ]
 }
