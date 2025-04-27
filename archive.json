@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-03-30T02:04:24.750084+00:00",
+  "timestamp": "2025-04-27T02:06:52.505126+00:00",
   "repo": "tlswg/tls-trust-anchor-ids",
   "labels": [
     {
@@ -900,9 +900,17 @@
       "labels": [],
       "body": "See https://mailarchive.ietf.org/arch/msg/tls/_KRqUkXizTjMLE0wMAR1tkxQORQ/ and  https://mailarchive.ietf.org/arch/msg/tls/gNdOdljj6c_Kc_b0MJQqUhz2LkE/",
       "createdAt": "2025-03-12T19:22:13Z",
-      "updatedAt": "2025-03-12T19:22:29Z",
+      "updatedAt": "2025-04-24T17:22:39Z",
       "closedAt": null,
-      "comments": []
+      "comments": [
+        {
+          "author": "davidben",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Related: probably should let the client request multiple anchors on retry just for symmetry.",
+          "createdAt": "2025-04-24T17:22:39Z",
+          "updatedAt": "2025-04-24T17:22:39Z"
+        }
+      ]
     }
   ],
   "pulls": [
