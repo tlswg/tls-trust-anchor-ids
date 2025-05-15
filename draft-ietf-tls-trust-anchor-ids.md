@@ -171,10 +171,12 @@ The length of a trust anchor ID's binary representation MUST NOT exceed 255 byte
 
 Relying parties are configured with one or more supported trust anchors. Each trust anchor that participates in this protocol must have an associated trust anchor ID.
 
-When trust anchors are represented as X.509 certificates, the X.509 trust anchor ID extension MAY be used to carry this ID. The trust anchor ID extension has an `extnID` of `id-trustAnchorID` and an `extnValue` containing a DER-encoded TrustAnchorID structure, defined below. The TrustAnchorID is the trust anchor ID's ASN.1 representation, described in {{trust-anchor-ids}}. This extension MUST be non-critical.
+When trust anchors are represented as X.509 certificates, the X.509 trust anchor ID extension MAY be used to carry this ID. The trust anchor ID extension has an `extnID` of `id-pe-trustAnchorID` and an `extnValue` containing a DER-encoded TrustAnchorID structure, defined below. The TrustAnchorID is the trust anchor ID's ASN.1 representation, described in {{trust-anchor-ids}}. This extension MUST be non-critical.
 
 ~~~
-id-trustAnchorID OBJECT IDENTIFIER ::= { TBD }
+id-pe-trustAnchorID OBJECT IDENTIFIER ::=
+    { iso(1) identified-organization(3) dod(6) internet(1)
+      security(5) mechanisms(5) pkix(7) id-pe(1) TBD }
 
 TrustAnchorID ::= RELATIVE-OID
 ~~~
@@ -567,6 +569,20 @@ Author:
 Change controller:
 : IETF
 
+## PKIX Registry Updates
+
+IANA is requested to create the following entry in the SMI Security for PKIX Module Identifier registry, defined by {{!RFC7299}}:
+
+| Decimal | Description                 | References |
+|---------|-----------------------------|------------|
+| TBD     | id-mod-trustAnchorIDs-2025  | [this-RFC] |
+
+IANA is requested to create the following entry in the SMI Security for PKIX Certificate Extension registry, defined by {{!RFC7299}}:
+
+| Decimal | Description         | References |
+|---------|---------------------|------------|
+| TBD     | id-pe-trustAnchorID | [this-RFC] |
+
 ## CertificatePropertyType Registry
 
 [[TODO: Establish a CertificatePropertyType registry.]]
@@ -576,9 +592,31 @@ Change controller:
 # ASN.1 Module
 
 ~~~
-TrustAnchorIDs DEFINITIONS ::= BEGIN
+TrustAnchorIDs-2025
+    { iso(1) identified-organization(3) dod(6) internet(1)
+      security(5) mechanisms(5) pkix(7) id-mod(0)
+      id-mod-trustAnchorIDs-2025(TBD) }
 
-id-trustAnchorID OBJECT IDENTIFIER ::= { TBD }
+DEFINITIONS EXPLICIT TAGS ::=
+BEGIN
+
+IMPORTS
+    EXTENSION
+    FROM PKIX-CommonTypes-2009 -- From [RFC5912]
+    { iso(1) identified-organization(3) dod(6)
+      internet(1) security(5) mechanisms(5) pkix(7)
+      id-mod(0) id-mod-pkixCommon-02(57) };
+
+-- Trust Anchor IDs Certificate Extension
+
+ext-TrustAnchorID EXTENSION ::= {
+    SYNTAX TrustAnchorID
+    IDENTIFIED BY id-pe-trustAnchorID
+    CRITICALITY { FALSE } }
+
+id-pe-trustAnchorID OBJECT IDENTIFIER ::=
+    { iso(1) identified-organization(3) dod(6) internet(1)
+      security(5) mechanisms(5) pkix(7) id-pe(1) TBD }
 
 TrustAnchorID ::= RELATIVE-OID
 
