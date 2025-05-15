@@ -5,10 +5,10 @@
 Transport Layer Security                                         B. Beck
 Internet-Draft                                               D. Benjamin
 Intended status: Standards Track                              D. O'Brien
-Expires: 13 September 2025                                    Google LLC
+Expires: 16 November 2025                                     Google LLC
                                                               K. Nekritz
                                                                     Meta
-                                                           12 March 2025
+                                                             15 May 2025
 
 
                       TLS Trust Anchor Identifiers
@@ -59,7 +59,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 13 September 2025.
+   This Internet-Draft will expire on 16 November 2025.
 
 Copyright Notice
 
@@ -116,7 +116,8 @@ Table of Contents
    10. IANA Considerations
      10.1.  TLS ExtensionType Updates
      10.2.  Media Type Updates
-     10.3.  CertificatePropertyType Registry
+     10.3.  PKIX Registry Updates
+     10.4.  CertificatePropertyType Registry
    11. References
      11.1.  Normative References
      11.2.  Informative References
@@ -284,13 +285,15 @@ Table of Contents
 
    When trust anchors are represented as X.509 certificates, the X.509
    trust anchor ID extension MAY be used to carry this ID.  The trust
-   anchor ID extension has an extnID of id-trustAnchorID and an
+   anchor ID extension has an extnID of id-pe-trustAnchorID and an
    extnValue containing a DER-encoded TrustAnchorID structure, defined
    below.  The TrustAnchorID is the trust anchor ID's ASN.1
    representation, described in Section 3.  This extension MUST be non-
    critical.
 
-   id-trustAnchorID OBJECT IDENTIFIER ::= { TBD }
+   id-pe-trustAnchorID OBJECT IDENTIFIER ::=
+       { iso(1) identified-organization(3) dod(6) internet(1)
+         security(5) mechanisms(5) pkix(7) id-pe(1) TBD }
 
    TrustAnchorID ::= RELATIVE-OID
 
@@ -1104,7 +1107,31 @@ Table of Contents
 
    Change controller:  IETF
 
-10.3.  CertificatePropertyType Registry
+10.3.  PKIX Registry Updates
+
+   IANA is requested to create the following entry in the SMI Security
+   for PKIX Module Identifier registry, defined by [RFC7299]:
+
+           +=========+============================+============+
+           | Decimal | Description                | References |
+           +=========+============================+============+
+           | TBD     | id-mod-trustAnchorIDs-2025 | [this-RFC] |
+           +---------+----------------------------+------------+
+
+                                  Table 2
+
+   IANA is requested to create the following entry in the SMI Security
+   for PKIX Certificate Extension registry, defined by [RFC7299]:
+
+              +=========+=====================+============+
+              | Decimal | Description         | References |
+              +=========+=====================+============+
+              | TBD     | id-pe-trustAnchorID | [this-RFC] |
+              +---------+---------------------+------------+
+
+                                 Table 3
+
+10.4.  CertificatePropertyType Registry
 
    [[TODO: Establish a CertificatePropertyType registry.]]
 
@@ -1144,6 +1171,10 @@ Table of Contents
               Considerations for Internet Protocols", RFC 6973,
               DOI 10.17487/RFC6973, July 2013,
               <https://www.rfc-editor.org/rfc/rfc6973>.
+
+   [RFC7299]  Housley, R., "Object Identifier Registry for the PKIX
+              Working Group", RFC 7299, DOI 10.17487/RFC7299, July 2014,
+              <https://www.rfc-editor.org/rfc/rfc7299>.
 
    [RFC7468]  Josefsson, S. and S. Leonard, "Textual Encodings of PKIX,
               PKCS, and CMS Structures", RFC 7468, DOI 10.17487/RFC7468,
@@ -1219,9 +1250,31 @@ Table of Contents
 
 Appendix A.  ASN.1 Module
 
-   TrustAnchorIDs DEFINITIONS ::= BEGIN
+   TrustAnchorIDs-2025
+       { iso(1) identified-organization(3) dod(6) internet(1)
+         security(5) mechanisms(5) pkix(7) id-mod(0)
+         id-mod-trustAnchorIDs-2025(TBD) }
 
-   id-trustAnchorID OBJECT IDENTIFIER ::= { TBD }
+   DEFINITIONS EXPLICIT TAGS ::=
+   BEGIN
+
+   IMPORTS
+       EXTENSION
+       FROM PKIX-CommonTypes-2009 -- From [RFC5912]
+       { iso(1) identified-organization(3) dod(6)
+         internet(1) security(5) mechanisms(5) pkix(7)
+         id-mod(0) id-mod-pkixCommon-02(57) };
+
+   -- Trust Anchor IDs Certificate Extension
+
+   ext-TrustAnchorID EXTENSION ::= {
+       SYNTAX TrustAnchorID
+       IDENTIFIED BY id-pe-trustAnchorID
+       CRITICALITY { FALSE } }
+
+   id-pe-trustAnchorID OBJECT IDENTIFIER ::=
+       { iso(1) identified-organization(3) dod(6) internet(1)
+         security(5) mechanisms(5) pkix(7) id-pe(1) TBD }
 
    TrustAnchorID ::= RELATIVE-OID
 
