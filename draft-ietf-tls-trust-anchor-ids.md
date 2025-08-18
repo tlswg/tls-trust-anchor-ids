@@ -174,7 +174,7 @@ Relying parties are configured with one or more supported trust anchors. Each tr
 
 When trust anchors are represented as X.509 certificates, the X.509 trust anchor ID extension MAY be used to carry this ID. The trust anchor ID extension has an `extnID` of `id-pe-trustAnchorID` and an `extnValue` containing a DER-encoded TrustAnchorID structure, defined below. The TrustAnchorID is the trust anchor ID's ASN.1 representation, described in {{trust-anchor-ids}}. This extension MUST be non-critical.
 
-~~~
+~~~ asn.1
 id-pe-trustAnchorID OBJECT IDENTIFIER ::=
     { iso(1) identified-organization(3) dod(6) internet(1)
       security(5) mechanisms(5) pkix(7) id-pe(1) TBD }
@@ -202,7 +202,7 @@ This section defines the `trust_anchors` extension, which is sent in the ClientH
 
 The `trust_anchors` extension is defined using the structures below:
 
-~~~
+~~~ tls-presentation
 enum { trust_anchors(TBD), (2^16-1) } ExtensionType;
 
 opaque TrustAnchorID<1..2^8-1>;
@@ -304,7 +304,7 @@ The extensibility aims to simplify application deployment as PKI mechanisms evol
 
 A CertificatePropertyList is defined using the TLS presentation language ({{Section 3 of !RFC8446}}) below:
 
-~~~
+~~~ tls-presentation
 enum { trust_anchor_id(0), (2^16-1) } CertificatePropertyType;
 
 struct {
@@ -327,7 +327,7 @@ A certification path with its associated CertificatePropertyList may be represen
 as follows, where "stricttextualmsg" and "eol" are as defined in
 {{Section 3 of !RFC7468}}:
 
-~~~
+~~~ abnf
 certchainwithproperties = stricttextualmsg eol stricttextualmsg
                           *(eol stricttextualmsg)
 ~~~
@@ -592,7 +592,7 @@ IANA is requested to create the following entry in the SMI Security for PKIX Cer
 
 # ASN.1 Module
 
-~~~
+~~~ asn.1
 TrustAnchorIDs-2025
     { iso(1) identified-organization(3) dod(6) internet(1)
       security(5) mechanisms(5) pkix(7) id-mod(0)
