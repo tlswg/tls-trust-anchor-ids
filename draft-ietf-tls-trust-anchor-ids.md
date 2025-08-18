@@ -23,8 +23,8 @@ author:
  -
     ins: "B. Beck"
     name: "Bob Beck"
-    organization: "Google LLC"
-    email: bbe@google.com
+    organization: "OpenSSL"
+    email: beck@openssl.org
 
  -
     ins: "D. Benjamin"
