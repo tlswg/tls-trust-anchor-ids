@@ -3,9 +3,10 @@
 
 
 Transport Layer Security                                         B. Beck
-Internet-Draft                                               D. Benjamin
-Intended status: Standards Track                              D. O'Brien
-Expires: 19 February 2026                                     Google LLC
+Internet-Draft                                                   OpenSSL
+Intended status: Standards Track                             D. Benjamin
+Expires: 19 February 2026                                     D. O'Brien
+                                                              Google LLC
                                                               K. Nekritz
                                                                     Meta
                                                           18 August 2025
@@ -1289,8 +1290,8 @@ Acknowledgements
 Authors' Addresses
 
    Bob Beck
-   Google LLC
-   Email: bbe@google.com
+   OpenSSL
+   Email: beck@openssl.org
 
 
    David Benjamin
