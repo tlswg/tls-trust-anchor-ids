@@ -5,8 +5,9 @@
 Transport Layer Security                                         B. Beck
 Internet-Draft                                                   OpenSSL
 Intended status: Standards Track                             D. Benjamin
-Expires: 19 February 2026                                     D. O'Brien
-                                                              Google LLC
+Expires: 19 February 2026                                     Google LLC
+                                                              D. O'Brien
+                                                                        
                                                               K. Nekritz
                                                                     Meta
                                                           18 August 2025
@@ -1300,8 +1301,7 @@ Authors' Addresses
 
 
    Devon O'Brien
-   Google LLC
-   Email: asymmetric@google.com
+   Email: devon.obrien@gmail.com
 
 
    Kyle Nekritz
