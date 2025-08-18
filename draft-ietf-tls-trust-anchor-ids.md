@@ -269,7 +269,7 @@ The wire format of the SvcParamValue is determined by prefixing each trust ancho
 
 For example, if a TLS server has three available certification paths issued by `32473.1`, `32473.2.1`, and `32473.2.2`, respectively, the DNS record in presentation syntax may be:
 
-~~~ dns
+~~~ dns-rr
 example.net.  7200  IN SVCB 3 server.example.net. (
     tls-trust-anchors=32473.1,32473.2.1,32473.2.2 )
 ~~~
