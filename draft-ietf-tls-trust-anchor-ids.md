@@ -35,8 +35,7 @@ author:
  -
     ins: "D. O'Brien"
     name: "Devon O'Brien"
-    organization: "Google LLC"
-    email: asymmetric@google.com
+    email: devon.obrien@gmail.com
 
  -
     ins: "K. Nekritz"
