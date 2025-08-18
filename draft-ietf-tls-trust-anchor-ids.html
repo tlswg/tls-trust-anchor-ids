@@ -1544,7 +1544,7 @@ TrustAnchorID TrustAnchorIDList&lt;0..2^16-1&gt;;
 <p id="section-5.1-2">The presentation <code>value</code> of the SvcParamValue is a non-empty comma-separated list (<span><a href="https://rfc-editor.org/rfc/rfc9460#appendix-A.1" class="relref">Appendix A.1</a> of [<a href="#RFC9460" class="cite xref">RFC9460</a>]</span>). Each element of the list is a trust anchor ID in the ASCII representation defined in <a href="#trust-anchor-ids" class="auto internal xref">Section 3</a>. Any other <code>value</code> is a syntax error. To enable simpler parsing, this SvcParam MUST NOT contain escape sequences.<a href="#section-5.1-2" class="pilcrow">¶</a></p>
 <p id="section-5.1-3">The wire format of the SvcParamValue is determined by prefixing each trust anchor ID with its length as a single octet, then concatenating each of these length-value pairs to form the SvcParamValue. These pairs MUST exactly fill the SvcParamValue; otherwise, the SvcParamValue is malformed.<a href="#section-5.1-3" class="pilcrow">¶</a></p>
 <p id="section-5.1-4">For example, if a TLS server has three available certification paths issued by <code>32473.1</code>, <code>32473.2.1</code>, and <code>32473.2.2</code>, respectively, the DNS record in presentation syntax may be:<a href="#section-5.1-4" class="pilcrow">¶</a></p>
-<div class="lang-dns sourcecode" id="section-5.1-5">
+<div class="lang-dns-rr sourcecode" id="section-5.1-5">
 <pre>
 example.net.  7200  IN SVCB 3 server.example.net. (
     tls-trust-anchors=32473.1,32473.2.1,32473.2.2 )
