@@ -20,14 +20,14 @@ To facilitate early experiments with Trust Anchor Identifiers, the following tab
 | 11129.9.2       | CN=GTS Root R2,O=Google Trust Services LLC,C=US | https://crt.sh/?caid=48271   |
 | 11129.9.3       | CN=GTS Root R3,O=Google Trust Services LLC,C=US | https://crt.sh/?caid=48268   |
 | 11129.9.4       | CN=GTS Root R4,O=Google Trust Services LLC,C=US | https://crt.sh/?caid=48274   |
-| 11129.9.5       | C=US, O=Google Trust Services, CN=WR1           | https://crt.sh/?caid=286242  |
-| 11129.9.6       | C=US, O=Google Trust Services, CN=WR2           | https://crt.sh/?caid=286243  |
-| 11129.9.7       | C=US, O=Google Trust Services, CN=WR3           | https://crt.sh/?caid=286244  |
-| 11129.9.8       | C=US, O=Google Trust Services, CN=WR4           | https://crt.sh/?caid=286245  |
-| 11129.9.9       | C=US, O=Google Trust Services, CN=WR5           | https://crt.sh/?caid=286246  |
-| 11129.9.10      | C=US, O=Google Trust Services, CN=WE1           | https://crt.sh/?caid=286236  |
-| 11129.9.11      | C=US, O=Google Trust Services, CN=WE2           | https://crt.sh/?caid=286237  |
-| 11129.9.12      | C=US, O=Google Trust Services, CN=WE3           | https://crt.sh/?caid=286239  |
-| 11129.9.13      | C=US, O=Google Trust Services, CN=WE4           | https://crt.sh/?caid=286240  |
-| 11129.9.14      | C=US, O=Google Trust Services, CN=WE5           | https://crt.sh/?caid=286241  |
-| 11129.9.15      | C=US, O=Google Trust Services, CN=AE1           | https://crt.sh/?caid=286234  |
+| 11129.9.5       | CN=WR1,O=Google Trust Services,C=US             | https://crt.sh/?caid=286242  |
+| 11129.9.6       | CN=WR2,O=Google Trust Services,C=US             | https://crt.sh/?caid=286243  |
+| 11129.9.7       | CN=WR3,O=Google Trust Services,C=US             | https://crt.sh/?caid=286244  |
+| 11129.9.8       | CN=WR4,O=Google Trust Services,C=US             | https://crt.sh/?caid=286245  |
+| 11129.9.9       | CN=WR5,O=Google Trust Services,C=US             | https://crt.sh/?caid=286246  |
+| 11129.9.10      | CN=WE1,O=Google Trust Services,C=US             | https://crt.sh/?caid=286236  |
+| 11129.9.11      | CN=WE2,O=Google Trust Services,C=US             | https://crt.sh/?caid=286237  |
+| 11129.9.12      | CN=WE3,O=Google Trust Services,C=US             | https://crt.sh/?caid=286239  |
+| 11129.9.13      | CN=WE4,O=Google Trust Services,C=US             | https://crt.sh/?caid=286240  |
+| 11129.9.14      | CN=WE5,O=Google Trust Services,C=US             | https://crt.sh/?caid=286241  |
+| 11129.9.15      | CN=AE1,O=Google Trust Services,C=US             | https://crt.sh/?caid=286234  |
