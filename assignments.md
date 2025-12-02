@@ -59,3 +59,22 @@ To facilitate early experiments with Trust Anchor Identifiers, the following tab
 | 44947.2.26      | CN=YR1,O=Let's Encrypt,C=US                             | https://crt.sh/?caid=432476  |
 | 44947.2.27      | CN=YR2,O=Let's Encrypt,C=US                             | https://crt.sh/?caid=432477  |
 | 44947.2.28      | CN=YR3,O=Let's Encrypt,C=US                             | https://crt.sh/?caid=432480  |
+| 52580.200109.1.1  | DigiCert High Assurance EV Root CA                    | https://crt.sh/?id=46         |
+| 52580.200109.1.2  | DigiCert Global Root CA                               | https://crt.sh/?id=853428     |
+| 52580.200109.1.3  | DigiCert Assured ID Root CA.                          | https://crt.sh/?id=348115     |
+| 52580.200109.1.4  | QuoVadis Root CA 2                                    | https://crt.sh/?id=2472       |
+| 52580.200109.1.5  | QuoVadis Root CA 3                                    | https://crt.sh/?id=6929       |
+| 52580.200109.1.6  | QuoVadis Root CA 1 G3                                 | https://crt.sh/?id=8564337    |
+| 52580.200109.1.7  | QuoVadis Root CA 2 G3                                 | https://crt.sh/?id=6006153    |
+| 52580.200109.1.8  | QuoVadis Root CA 3 G3                                 | https://crt.sh/?id=8586094    |
+| 52580.200109.1.9  | DigiCert Global Root G2                               | https://crt.sh/?id=8656329    |
+| 52580.200109.1.10 | DigiCert Global Root G3                               | https://crt.sh/?id=8568700    |
+| 52580.200109.1.11 | DigiCert Trusted Root G4                              | https://crt.sh/?id=8559455    |
+| 52580.200109.1.12 | DigiCert Assured ID Root G2                           | https://crt.sh/?id=8559057    |
+| 52580.200109.1.13 | DigiCert Assured ID Root G3                           | https://crt.sh/?id=8569831    |
+| 52580.200109.1.14 | DigiCert Client RSA4096 Root G5                       | https://crt.sh/?id=4478389354 |
+| 52580.200109.1.15 | DigiCert SMIME ECC P384 Root G5                       | https://crt.sh/?id=4433774571 |
+| 52580.200109.1.16 | DigiCert SMIME RSA4096 Root G5                        | https://crt.sh/?id=4433776671 |
+| 52580.200109.1.17 | DigiCert Client ECC P384 Root G5                      | https://crt.sh/?id=4478383676 |
+| 52580.200109.1.18 | DigiCert TLS RSA4096 Root G5                          | https://crt.sh/?id=4433779285 |
+| 52580.200109.1.19 | DigiCert TLS ECC P384 Root G5                         | https://crt.sh/?id=4433777742 |
