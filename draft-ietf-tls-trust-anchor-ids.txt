@@ -5,12 +5,12 @@
 Transport Layer Security                                         B. Beck
 Internet-Draft                                                   OpenSSL
 Intended status: Standards Track                             D. Benjamin
-Expires: 22 May 2026                                          Google LLC
+Expires: 5 June 2026                                          Google LLC
                                                               D. O'Brien
                                                                         
                                                               K. Nekritz
                                                                     Meta
-                                                        18 November 2025
+                                                         2 December 2025
 
 
                       TLS Trust Anchor Identifiers
@@ -61,7 +61,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 22 May 2026.
+   This Internet-Draft will expire on 5 June 2026.
 
 Copyright Notice
 
