@@ -78,3 +78,7 @@ To facilitate early experiments with Trust Anchor Identifiers, the following tab
 | 52580.200109.1.17 | DigiCert Client ECC P384 Root G5                      | https://crt.sh/?id=4478383676 |
 | 52580.200109.1.18 | DigiCert TLS RSA4096 Root G5                          | https://crt.sh/?id=4433779285 |
 | 52580.200109.1.19 | DigiCert TLS ECC P384 Root G5                         | https://crt.sh/?id=4433777742 |
+| 52580.200109.1.100 | DigiCert TLS RSA SHA256 2020 CA1                     | https://crt.sh/?id=4385364571 |
+| 52580.200109.1.101 | DigiCert Secure Site ECC CA-1                        | https://crt.sh/?id=1211418193 |
+| 52580.200109.1.102 | DigiCert Global G2 TLS RSA SHA256 2020 CA1           | https://crt.sh/?id=4304297828 |
+| 52580.200109.1.103 | DigiCert Global G3 TLS ECC SHA384 2020 CA1           | https://crt.sh/?id=4385364572 |
