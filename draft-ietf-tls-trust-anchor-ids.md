@@ -167,6 +167,46 @@ Trust anchor IDs SHOULD be allocated by the CA operator and common among relying
 
 The length of a trust anchor ID's binary representation MUST NOT exceed 255 bytes. It SHOULD be significantly shorter, for bandwidth efficiency.
 
+## Trust Anchor Ranges
+
+This document additionally defines a trust anchor range, which describes a series of related trust anchor IDs. A trust anchor range is defined by three properties:
+
+* A trust anchor ID `base`
+* Two non-negative, 64-bit integers `min` and `max`
+
+A trust anchor range is said to *contain* some trust anchor ID, `id` if the `id`, as a relative OID, is the concatenation of `base` and some integer component between `min` and `max`, inclusive.
+
+The following procedure can be used to perform this check. It succeeds if the range contains `id` and fails otherwise:
+
+1. Check that `base` does not end in the middle of an OID component. That is, check that the most-significant bit of the last byte of `base` is unset. If it is set, fail the procedure.
+2. Check that `base` is a prefix of `id`. If not, fail the procedure. Let `rest` be `id` with the `base` prefix removed.
+3. Decode `rest` as a minimally-encoded, big-endian, base-128 OID component as follows:
+   1. If `rest` is empty, fail the procedure.
+   2. If the most-significant bit of the last byte of `rest` is set, fail the procedure.
+   3. If the most-significant bit of any other byte of `rest` is unset, fail the procedure.
+   4. If the first byte of `rest` is 0x80, fail the procedure.
+   5. Set `v` to zero. Throughout this procedure, `v` will be less than 2<sup>64</sup>.
+   6. For each byte `b` of `rest`:
+      1. If `v` is greater than or equal to 2<sup>57</sup>, fail the procedure.
+      2. Set `v` to `(v << 7) + (b & 127)`.
+4. Check if `min <= v <= max`. If this is not true, fail the procedure. Otherwise, the procedure succeeds.
+
+## Authenticating Party Configuration
+
+Authenticating parties are configured with one or more candidate certification paths to present in TLS, in some preference order. This preference order is used when multiple candidate paths are usable for a connection. For example, the authenticating party may prefer candidates that minimize message size or have more performant private keys.
+
+Each candidate path that participates in this protocol must be configured with two properties:
+
+* The trust anchor ID for its corresponding trust anchor.
+
+* Optionally, a list of additional trust anchor ranges ({{trust-anchor-ranges}}) that also imply support for this path.
+
+These properties allow certificate selection (see {{certificate-selection}}) to consider this path when a relying party advertises a matching trust anchor ID. It is RECOMMENDED, though not required, that this information come from the CA. {{certificate-properties}} defines a RECOMMENDED format for this information, along with an optional ACME {{!RFC8555}} extension for CAs to send it.
+
+The path's additional trust anchor ranges can optionally be used to optimize relying party messages: In some TLS deployments, all relying parties that accept one trust anchor may be known to also accept some other, related trust anchor. A TLS deployment can incorporate this knowledge into certificate selection to reduce the number of IDs that a relying party must send, as described in {{overview}}.
+
+Authenticating parties MAY have candidate certification paths without associated trust anchor IDs, but such paths will not participate in this protocol. Those paths MAY participate in other trust anchor negotiation protocols, such as the `certificate_authorities` extension.
+
 ## Relying Party Configuration
 
 Relying parties are configured with one or more supported trust anchors. Each trust anchor that participates in this protocol must have an associated trust anchor ID.
@@ -185,14 +225,6 @@ Relying parties MAY instead or additionally configure trust anchor IDs via some 
 
 Relying parties MAY support trust anchors without associated trust anchor IDs, but such trust anchors will not participate in this protocol. Those trust anchors MAY participate in other trust anchor negotiation protocols, such as the `certificate_authorities` extension.
 
-## Authenticating Party Configuration
-
-Authenticating parties are configured with one or more candidate certification paths to present in TLS, in some preference order. This preference order is used when multiple candidate paths are usable for a connection. For example, the authenticating party may prefer candidates that minimize message size or have more performant private keys.
-
-Each candidate path which participates in this protocol must be configured with the trust anchor ID for its corresponding trust anchor. It is RECOMMENDED, though not required, that this information come from the CA. {{certificate-properties}} defines a RECOMMENDED format for this information, along with an optional ACME {{!RFC8555}} extension for CAs to send it.
-
-Authenticating parties MAY have candidate certification paths without associated trust anchor IDs, but such paths will not participate in this protocol. Those paths MAY participate in other trust anchor negotiation protocols, such as the `certificate_authorities` extension.
-
 # TLS Extension
 
 This section defines the `trust_anchors` extension, which is sent in the ClientHello, EncryptedExtensions, CertificateRequest, and Certificate messages in TLS 1.3 or later.
@@ -209,7 +241,7 @@ opaque TrustAnchorID<1..2^8-1>;
 TrustAnchorID TrustAnchorIDList<0..2^16-1>;
 ~~~
 
-When the extension is sent in the ClientHello or CertificateRequest messages, the `extension_data` is a TrustAnchorIDList and indicates that the sender supports the specified trust anchors. The list is unordered, and MAY be empty. Each TrustAnchorID uses the binary representation, as described in {{trust-anchor-ids}}.
+When the extension is sent in the ClientHello or CertificateRequest messages, the `extension_data` is a TrustAnchorIDList and indicates that the sender supports the specified trust anchors. The list is unordered, and MAY be empty. Each TrustAnchorID uses the binary representation, as described in {{trust-anchor-ids}}. In applications whose authenticating parties configure additional trust anchor ranges (see {{authenticating-party-configuration}}), one trust anchor ID can imply multiple trust anchors. For efficiency, relying parties MAY then omit trust anchor IDs that would be implied by others in the list.
 
 When the extension is sent in EncryptedExtensions, the `extension_data` is a TrustAnchorIDList containing the list of trust anchors that server has available, in the server's preference order, and MUST NOT be empty.
 
@@ -219,7 +251,11 @@ When the extension is sent in Certificate, the `extension_data` MUST be empty an
 
 A `trust_anchors` extension in the ClientHello or CertificateRequest is processed similarly to the `certificate_authorities` extension. The relying party indicates some set of supported trust anchors in the ClientHello or CertificateRequest `trust_anchors` extension. The authenticating party then selects a certificate from its candidate certification paths (see {{authenticating-party-configuration}}), as described in {{Section 4.4.2.2 of RFC8446}} and {{Section 4.4.2.3 of RFC8446}}. This process is extended as follows:
 
-If the ClientHello or CertificateRequest contains a `trust_anchors` extension, the authenticating party SHOULD send a certification path whose trust anchor ID appears in the relying party's `trust_anchors` extension.
+If the ClientHello or CertificateRequest contains a `trust_anchors` extension, the authenticating party SHOULD send a certification path such that either:
+
+* The path's trust anchor ID appears in the relying party's `trust_anchors` extension.
+
+* One of the path's additional trust anchor ranges contains some ID in the relying party's `trust_anchors` extension.
 
 If the ClientHello or CertificateRequest contains both `trust_anchors` and `certificate_authorities`, certification paths that satisfy either extension's criteria may be used. This additionally applies to future extensions which play a similar role.
 
@@ -256,7 +292,7 @@ This mechanism also allows servers to safely send fallback certificates that may
 
 # DNS Service Parameter
 
-This section defines the `tls-trust-anchors` SvcParamKey {{!RFC9460}}. TLS servers can use this to advertise their available trust anchors in DNS, and aid the client in formulating its `trust_anchors` extension (see {{retry-mechanism}}). This allows TLS deployments to support clients with many trust anchors without incurring the overhead of a reconnect.
+This section defines the `tls-trust-anchors` SvcParamKey {{!RFC9460}}. TLS servers can use this to advertise their available trust anchors in DNS, and aid the client in formulating its `trust_anchors` extension (see {{retry-mechanism}})ontg. This allows TLS deployments to support clients with many trust anchors without incurring the overhead of a reconnect.
 
 ## Syntax
 
@@ -304,7 +340,10 @@ The extensibility aims to simplify application deployment as PKI mechanisms evol
 A CertificatePropertyList is defined using the TLS presentation language ({{Section 3 of !RFC8446}}) below:
 
 ~~~ tls-presentation
-enum { trust_anchor_id(0), (2^16-1) } CertificatePropertyType;
+enum {
+    trust_anchor_id(0),
+    additional_trust_anchor_ranges(1)(2^16-1)
+} CertificatePropertyType;
 
 struct {
     CertificatePropertyType type;
@@ -316,9 +355,30 @@ CertificateProperty CertificatePropertyList<0..2^16-1>;
 
 The entries in a CertificatePropertyList MUST be sorted numerically by `type` and MUST NOT contain values with a duplicate `type`. Inputs that do not satisfy these invariants are syntax errors and MUST be rejected by parsers.
 
-This document defines a single property, `trust_anchor_id`. The `data` field of the property contains the binary representation of the trust anchor ID of the certification path's trust anchor, as described in {{authenticating-party-configuration}}. Future documents may define other properties for use with other mechanisms.
+This document defines two properties:
 
-Authenticating parties MUST ignore properties with unrecognized CertificatePropertyType values.
+* `trust_anchor_id`, defined in {{trust-anchor-id-property}}
+* `additional_trust_anchor_ranges`, defined in {{additional-trust-anchor-ranges}}
+
+Future documents MAY define other properties for use with other mechanisms. Such a document MUST define the format of the `data` field and how authenticating parties interpret the property. Authenticating parties MUST ignore properties with unrecognized CertificatePropertyType values.
+
+## Trust Anchor ID Property
+
+The `trust_anchor_id` property's `data` field contains the binary representation of the trust anchor ID of the certification path's trust anchor, as described in {{authenticating-party-configuration}}.
+
+## Additional Trust Anchor Ranges
+
+The `additional_trust_anchor_ranges` property's `data` field contains the certification path's additional trust anchor ranges, as described in {{authenticating-party-configuration}}. The ranges are described in a TrustAnchorRangeList structure, defined below. Each TrustAnchorRange structure describes a trust anchor range, as defined in {{trust-anchor-ranges}}.
+
+~~~
+struct {
+    TrustAnchorID base;
+    uint64 min;
+    uint64 max;
+} TrustAnchorRange;
+
+TrustAnchorRange TrustAnchorRangeList<1..2^16-1>;
+~~~
 
 ## Media Type
 
