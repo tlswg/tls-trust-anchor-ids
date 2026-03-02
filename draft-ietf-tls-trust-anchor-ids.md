@@ -292,7 +292,7 @@ This mechanism also allows servers to safely send fallback certificates that may
 
 # DNS Service Parameter
 
-This section defines the `tls-trust-anchors` SvcParamKey {{!RFC9460}}. TLS servers can use this to advertise their available trust anchors in DNS, and aid the client in formulating its `trust_anchors` extension (see {{retry-mechanism}})ontg. This allows TLS deployments to support clients with many trust anchors without incurring the overhead of a reconnect.
+This section defines the `tls-trust-anchors` SvcParamKey {{!RFC9460}}. TLS servers can use this to advertise their available trust anchors in DNS, and aid the client in formulating its `trust_anchors` extension (see {{retry-mechanism}}). This allows TLS deployments to support clients with many trust anchors without incurring the overhead of a reconnect.
 
 ## Syntax
 
