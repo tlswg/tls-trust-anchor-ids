@@ -321,7 +321,7 @@ Groups specific to a CA operator will cover fewer trust anchors, so a relying pa
 
 Over time, a CA operator may add or retire CAs, or relying parties may trust or distrust CAs. In this case, existing trust anchor groups SHOULD NOT be redefined, but the following versioning scheme MAY be used to reflect these and other changes:
 
-The defining party allocates an OID arc to define a series of related trust anchor groups. Each version of the group is identified by this OID arc, with an integer version number component appended. For example, if a CA operator defines a trust anchor group series with the OID arc `32473.2`, individual groups would have IDs `32473.2.0`, `32473.2.1`, `32473.2.2`, and so on.
+The defining party allocates an OID arc to define a series of related trust anchor groups. Each version of the group is identified by this OID arc, with an integer version number component appended. For example, if a CA operator defines a trust anchor group series with the OID arc `32473.2`, the individual groups would have IDs `32473.2.0`, `32473.2.1`, `32473.2.2`, and so on.
 
 When describing trust anchor group inclusions, a CA can use a trust anchor range ({{trust-anchor-ranges}}) to describe which group versions include a candidate certification path's trust anchor:
 
