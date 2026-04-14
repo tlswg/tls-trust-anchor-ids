@@ -268,7 +268,7 @@ If the ClientHello or CertificateRequest contains a `trust_anchors` extension, t
 
 * The path's trust anchor ID appears in the relying party's `trust_anchors` extension.
 
-* One in the path's trust anchor group inclusions contains some ID in the relying party's `trust_anchors` extension.
+* One of the path's trust anchor group inclusions contains some ID in the relying party's `trust_anchors` extension.
 
 If the ClientHello or CertificateRequest contains both `trust_anchors` and `certificate_authorities`, certification paths that satisfy either extension's criteria may be used. This additionally applies to future extensions which play a similar role.
 
@@ -307,7 +307,7 @@ This mechanism also allows servers to safely send fallback certificates that may
 
 A trust anchor ID is typically much smaller than the corresponding X.509 name. Depending on the number of trust anchors, this can be sufficient to efficiently represent relying party state.
 
-PKIs where further size savings are needed can use trust anchor groups ({{trust-anchor-ids}}). Trust anchor groups can require additional coordination within a PKI. To be usable, a trust anchor group must be known to relying parties (see {{relying-party-configuration}}) and configured in with candidate paths in authenticating parties (see {{authenticating-party-configuration}}). However, they can further reduce relying party message sizes by allowing one ID to signal multiple trust anchors.
+PKIs where further size savings are needed can use trust anchor groups ({{trust-anchor-ids}}). Trust anchor groups require additional coordination within a PKI. To be usable, a trust anchor group must be known to relying parties (see {{relying-party-configuration}}) and configured with candidate paths in authenticating parties (see {{authenticating-party-configuration}}). However, they can further reduce relying party message sizes by allowing one ID to signal multiple trust anchors.
 
 This section does not prescribe how to define trust anchor groups, but gives some general guidance:
 
@@ -329,7 +329,7 @@ When describing trust anchor group inclusions, a CA can use a trust anchor range
 
 * If the trust anchor is in the latest version of the group, at the time of issuance, the CA sets `min` to the first version which includes the trust anchor, and `max` to 2<sup>64</sup>-1.
 
-In the second case, if the trust anchor is removed from later versions, the unlimited upper bound will become incorrect. The TLS software may then misinterpret a relying party advertising a later version as supporting this trust anchor. Such signaling errors may result in the wrong certification path being selected. This can be mitigated in several ways:
+In the second case, if the trust anchor is removed from later versions, the unlimited upper bound will become incorrect. The authenticating party TLS software may then misinterpret a relying party advertising a later version as supporting this trust anchor. Such signaling errors may result in the wrong certification path being selected. This can be mitigated in several ways:
 
 * If the authenticating party prefers a certificate from some replacement CA over the certificate from the removed CA, the correct certificate will still be chosen.
 
