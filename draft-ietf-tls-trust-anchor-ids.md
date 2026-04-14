@@ -317,11 +317,11 @@ A trust anchor group specifies a collection of trust anchors that are all truste
 
 * A relying party vendor might depend a trust anchor group for the trust anchors its relying parties trust.
 
-Groups specific to a CA operator will cover fewer trust anchors, so a relying party might combine several operators' IDs to describe its trust anchors. However, such groups are more generally usable. A group specific to a relying party vendor can potentially be the only ID sent, but is less generally usable.
+Groups specific to a CA operator will cover fewer trust anchors, so a relying party might combine several operators' IDs to describe its trust anchors. A group specific to a relying party vendor can potentially be the only ID sent, but is less generally usable.
 
 Over time, a CA operator may add or retire CAs, or relying parties may trust or distrust CAs. In this case, existing trust anchor groups SHOULD NOT be redefined, but the following versioning scheme MAY be used to reflect these and other changes:
 
-The defining party allocates an OID arc to define a series of related trust anchor groups. Each version of the group is identified by this OID arc, with an integer version number component appended. For example, a CA operator may define a trust anchor group series with the OID arc `32473.2`. Individual groups would have IDs `32473.2.0`, `32473.2.1`, `32473.2.2`, and so on.
+The defining party allocates an OID arc to define a series of related trust anchor groups. Each version of the group is identified by this OID arc, with an integer version number component appended. For example, if a CA operator defines a trust anchor group series with the OID arc `32473.2`, individual groups would have IDs `32473.2.0`, `32473.2.1`, `32473.2.2`, and so on.
 
 When describing trust anchor group inclusions, a CA can use a trust anchor range ({{trust-anchor-ranges}}) to describe which group versions include a candidate certification path's trust anchor:
 
