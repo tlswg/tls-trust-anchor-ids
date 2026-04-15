@@ -104,7 +104,7 @@ Additionally, to support TLS clients with many trusted certification authorities
 
 # Introduction
 
-TLS {{!RFC8446}} authentication uses X.509 certificates {{!RFC5280}} to associate the *authenticating party's* TLS key with its application identifiers, such as DNS names. These associations are signed by some certificate authority (CA). The peer, or *relying party*, curates a set of CAs that are trusted to only sign correct associations, which allows it to rely on the TLS to authenticate application identifiers. Typically the authenticating party is the server and the relying party is the client.
+TLS {{!RFC8446}} authentication uses X.509 certificates {{!RFC5280}} to associate the *authenticating party's* TLS key with its application identifiers, such as DNS names. These associations are signed by some certification authority (CA). The peer, or *relying party*, curates a set of CAs that are trusted to only sign correct associations, which allows it to rely on the TLS to authenticate application identifiers. Typically the authenticating party is the server and the relying party is the client.
 
 An authenticating party may need to interoperate with relying parties that trust different sets of CAs. {{Section 4.2.4 of RFC8446}} defines the `certificate_authorities` extension to accommodate this. It allows the authenticating party to provision multiple certificates and select the one that will allow the relying party to accept its TLS key. This is analogous to parameter negotiation elsewhere in TLS.
 
@@ -307,7 +307,7 @@ This mechanism also allows servers to safely send fallback certificates that may
 
 A trust anchor ID is typically much smaller than the corresponding X.509 name. Depending on the number of trust anchors, this can be sufficient to efficiently represent relying party state.
 
-PKIs where further size savings are needed can use trust anchor groups ({{trust-anchor-ids}}). Trust anchor groups require additional coordination within a PKI. To be usable, a trust anchor group must be known to relying parties (see {{relying-party-configuration}}) and configured with candidate paths in authenticating parties (see {{authenticating-party-configuration}}). However, they can further reduce relying party message sizes by allowing one ID to signal multiple trust anchors.
+PKIs where further size savings are needed can use trust anchor groups ({{trust-anchor-ids}}). Trust anchor groups require additional coordination within a PKI, but they can further reduce relying party message sizes by allowing one ID to signal multiple trust anchors. To be usable, a trust anchor group must be known to relying parties (see {{relying-party-configuration}}) and configured with candidate paths in authenticating parties (see {{authenticating-party-configuration}}). The latter information SHOULD be provided by the CA, e.g., with the format defined in {{certificate-properties}}.
 
 This section does not prescribe how to define trust anchor groups, but gives some general guidance:
 
@@ -323,17 +323,17 @@ Over time, a CA operator may add or retire CAs, or relying parties may trust or 
 
 The defining party allocates an OID arc to define a series of related trust anchor groups. Each version of the group is identified by this OID arc, with an integer version number component appended. For example, if a CA operator defines a trust anchor group series with the OID arc `32473.2`, the individual groups would have IDs `32473.2.0`, `32473.2.1`, `32473.2.2`, and so on.
 
-When describing trust anchor group inclusions, a CA can use a trust anchor range ({{trust-anchor-ranges}}) to describe which group versions include a candidate certification path's trust anchor:
+The trust anchor group inclusion for a candidate path is a trust anchor range ({{trust-anchor-ranges}}) determined as follows:
 
-* If the trust anchor is no longer in the latest version of the group, the CA sets `min` and `max` to the first and last version which include the trust anchor, respectively.
+* If the trust anchor is no longer in the latest version of the group, the range's `min` and `max` values are the first and last version that include the trust anchor, respectively.
 
-* If the trust anchor is in the latest version of the group, at the time of issuance, the CA sets `min` to the first version which includes the trust anchor, and `max` to 2<sup>64</sup>-1.
+* If the trust anchor is in the latest version of the group, at the time of issuance, the range's `min` value is the first version that includes the trust anchor, and `max` value is 2<sup>64</sup>-1.
 
 In the second case, if the trust anchor is removed from later versions, the unlimited upper bound will become incorrect. The authenticating party TLS software may then misinterpret a relying party advertising a later version as supporting this trust anchor. Such signaling errors may result in the wrong certification path being selected. This can be mitigated in several ways:
 
 * If the authenticating party prefers a certificate from some replacement CA over the certificate from the removed CA, the correct certificate will still be chosen.
 
-* Only pre-existing certificates are impacted. Newly-issued certificates postdate the upper bound being known, so the CA can correctly configure the trust anchor range. When the certificate is renewed, the metadata will be corrected.
+* Only pre-existing certificates are impacted. Newly-issued certificates postdate the upper bound being known and will have the correct upper bound. When the certificate is renewed, the metadata will be corrected.
 
 * {{SCTNotAfter}} describes a trust anchor removal strategy that only impacts newly-issued certificates. In this case, there is no signaling error because pre-existing group inclusions remain accurate. Only newly-issued certificates need a tighter upper bound, but those will be issued with the correct information.
 
@@ -467,7 +467,7 @@ The IANA registration for this media type is described in {{media-type-updates}}
 
 ## ACME Extension
 
-The format defined in {{media-type}} can be used with ACME's alternate format mechanism (see {{Section 7.4.2 of !RFC8555}}) as follows. When downloading certificates, a supporting client SHOULD include "application/pem-certificate-chain-with-properties" in its HTTP Accept header ({{Section 12.5.1 of !RFC9110}}). When a supporting server sees such a header, it MAY then respond with that format to include a CertificatePropertyList with the certification path. This CertificatePropertyList MAY include a `trust_anchor_id` property for use with this protocol, or other properties defined in another document.
+The format defined in {{media-type}} can be used with ACME's alternate format mechanism (see {{Section 7.4.2 of !RFC8555}}) as follows. When downloading certificates, a supporting client SHOULD include "application/pem-certificate-chain-with-properties" in its HTTP Accept header ({{Section 12.5.1 of !RFC9110}}). When a supporting server sees such a header, it MAY then respond with that format to include a CertificatePropertyList with the certification path. This CertificatePropertyList MAY include `trust_anchor_id` and `trust_anchor_group_inclusions` properties for use with this protocol, or other properties defined in another document.
 
 When used with ACME's alternate certificate chain mechanism (see {{Section 7.4.2 of !RFC8555}}), this protocol removes the need for heuristics in determining which path to serve to which relying party.
 
@@ -531,7 +531,7 @@ Trust anchor negotiation allows these conflicts to be resolved by different trus
 
 ## Backup Certificates
 
-An authenticating party may obtain certificate paths from multiple CAs for redundancy. If one CA is compromised and removed from newer relying parties, the TLS server software will be able to gracefully serve a backup certificate path, avoiding the immediate breakage that would otherwise be caused by this removal.
+An authenticating party may obtain certification paths from multiple CAs for redundancy. If one CA is compromised and removed from newer relying parties, the TLS server software will be able to gracefully serve a backup certification path, avoiding the immediate breakage that would otherwise be caused by this removal.
 
 ## Public Key Pinning
 
