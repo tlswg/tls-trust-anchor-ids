@@ -307,35 +307,46 @@ This mechanism also allows servers to safely send fallback certificates that may
 
 A trust anchor ID is typically much smaller than the corresponding X.509 name. Depending on the number of trust anchors, this can be sufficient to efficiently represent relying party state.
 
-PKIs where further size savings are needed can use trust anchor groups ({{trust-anchor-ids}}). Trust anchor groups require additional coordination within a PKI, but they can further reduce relying party message sizes by allowing one ID to signal multiple trust anchors. To be usable, a trust anchor group must be known to relying parties (see {{relying-party-configuration}}) and configured with candidate paths in authenticating parties (see {{authenticating-party-configuration}}). The latter information SHOULD be provided by the CA, e.g., with the format defined in {{certificate-properties}}.
+PKIs where further size savings are needed can use trust anchor groups ({{trust-anchor-ids}}). Trust anchor groups require additional coordination within a PKI, but they can further reduce relying party message sizes by allowing one ID to signal multiple trust anchors. To be usable, a trust anchor group must:
 
-This section does not prescribe how to define trust anchor groups, but gives some general guidance:
+* be known to and sent by relying parties (see {{relying-party-configuration}}); and
+* configured with candidate paths in authenticating parties (see {{authenticating-party-configuration}}), ideally provided by the CA during issuance (see {{certificate-properties}}).
 
-A trust anchor group specifies a collection of trust anchors that are all trusted by some relying party. For example:
+This document does not prescribe how to define trust anchor groups, but gives some general guidance:
 
-* A CA operator might define a trust anchor group for the root CAs (or intermediate CAs, as described in {{intermediate-elision}}) that it expects supporting relying parties use as trust anchors.
+A trust anchor group specifies a collection of trust anchors, which a relying party can send to represent the contents. For example:
 
-* A relying party vendor might depend a trust anchor group for the trust anchors its relying parties trust.
+* A set of root CAs (or intermediate CAs, as in {{intermediate-elision}}) operated by a CA operator.
 
-Groups specific to a CA operator will cover fewer trust anchors, so a relying party might combine several operators' IDs to describe its trust anchors. A group specific to a relying party vendor can potentially be the only ID sent, but is less generally usable.
+* A set of trust anchors common to large set of relying parties. For example, trust anchors common to up-to-date web browsers, or common to some relying party vendor.
 
-Over time, a CA operator may add or retire CAs, or relying parties may trust or distrust CAs. In this case, existing trust anchor groups SHOULD NOT be redefined, but the following versioning scheme MAY be used to reflect these and other changes:
+* A set of related application-specific trust anchors, such as a range of Merkle Tree Certificate landmarks {{?I-D.ietf-plants-merkle-tree-certs}}.
 
-The defining party allocates an OID arc to define a series of related trust anchor groups. Each version of the group is identified by this OID arc, with an integer version number component appended. For example, if a CA operator defines a trust anchor group series with the OID arc `32473.2`, the individual groups would have IDs `32473.2.0`, `32473.2.1`, `32473.2.2`, and so on.
+Different group definitions trade off size savings, applicability, and coordination overhead. A group that reflects a single CA operator will cover fewer trust anchors, so a relying party might combine several operators' IDs to describe its trust anchors. However, it is generally usable by relying parties that trust this CA operator. Such a group also requires minimal coordination for the CA operator to provide group inclusion information ({{authenticating-party-configuration}}) with the certificate.
+
+Conversely, a group that reflects a single relying party vendor can potentially be the only ID sent. However, it may be less generally usable when relying parties differ. Groups reflecting multiple relying party vendors are more broadly usable, but may need to be combined with other IDs in a given relying party. For example, a relying party might send a group containing established CAs common to its ecosystem, and individual IDs for its remaining, not yet as common CAs.
+
+A client relying party MAY send a group containing CAs it does not trust, however it SHOULD then be prepared to retry (see {{retry-mechanism}}) in case of signaling failure.
+
+Over time, a group may become out-of-date, making it describe current relying parties less effectively. For example, a CA operator may deploy or turn down a CA instance, or a relying party may trust a new CA or distrust an existing CA. Existing trust anchor groups SHOULD NOT be redefined, but the following versioning scheme MAY be used to define updated groups:
+
+A versioned sequence of trust anchor groups is identified by a OID arc. Each group has an ID of this OID arc, with a non-negative integer version number component appended. For example, versioned groups using the OID arc `32473.2` would have IDs `32473.2.0`, `32473.2.1`, `32473.2.2`, and so on. When defining a new group version, the version component is incremented.
 
 The trust anchor group inclusion for a candidate path is a trust anchor range ({{trust-anchor-ranges}}) determined as follows:
 
-* If the trust anchor is no longer in the latest version of the group, the range's `min` and `max` values are the first and last version that include the trust anchor, respectively.
+* At issuance, if the trust anchor is no longer in the latest group version, the range's `min` and `max` values are the first and last version that include the trust anchor, respectively.
 
-* If the trust anchor is in the latest version of the group, at the time of issuance, the range's `min` value is the first version that includes the trust anchor, and `max` value is 2<sup>64</sup>-1.
+* At issuance, if the trust anchor is in the latest group version, the range's `min` value is the first version that includes the trust anchor, and its `max` value is 2<sup>64</sup>-1.
 
-In the second case, if the trust anchor is removed from later versions, the unlimited upper bound will become incorrect. The authenticating party TLS software may then misinterpret a relying party advertising a later version as supporting this trust anchor. Such signaling errors may result in the wrong certification path being selected. This can be mitigated in several ways:
+In the second case, the range contains not-yet-defined group versions, so there is a potential signaling error. Suppose, after issuance, a new group version is defined without the trust anchor. The unlimited upper bound is now incorrect. A relying party might not trust this trust anchor, while sending this new group version. However, the authentiation party willmisinterpret the certificate as compatible based on its stale information. Such signaling errors may result in the wrong certificate being selected.
 
-* If the authenticating party prefers a certificate from some replacement CA over the certificate from the removed CA, the correct certificate will still be chosen.
+This can be mitigated in one several ways:
 
-* Only pre-existing certificates are impacted. Newly-issued certificates postdate the upper bound being known and will have the correct upper bound. When the certificate is renewed, the metadata will be corrected.
+* Only pre-existing certificates are impacted. Newly-issued certificates postdate this version and will have the correct upper bound. When the certificate is renewed, group inclusions will be corrected.
 
-* {{SCTNotAfter}} describes a trust anchor removal strategy that only impacts newly-issued certificates. In this case, there is no signaling error because pre-existing group inclusions remain accurate. Only newly-issued certificates need a tighter upper bound, but those will be issued with the correct information.
+* {{SCTNotAfter}} describes a trust anchor removal strategy that only impacts newly-issued certificates. In this case, no renewal is needed. Pre-existing group inclusions remain accurate under this strategy.
+
+* If the authenticating party's preferences place the correct candidate path (issued by a newer trust anchor) ahead of misinterpreted one (issued by the removed trust anchor), the correct candidate will still be chosen.
 
 * When the relying party is a client, any remaining signaling errors can be corrected with the retry mechanism described in {{retry-mechanism}}.
 
