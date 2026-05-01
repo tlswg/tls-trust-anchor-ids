@@ -120,9 +120,9 @@ To address this, this document introduces Trust Anchor Identifiers (Trust Anchor
 
 1. {{trust-anchor-ids}} defines *trust anchor IDs*, which are short, unique identifiers for X.509 trust anchors, or groups of trust anchors.
 
-2. {{tls-extension}} defines a TLS extension that communicates the relying party's requested trust anchors using trust anchor IDs. IDs that represent individual trust anchors can mitigate long X.509 names. IDs that represent groups of trust anchors can mitigate large lists of trust anchors.
+2. {{tls-extension}} defines a TLS extension that communicates the relying party's requested trust anchors using trust anchor IDs. IDs that represent individual trust anchors can mitigate long X.509 names. IDs that represent groups of trust anchors can mitigate large trust anchor lists.
 
-3. {{retry-mechanism}} defines a retry mechanism that, when the relying party is a TLS client, can mitigate signaling failures. The server provides its list of available trust anchors in response so that the client can retry on mismatch. This can further mitigate large lists of trust anchors by giving deployments more flexibility in defining IDs for trust anchor groups. It also allows a TLS client to initially send only a subset of its trust anchors to the TLS server.
+3. {{retry-mechanism}} defines a retry mechanism that, when the relying party is a TLS client, can mitigate signaling failures. The server provides its available trust anchors alongside its certificate, so that the client can retry on mismatch. This can further mitigate large trust anchor lists by allowing the client to initially omit some trust anchors or use an otherwise too broad trust anchor group. However, this mitigation can come at the cost of additional round trips in some cases.
 
 4. {{dns-service-parameter}}, finally, allows TLS servers to advertise their available trust anchors in HTTPS or SVCB {{!RFC9460}} DNS records. When the above options are insufficient, TLS clients can request an accurate initial subset and avoid a retry penalty.
 
@@ -176,11 +176,11 @@ The length of a trust anchor ID's binary representation MUST NOT exceed 255 byte
 
 A trust anchor ID representing a single trust anchor SHOULD be allocated by the CA operator and be common among relying parties that trust the CA. They MAY be allocated by another party, e.g. when bootstrapping an existing ecosystem, if all parties agree on the ID. In particular, the protocol requires authenticating and relying parties to agree, and the authenticating party's configuration typically comes from the CA.
 
-A trust anchor ID representing a trust anchor group MAY be allocated by CA operators, relying party vendors, or other parties, but for them to be useful they require agreement between relying parties and authenticating parties. {{trust-anchor-groups}} discusses defining trust anchor groups in more detail.
+A trust anchor ID representing a trust anchor group MAY be allocated by any party. However, to be useful, the group requires agreement between relying parties and authenticating parties. {{trust-anchor-groups}} discusses defining trust anchor groups in more detail.
 
 ## Trust Anchor Ranges
 
-Related trust anchor IDs can be allocated from a single OID arc. For example, a CA operator may allocate an OID arc, then append a version number, to describe snapshots of the CAs it operates. This section defines a *trust anchor range*, which describes a series of related trust anchor IDs. A trust anchor range is defined by three properties:
+Related trust anchor IDs can be allocated from a single OID arc, such as in the versioning construction described in {{trust-anchor-groups}}. This section defines a *trust anchor range*, which describes a series of such IDs. Concretely, a trust anchor range is defined by three properties:
 
 * A trust anchor ID `base`
 * Two non-negative, 64-bit integers `min` and `max`
@@ -214,7 +214,7 @@ Each candidate path that participates in this protocol must be configured with t
 
 These properties allow certificate selection (see {{certificate-selection}}) to consider this path when a relying party advertises a matching trust anchor ID. It is RECOMMENDED, though not required, that this information come from the CA. {{certificate-properties}} defines a RECOMMENDED format for this information, along with an optional ACME {{!RFC8555}} extension for CAs to send it.
 
-Authenticating parties MAY have candidate certification paths without associated trust anchor IDs, but such paths will not participate in this protocol. Those paths MAY participate in other trust anchor negotiation protocols, such as the `certificate_authorities` extension.
+Authenticating parties MAY have candidate certification paths without these associated properties. Such paths will not participate in this protocol. They MAY participate in other trust anchor negotiation protocols, such as the `certificate_authorities` extension.
 
 ## Relying Party Configuration
 
@@ -318,7 +318,7 @@ A trust anchor group specifies a collection of trust anchors, which a relying pa
 
 * A set of root CAs (or intermediate CAs, as in {{intermediate-elision}}) operated by a CA operator.
 
-* A set of trust anchors common to large set of relying parties. For example, trust anchors common to up-to-date web browsers, or common to some relying party vendor.
+* A set of trust anchors common to large set of relying parties.
 
 * A set of related application-specific trust anchors, such as a range of Merkle Tree Certificate landmarks {{?I-D.ietf-plants-merkle-tree-certs}}.
 
