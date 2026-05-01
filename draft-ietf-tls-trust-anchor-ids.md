@@ -342,7 +342,7 @@ The trust anchor group inclusion for a candidate path is a trust anchor range ({
 
 * At issuance, if the trust anchor is in the latest group version, the range's `min` value is the first version that includes the trust anchor, and its `max` value is 2<sup>64</sup>-1.
 
-In the second case, the range contains not-yet-defined group versions, so there is a potential signaling error. Suppose, after issuance, a new group version is defined without the trust anchor. The unlimited upper bound is now incorrect. A relying party might not trust this trust anchor, while sending this new group version. However, the authentiation party willmisinterpret the certificate as compatible based on its stale information. Such signaling errors may result in the wrong certificate being selected.
+In the second case, the range contains not-yet-defined group versions, so there is a potential signaling error. Suppose, after issuance, a new group version is defined without the trust anchor. The unlimited upper bound is now incorrect. A relying party might not trust this trust anchor, while sending this new group version. However, the authenticating party will misinterpret the certificate as compatible based on its stale information. Such signaling errors may result in the wrong certificate being selected.
 
 This can be mitigated in one several ways:
 
