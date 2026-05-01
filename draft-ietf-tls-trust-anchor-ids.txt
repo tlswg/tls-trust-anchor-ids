@@ -667,9 +667,9 @@ Table of Contents
    issuance, a new group version is defined without the trust anchor.
    The unlimited upper bound is now incorrect.  A relying party might
    not trust this trust anchor, while sending this new group version.
-   However, the authentiation party willmisinterpret the certificate as
-   compatible based on its stale information.  Such signaling errors may
-   result in the wrong certificate being selected.
+   However, the authenticating party will misinterpret the certificate
+   as compatible based on its stale information.  Such signaling errors
+   may result in the wrong certificate being selected.
 
    This can be mitigated in one several ways:
 
