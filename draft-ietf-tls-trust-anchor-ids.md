@@ -180,7 +180,7 @@ A trust anchor ID representing a trust anchor group MAY be allocated by any part
 
 ## Trust Anchor Ranges
 
-Related trust anchor IDs can be allocated from a single OID arc, such as in the versioning construction described in {{trust-anchor-groups}}. This section defines a *trust anchor range*, which describes a series of such IDs. Concretely, a trust anchor range is defined by three properties:
+Related trust anchor IDs can be allocated from a single OID arc, such as in the versioning construction described in {{versioned-groups}}. This section defines a *trust anchor range*, which describes a series of such IDs. Concretely, a trust anchor range is defined by three properties:
 
 * A trust anchor ID `base`
 * Two non-negative, 64-bit integers `min` and `max`
@@ -327,6 +327,10 @@ Different group definitions trade off size savings, applicability, and coordinat
 Conversely, a group that reflects a single relying party vendor can potentially be the only ID sent. However, it may be less generally usable when relying parties differ. Groups reflecting multiple relying party vendors are more broadly usable, but may need to be combined with other IDs in a given relying party. For example, a relying party might send a group containing established CAs common to its ecosystem, and individual IDs for its remaining, not yet as common CAs.
 
 A client relying party MAY send a group containing CAs it does not trust, however it SHOULD then be prepared to retry (see {{retry-mechanism}}) in case of signaling failure.
+
+The authenticating party selection process described in {{certificate-selection}} can implemented generically for any trust anchor group. This allows deployments tailor their group allocation based on their needs, without requiring software updates in authenticating parties. Where feasible, deployments SHOULD use groups that are more broadly applicable and require lower coordination overhead.
+
+## Versioned Groups
 
 Over time, a group may become out-of-date, making it describe current relying parties less effectively. For example, a CA operator may deploy or turn down a CA instance, or a relying party may trust a new CA or distrust an existing CA. Existing trust anchor groups SHOULD NOT be redefined, but the following versioning scheme MAY be used to define updated groups:
 
