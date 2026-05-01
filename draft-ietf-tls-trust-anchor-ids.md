@@ -85,6 +85,13 @@ informative:
     date: 2023-08
     seriesinfo:
       "FIPS PUB": "204"
+
+  SCTNotAfter:
+    title: How to distrust a CA without any certificate errors
+    target: https://dadrian.io/blog/posts/sct-not-after/
+    date: March 6, 2025
+    author:
+    - name: David Adrian
 ...
 
 --- abstract
@@ -97,7 +104,7 @@ Additionally, to support TLS clients with many trusted certification authorities
 
 # Introduction
 
-TLS {{!RFC8446}} authentication uses X.509 certificates {{!RFC5280}} to associate the *authenticating party's* TLS key with its application identifiers, such as DNS names. These associations are signed by some certificate authority (CA). The peer, or *relying party*, curates a set of CAs that are trusted to only sign correct associations, which allows it to rely on the TLS to authenticate application identifiers. Typically the authenticating party is the server and the relying party is the client.
+TLS {{!RFC8446}} authentication uses X.509 certificates {{!RFC5280}} to associate the *authenticating party's* TLS key with its application identifiers, such as DNS names. These associations are signed by some certification authority (CA). The peer, or *relying party*, curates a set of CAs that are trusted to only sign correct associations, which allows it to rely on the TLS to authenticate application identifiers. Typically the authenticating party is the server and the relying party is the client.
 
 An authenticating party may need to interoperate with relying parties that trust different sets of CAs. {{Section 4.2.4 of RFC8446}} defines the `certificate_authorities` extension to accommodate this. It allows the authenticating party to provision multiple certificates and select the one that will allow the relying party to accept its TLS key. This is analogous to parameter negotiation elsewhere in TLS.
 
@@ -109,13 +116,15 @@ Without a negotiation mechanism, the authenticating party must obtain a single c
 
 * When a relying party must update its policies to meet new security requirements, it adds to relying party diversity and the challenges that authenticating parties and CAs face. The relying party must then choose between compromising on user security or burdening the rest of the ecosystem, potentially impacting availability in the process.
 
-To address this, this document introduces Trust Anchor Identifiers (Trust Anchor IDs). There are three parts to this mechanism:
+To address this, this document introduces Trust Anchor Identifiers (Trust Anchor IDs). There are several parts to this mechanism:
 
-1. {{trust-anchor-ids}} defines *trust anchor IDs*, which are short, unique identifiers for X.509 trust anchors.
+1. {{trust-anchor-ids}} defines *trust anchor IDs*, which are short, unique identifiers for X.509 trust anchors, or groups of trust anchors.
 
-2. {{tls-extension}} defines a TLS extension that communicates the relying party's requested trust anchors, and the authenticating party's available ones. When the relying party is a TLS client, it can mitigate large lists by sending a, possibly empty, subset of its trust anchors to the TLS server. The server provides its list of available trust anchors in response so that the client can retry on mismatch.
+2. {{tls-extension}} defines a TLS extension that communicates the relying party's requested trust anchors using trust anchor IDs. IDs that represent individual trust anchors can mitigate long X.509 names. IDs that represent groups of trust anchors can mitigate large trust anchor lists.
 
-3. {{dns-service-parameter}} allows TLS servers to advertise their available trust anchors in HTTPS or SVCB {{!RFC9460}} DNS records. TLS clients can then request an accurate initial subset and avoid a retry penalty.
+3. {{retry-mechanism}} defines a retry mechanism that, when the relying party is a TLS client, can mitigate signaling failures. The server provides its available trust anchors alongside its certificate, so that the client can retry on mismatch. This can further mitigate large trust anchor lists by allowing the client to initially omit some trust anchors or use an otherwise too broad trust anchor group. However, this mitigation can come at the cost of additional round trips in some cases.
+
+4. {{dns-service-parameter}}, finally, allows TLS servers to advertise their available trust anchors in HTTPS or SVCB {{!RFC9460}} DNS records. When the above options are insufficient, TLS clients can request an accurate initial subset and avoid a retry penalty.
 
 Together, they reduce the size costs of trust anchor negotiation, supporting flexible and robust PKIs for more applications.
 
@@ -151,9 +160,9 @@ Certification path:
 
 # Trust Anchor Identifiers {#trust-anchor-ids}
 
-This section defines trust anchor IDs, which are short, unique identifiers for a trust anchor. To simplify allocation, trust anchor IDs are defined with object identifiers (OIDs) {{X680}} and IANA-registered Private Enterprise Numbers (PENs) {{!RFC9371}}:
+This section defines trust anchor IDs, which are short, unique identifiers that represent either a trust anchor, or a group of trust anchors. When a trust anchor ID represents a group of trust anchors, it is known as a *trust anchor group*.
 
-A trust anchor ID is defined with an OID under the OID arc of some PEN. For compactness, they are represented as relative object identifiers (see Section 33 of {{X680}}), relative to the OID prefix `1.3.6.1.4.1`. For example, an organization with PEN 32473 might define a trust anchor ID with the OID `1.3.6.1.4.1.32473.1`. As a relative object identifier, it would be the OID `32473.1`.
+A trust anchor ID is an object identifier (OID) {{X680}} under the OID arc of some IANA-registered Private Enterprise Number (PEN) {{!RFC9371}}. For compactness, they are represented as relative object identifiers (see Section 33 of {{X680}}), relative to the OID prefix `1.3.6.1.4.1`. For example, an organization with PEN 32473 might define a trust anchor ID with the OID `1.3.6.1.4.1.32473.1`. As a relative object identifier, it would be the OID `32473.1`.
 
 Depending on the protocol, trust anchor IDs may be represented in one of three ways:
 
@@ -163,9 +172,49 @@ Depending on the protocol, trust anchor IDs may be represented in one of three w
 
 * For use in ASCII-compatible text protocols, a trust anchor ID's ASCII representation is the relative object identifier in dotted decimal notation. The example ID's ASCII representation is `32473.1`.
 
-Trust anchor IDs SHOULD be allocated by the CA operator and common among relying parties that trust the CA. They MAY be allocated by another party, e.g. when bootstrapping an existing ecosystem, if all parties agree on the ID. In particular, the protocol requires authenticating and relying parties to agree, and the authenticating party's configuration typically comes from the CA.
-
 The length of a trust anchor ID's binary representation MUST NOT exceed 255 bytes. It SHOULD be significantly shorter, for bandwidth efficiency.
+
+A trust anchor ID representing a single trust anchor SHOULD be allocated by the CA operator and be common among relying parties that trust the CA. They MAY be allocated by another party, e.g. when bootstrapping an existing ecosystem, if all parties agree on the ID. In particular, the protocol requires authenticating and relying parties to agree, and the authenticating party's configuration typically comes from the CA.
+
+A trust anchor ID representing a trust anchor group MAY be allocated by any party. However, to be useful, the group requires agreement between relying parties and authenticating parties. {{trust-anchor-groups}} discusses defining trust anchor groups in more detail.
+
+## Trust Anchor Ranges
+
+Related trust anchor IDs can be allocated from a single OID arc, such as in the versioning construction described in {{versioned-groups}}. This section defines a *trust anchor range*, which describes a series of such IDs. Concretely, a trust anchor range is defined by three properties:
+
+* A trust anchor ID `base`
+* Two non-negative, 64-bit integers `min` and `max`
+
+A trust anchor range is said to *contain* some trust anchor ID, `id` if the `id`, as a relative OID, is the concatenation of `base` and some integer component between `min` and `max`, inclusive. `max` can be set to 2<sup>64</sup>-1 if there is no upper bound.
+
+The following procedure can be used to perform this check. It succeeds if the range contains `id` and fails otherwise:
+
+1. Check that `base` does not end in the middle of an OID component. That is, check that the most-significant bit of the last byte of `base` is unset. If it is set, fail the procedure.
+2. Check that `base` is a prefix of `id`. If not, fail the procedure. Let `rest` be `id` with the `base` prefix removed.
+3. Decode `rest` as a minimally-encoded, big-endian, base-128 OID component as follows:
+   1. If `rest` is empty, fail the procedure.
+   2. If the most-significant bit of the last byte of `rest` is set, fail the procedure.
+   3. If the most-significant bit of any other byte of `rest` is unset, fail the procedure.
+   4. If the first byte of `rest` is 0x80, fail the procedure.
+   5. Set `v` to zero. Throughout this procedure, `v` will be less than 2<sup>64</sup>.
+   6. For each byte `b` of `rest`:
+      1. If `v` is greater than or equal to 2<sup>57</sup>, fail the procedure.
+      2. Set `v` to `(v << 7) + (b & 127)`.
+4. Check if `min <= v <= max`. If this is not true, fail the procedure. Otherwise, the procedure succeeds.
+
+## Authenticating Party Configuration
+
+Authenticating parties are configured with one or more candidate certification paths to present in TLS, in some preference order. This preference order is used when multiple candidate paths are usable for a connection. For example, the authenticating party may prefer candidates that minimize message size or have more performant private keys.
+
+Each candidate path that participates in this protocol must be configured with two properties:
+
+* The trust anchor ID for its corresponding trust anchor.
+
+* Optionally, a list of *trust anchor group inclusions*. A trust anchor group inclusion is a trust anchor range ({{trust-anchor-ranges}}) that describes some trust anchor groups also containing the path's trust anchor.
+
+These properties allow certificate selection (see {{certificate-selection}}) to consider this path when a relying party advertises a matching trust anchor ID. It is RECOMMENDED, though not required, that this information come from the CA. {{certificate-properties}} defines a RECOMMENDED format for this information, along with an optional ACME {{!RFC8555}} extension for CAs to send it.
+
+Authenticating parties MAY have candidate certification paths without these associated properties. Such paths will not participate in this protocol. They MAY participate in other trust anchor negotiation protocols, such as the `certificate_authorities` extension.
 
 ## Relying Party Configuration
 
@@ -183,15 +232,9 @@ TrustAnchorID ::= RELATIVE-OID
 
 Relying parties MAY instead or additionally configure trust anchor IDs via some application-specific out-of-band information.
 
+Relying parties MAY additionally be configured with trust anchor groups that include their trust anchors. When authenticating parties are known to be configured with corresponding inclusion lists ({{authenticating-party-configuration}}), this can further reduce the size of messages sent by the relying party.
+
 Relying parties MAY support trust anchors without associated trust anchor IDs, but such trust anchors will not participate in this protocol. Those trust anchors MAY participate in other trust anchor negotiation protocols, such as the `certificate_authorities` extension.
-
-## Authenticating Party Configuration
-
-Authenticating parties are configured with one or more candidate certification paths to present in TLS, in some preference order. This preference order is used when multiple candidate paths are usable for a connection. For example, the authenticating party may prefer candidates that minimize message size or have more performant private keys.
-
-Each candidate path which participates in this protocol must be configured with the trust anchor ID for its corresponding trust anchor. It is RECOMMENDED, though not required, that this information come from the CA. {{certificate-properties}} defines a RECOMMENDED format for this information, along with an optional ACME {{!RFC8555}} extension for CAs to send it.
-
-Authenticating parties MAY have candidate certification paths without associated trust anchor IDs, but such paths will not participate in this protocol. Those paths MAY participate in other trust anchor negotiation protocols, such as the `certificate_authorities` extension.
 
 # TLS Extension
 
@@ -206,12 +249,14 @@ enum { trust_anchors(TBD), (2^16-1) } ExtensionType;
 
 opaque TrustAnchorID<1..2^8-1>;
 
-TrustAnchorID TrustAnchorIDList<0..2^16-1>;
+/* These types differ in whether they may be empty. */
+TrustAnchorID RequestedTrustAnchorList<0..2^16-1>;
+TrustAnchorID AvailableTrustAnchorList<1..2^16-1>;
 ~~~
 
-When the extension is sent in the ClientHello or CertificateRequest messages, the `extension_data` is a TrustAnchorIDList and indicates that the sender supports the specified trust anchors. The list is unordered, and MAY be empty. Each TrustAnchorID uses the binary representation, as described in {{trust-anchor-ids}}.
+When the extension is sent in the ClientHello or CertificateRequest messages, the `extension_data` is a RequestedTrustAnchorList and indicates that the sender supports the specified trust anchors or trust anchor groups. The list is unordered, and MAY be empty. Each TrustAnchorID uses the binary representation, as described in {{trust-anchor-ids}}.
 
-When the extension is sent in EncryptedExtensions, the `extension_data` is a TrustAnchorIDList containing the list of trust anchors that server has available, in the server's preference order, and MUST NOT be empty.
+When the extension is sent in EncryptedExtensions, the `extension_data` is an AvailableTrustAnchorList containing the list of individual trust anchors for which the server has a candidate path. This list is ordered matching the server's candidate path preference order, and MUST NOT be empty.
 
 When the extension is sent in Certificate, the `extension_data` MUST be empty and indicates that the sender sent the certificate because the certificate matched a trust anchor ID sent by the peer. When used in this form, the extension may only be sent in the first CertificateEntry. It MUST NOT be sent in subsequent ones.
 
@@ -219,7 +264,11 @@ When the extension is sent in Certificate, the `extension_data` MUST be empty an
 
 A `trust_anchors` extension in the ClientHello or CertificateRequest is processed similarly to the `certificate_authorities` extension. The relying party indicates some set of supported trust anchors in the ClientHello or CertificateRequest `trust_anchors` extension. The authenticating party then selects a certificate from its candidate certification paths (see {{authenticating-party-configuration}}), as described in {{Section 4.4.2.2 of RFC8446}} and {{Section 4.4.2.3 of RFC8446}}. This process is extended as follows:
 
-If the ClientHello or CertificateRequest contains a `trust_anchors` extension, the authenticating party SHOULD send a certification path whose trust anchor ID appears in the relying party's `trust_anchors` extension.
+If the ClientHello or CertificateRequest contains a `trust_anchors` extension, the authenticating party SHOULD send a certification path such that either:
+
+* The path's trust anchor ID appears in the relying party's `trust_anchors` extension.
+
+* One of the path's trust anchor group inclusions contains some ID in the relying party's `trust_anchors` extension.
 
 If the ClientHello or CertificateRequest contains both `trust_anchors` and `certificate_authorities`, certification paths that satisfy either extension's criteria may be used. This additionally applies to future extensions which play a similar role.
 
@@ -253,6 +302,57 @@ Clients SHOULD retry at most once per connection attempt.
 This mechanism allows the connection to recover from a certificate selection failure, e.g. due to the client not revealing its full preference list, at additional latency cost. {{dns-service-parameter}} describes an optimization which can avoid this cost.
 
 This mechanism also allows servers to safely send fallback certificates that may not be as ubiquitously acceptable. Without some form of trust anchor negotiation, servers are limited to selecting certification paths that are ubiquitously trusted in all supported clients. This often means sending extra cross-certificates to target the lowest common denominator at a bandwidth cost. If the ClientHello contains `trust_anchors`, the server MAY opportunistically send a less ubiquitous, more bandwidth-efficient path based on local heuristics, with the expectation that the client will retry when the heuristics fail.
+
+# Trust Anchor Groups
+
+A trust anchor ID is typically much smaller than the corresponding X.509 name. Depending on the number of trust anchors, this can be sufficient to efficiently represent relying party state.
+
+PKIs where further size savings are needed can use trust anchor groups ({{trust-anchor-ids}}). Trust anchor groups require additional coordination within a PKI, but they can further reduce relying party message sizes by allowing one ID to signal multiple trust anchors. To be usable, a trust anchor group must:
+
+* be known to and sent by relying parties (see {{relying-party-configuration}}); and
+* configured with candidate paths in authenticating parties (see {{authenticating-party-configuration}}), ideally provided by the CA during issuance (see {{certificate-properties}}).
+
+This document does not prescribe how to define trust anchor groups, but gives some general guidance:
+
+A trust anchor group specifies a collection of trust anchors, which a relying party can send to represent the contents. For example:
+
+* A set of root CAs (or intermediate CAs, as in {{intermediate-elision}}) operated by a CA operator.
+
+* A set of trust anchors common to large set of relying parties.
+
+* A set of related application-specific trust anchors, such as a range of Merkle Tree Certificate landmarks {{?I-D.ietf-plants-merkle-tree-certs}}.
+
+Different group definitions trade off size savings, applicability, and coordination overhead. A group that reflects a single CA operator will cover fewer trust anchors, so a relying party might combine several operators' IDs to describe its trust anchors. However, it is generally usable by relying parties that trust this CA operator. Such a group also requires minimal coordination for the CA operator to provide group inclusion information ({{authenticating-party-configuration}}) with the certificate.
+
+Conversely, a group that reflects a single relying party vendor can potentially be the only ID sent. However, it may be less generally usable when relying parties differ. Groups reflecting multiple relying party vendors are more broadly usable, but may need to be combined with other IDs in a given relying party. For example, a relying party might send a group containing established CAs common to its ecosystem, and individual IDs for its remaining, not yet as common CAs.
+
+A client relying party MAY send a group containing CAs it does not trust, however it SHOULD then be prepared to retry (see {{retry-mechanism}}) in case of signaling failure.
+
+The authenticating party selection process described in {{certificate-selection}} can implemented generically for any trust anchor group. This allows deployments to tailor their group allocation based on their needs, without requiring software updates in authenticating parties. Where feasible, deployments SHOULD use groups that are more broadly applicable and require lower coordination overhead.
+
+## Versioned Groups
+
+Over time, a group may become out-of-date, making it describe current relying parties less effectively. For example, a CA operator may deploy or turn down a CA instance, or a relying party may trust a new CA or distrust an existing CA. Existing trust anchor groups SHOULD NOT be redefined, but the following versioning scheme MAY be used to define updated groups:
+
+A versioned sequence of trust anchor groups is identified by a OID arc. Each group has an ID of this OID arc, with a non-negative integer version number component appended. For example, versioned groups using the OID arc `32473.2` would have IDs `32473.2.0`, `32473.2.1`, `32473.2.2`, and so on. When defining a new group version, the version component is incremented.
+
+The trust anchor group inclusion for a candidate path is a trust anchor range ({{trust-anchor-ranges}}) determined as follows:
+
+* At issuance, if the trust anchor is no longer in the latest group version, the range's `min` and `max` values are the first and last version that include the trust anchor, respectively.
+
+* At issuance, if the trust anchor is in the latest group version, the range's `min` value is the first version that includes the trust anchor, and its `max` value is 2<sup>64</sup>-1.
+
+In the second case, the range contains not-yet-defined group versions, so there is a potential signaling error. Suppose, after issuance, a new group version is defined without the trust anchor. The unlimited upper bound is now incorrect. A relying party might not trust this trust anchor, while sending this new group version. However, the authentiation party willmisinterpret the certificate as compatible based on its stale information. Such signaling errors may result in the wrong certificate being selected.
+
+This can be mitigated in one several ways:
+
+* Only pre-existing certificates are impacted. Newly-issued certificates postdate this version and will have the correct upper bound. When the certificate is renewed, group inclusions will be corrected.
+
+* {{SCTNotAfter}} describes a trust anchor removal strategy that only impacts newly-issued certificates. In this case, no renewal is needed. Pre-existing group inclusions remain accurate under this strategy.
+
+* If the authenticating party's preferences place the correct candidate path (issued by a newer trust anchor) ahead of misinterpreted one (issued by the removed trust anchor), the correct candidate will still be chosen.
+
+* When the relying party is a client, any remaining signaling errors can be corrected with the retry mechanism described in {{retry-mechanism}}.
 
 # DNS Service Parameter
 
@@ -304,7 +404,11 @@ The extensibility aims to simplify application deployment as PKI mechanisms evol
 A CertificatePropertyList is defined using the TLS presentation language ({{Section 3 of !RFC8446}}) below:
 
 ~~~ tls-presentation
-enum { trust_anchor_id(0), (2^16-1) } CertificatePropertyType;
+enum {
+    trust_anchor_id(0),
+    trust_anchor_group_inclusions(1),
+    (2^16-1)
+} CertificatePropertyType;
 
 struct {
     CertificatePropertyType type;
@@ -316,9 +420,30 @@ CertificateProperty CertificatePropertyList<0..2^16-1>;
 
 The entries in a CertificatePropertyList MUST be sorted numerically by `type` and MUST NOT contain values with a duplicate `type`. Inputs that do not satisfy these invariants are syntax errors and MUST be rejected by parsers.
 
-This document defines a single property, `trust_anchor_id`. The `data` field of the property contains the binary representation of the trust anchor ID of the certification path's trust anchor, as described in {{authenticating-party-configuration}}. Future documents may define other properties for use with other mechanisms.
+This document defines two properties:
 
-Authenticating parties MUST ignore properties with unrecognized CertificatePropertyType values.
+* `trust_anchor_id`, defined in {{trust-anchor-id-property}}
+* `trust_anchor_group_inclusions`, defined in {{trust-anchor-group-inclusions-property}}
+
+Future documents MAY define other properties for use with other mechanisms. Such a document MUST define the format of the `data` field and how authenticating parties interpret the property. Authenticating parties MUST ignore properties with unrecognized CertificatePropertyType values.
+
+## Trust Anchor ID Property
+
+The `trust_anchor_id` property's `data` field contains the binary representation of the trust anchor ID of the certification path's trust anchor, as described in {{authenticating-party-configuration}}.
+
+## Trust Anchor Group Inclusions Property
+
+The `trust_anchor_group_inclusions` property's `data` field contains the certification path's trust anchor group inclusions, as described in {{authenticating-party-configuration}}. Each trust anchor group inclusion is described in a TrustAnchorRangeList structure, defined below. Each TrustAnchorRange structure describes a trust anchor range, as defined in {{trust-anchor-ranges}}.
+
+~~~
+struct {
+    TrustAnchorID base;
+    uint64 min;
+    uint64 max;
+} TrustAnchorRange;
+
+TrustAnchorRange TrustAnchorRangeList<1..2^16-1>;
+~~~
 
 ## Media Type
 
@@ -357,7 +482,7 @@ The IANA registration for this media type is described in {{media-type-updates}}
 
 ## ACME Extension
 
-The format defined in {{media-type}} can be used with ACME's alternate format mechanism (see {{Section 7.4.2 of !RFC8555}}) as follows. When downloading certificates, a supporting client SHOULD include "application/pem-certificate-chain-with-properties" in its HTTP Accept header ({{Section 12.5.1 of !RFC9110}}). When a supporting server sees such a header, it MAY then respond with that format to include a CertificatePropertyList with the certification path. This CertificatePropertyList MAY include a `trust_anchor_id` property for use with this protocol, or other properties defined in another document.
+The format defined in {{media-type}} can be used with ACME's alternate format mechanism (see {{Section 7.4.2 of !RFC8555}}) as follows. When downloading certificates, a supporting client SHOULD include "application/pem-certificate-chain-with-properties" in its HTTP Accept header ({{Section 12.5.1 of !RFC9110}}). When a supporting server sees such a header, it MAY then respond with that format to include a CertificatePropertyList with the certification path. This CertificatePropertyList MAY include `trust_anchor_id` and `trust_anchor_group_inclusions` properties for use with this protocol, or other properties defined in another document.
 
 When used with ACME's alternate certificate chain mechanism (see {{Section 7.4.2 of !RFC8555}}), this protocol removes the need for heuristics in determining which path to serve to which relying party.
 
@@ -421,7 +546,7 @@ Trust anchor negotiation allows these conflicts to be resolved by different trus
 
 ## Backup Certificates
 
-An authenticating party may obtain certificate paths from multiple CAs for redundancy. If one CA is compromised and removed from newer relying parties, the TLS server software will be able to gracefully serve a backup certificate path, avoiding the immediate breakage that would otherwise be caused by this removal.
+An authenticating party may obtain certification paths from multiple CAs for redundancy. If one CA is compromised and removed from newer relying parties, the TLS server software will be able to gracefully serve a backup certification path, avoiding the immediate breakage that would otherwise be caused by this removal.
 
 ## Public Key Pinning
 
