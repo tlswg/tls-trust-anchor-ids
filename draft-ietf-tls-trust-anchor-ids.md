@@ -176,7 +176,7 @@ The length of a trust anchor ID's binary representation MUST NOT exceed 255 byte
 
 A trust anchor ID representing a single trust anchor SHOULD be allocated by the CA operator and be common among relying parties that trust the CA. They MAY be allocated by another party, e.g. when bootstrapping an existing ecosystem, if all parties agree on the ID. In particular, the protocol requires authenticating and relying parties to agree, and the authenticating party's configuration typically comes from the CA.
 
-A trust anchor ID representing a trust anchor group MAY be allocated by CA operators, relying party vendors, or other parties. {{trust-anchor-groups}} discusses defining trust anchor groups in more detail.
+A trust anchor ID representing a trust anchor group MAY be allocated by CA operators, relying party vendors, or other parties, but for them to be useful they require agreement between relying parties and authenticating parties. {{trust-anchor-groups}} discusses defining trust anchor groups in more detail.
 
 ## Trust Anchor Ranges
 
@@ -232,7 +232,7 @@ TrustAnchorID ::= RELATIVE-OID
 
 Relying parties MAY instead or additionally configure trust anchor IDs via some application-specific out-of-band information.
 
-Relying parties MAY additionally be configured with trust anchor groups that include its trust anchors. When authenticating parties are known to be configured with corresponding inclusion lists ({{authenticating-party-configuration}}), this can further reduce the size of messages sent by the relying party.
+Relying parties MAY additionally be configured with trust anchor groups that include their trust anchors. When authenticating parties are known to be configured with corresponding inclusion lists ({{authenticating-party-configuration}}), this can further reduce the size of messages sent by the relying party.
 
 Relying parties MAY support trust anchors without associated trust anchor IDs, but such trust anchors will not participate in this protocol. Those trust anchors MAY participate in other trust anchor negotiation protocols, such as the `certificate_authorities` extension.
 
