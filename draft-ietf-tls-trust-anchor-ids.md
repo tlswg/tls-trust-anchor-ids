@@ -328,7 +328,7 @@ Conversely, a group that reflects a single relying party vendor can potentially 
 
 A client relying party MAY send a group containing CAs it does not trust, however it SHOULD then be prepared to retry (see {{retry-mechanism}}) in case of signaling failure.
 
-The authenticating party selection process described in {{certificate-selection}} can implemented generically for any trust anchor group. This allows deployments tailor their group allocation based on their needs, without requiring software updates in authenticating parties. Where feasible, deployments SHOULD use groups that are more broadly applicable and require lower coordination overhead.
+The authenticating party selection process described in {{certificate-selection}} can implemented generically for any trust anchor group. This allows deployments to tailor their group allocation based on their needs, without requiring software updates in authenticating parties. Where feasible, deployments SHOULD use groups that are more broadly applicable and require lower coordination overhead.
 
 ## Versioned Groups
 
