@@ -823,11 +823,12 @@ Table of Contents
 
 7.2.  Trust Anchor Group Inclusions Property
 
-   The trust_anchor_group_inclusions property's data field contains the
-   certification path's trust anchor group inclusions, as described in
-   Section 3.2.  Each trust anchor group inclusion is described in a
-   TrustAnchorRangeList structure, defined below.  Each TrustAnchorRange
-   structure describes a trust anchor range, as defined in Section 3.1.
+   The trust_anchor_group_inclusions property's data field contains a
+   TrustAnchorRangeList structure, defined below.  The
+   TrustAnchorRangeList structure describes the certification path's
+   trust anchor group inclusions, as described in Section 3.2.  Each
+   TrustAnchorRange structure describes a trust anchor range, as defined
+   in Section 3.1.
 
    struct {
        TrustAnchorID base;

@@ -1798,7 +1798,7 @@ CertificateProperty CertificatePropertyList&lt;0..2^16-1&gt;;
         <h3 id="name-trust-anchor-group-inclusio">
 <a href="#section-7.2" class="section-number selfRef">7.2. </a><a href="#name-trust-anchor-group-inclusio" class="section-name selfRef">Trust Anchor Group Inclusions Property</a>
         </h3>
-<p id="section-7.2-1">The <code>trust_anchor_group_inclusions</code> property's <code>data</code> field contains the certification path's trust anchor group inclusions, as described in <a href="#authenticating-party-configuration" class="auto internal xref">Section 3.2</a>. Each trust anchor group inclusion is described in a TrustAnchorRangeList structure, defined below. Each TrustAnchorRange structure describes a trust anchor range, as defined in <a href="#trust-anchor-ranges" class="auto internal xref">Section 3.1</a>.<a href="#section-7.2-1" class="pilcrow">¶</a></p>
+<p id="section-7.2-1">The <code>trust_anchor_group_inclusions</code> property's <code>data</code> field contains a TrustAnchorRangeList structure, defined below. The TrustAnchorRangeList structure describes the certification path's trust anchor group inclusions, as described in <a href="#authenticating-party-configuration" class="auto internal xref">Section 3.2</a>. Each TrustAnchorRange structure describes a trust anchor range, as defined in <a href="#trust-anchor-ranges" class="auto internal xref">Section 3.1</a>.<a href="#section-7.2-1" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-7.2-2">
 <pre>
 struct {
