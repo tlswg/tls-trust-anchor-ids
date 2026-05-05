@@ -530,13 +530,11 @@ This same procedure may also be used to transition between newer, more size-effi
 
 ## Intermediate Elision
 
-In my PKIs, root CAs issue shorter-lived intermediate certificates which, in turn, issue end-entity certificates. This comes at a bandwidth cost: the TLS handshake includes an extra certificate, which includes a public key, signature, and X.509 metadata. Post-quantum signature algorithms will dramatically increase this cost. ML-DSA-65 {{FIPS204}}, for example, has a total public key and signature size of 5,261 bytes.
+In many PKIs, root CAs issue shorter-lived intermediate certificates which, in turn, issue end-entity certificates. This comes at a bandwidth cost: the TLS handshake includes an extra certificate, which includes a public key, signature, and X.509 metadata. Post-quantum signature algorithms will dramatically increase this cost. ML-DSA-65 {{FIPS204}}, for example, has a total public key and signature size of 5,261 bytes.
 
-{{?I-D.ietf-tls-cert-abridge}} predistributes a specific set of intermediate CA certificates to relying parties so that these certificates can be omitted from TLS connections, as a compression scheme. Negotiating intermediate CAs as short-lived trust anchors also achieves this effect, but is usable by more relying parties than the specific intermediate set accommodates.
+Trust anchor negotiation can avoid this size cost. Relying parties predistribute intermediate CAs and configure them as short-lived trust anchors. Authenticating parties can then send shorter paths to those relying parties.
 
-In this model, a CA operator provides authenticating parties with two certification paths: a longer path ending at a long-lived root and shorter path the other ending at a short-lived root. Relying parties trust both the long-lived root and the most recent short-lived root. The authenticating party sends the shorter path when possible, falling back to the longer path when the relying party’s short-lived root is stale.
-
-This achieves the same effect with a simpler and more flexible, general-purpose mechanism.
+More generally, a CA operator provides authenticating parties with two certification paths: a longer path ending at a long-lived root and shorter path the other ending at a short-lived root. Relying parties trust both the long-lived root and the most recent short-lived root. The authenticating party sends the shorter path when possible, falling back to the longer path when the relying party’s short-lived root is stale.
 
 ## Conflicting Relying Party Requirements
 
