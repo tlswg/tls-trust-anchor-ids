@@ -433,7 +433,7 @@ The `trust_anchor_id` property's `data` field contains the binary representation
 
 ## Trust Anchor Group Inclusions Property
 
-The `trust_anchor_group_inclusions` property's `data` field contains the certification path's trust anchor group inclusions, as described in {{authenticating-party-configuration}}. Each trust anchor group inclusion is described in a TrustAnchorRangeList structure, defined below. Each TrustAnchorRange structure describes a trust anchor range, as defined in {{trust-anchor-ranges}}.
+The `trust_anchor_group_inclusions` property's `data` field contains a TrustAnchorRangeList structure, defined below. The TrustAnchorRangeList structure describes the certification path's trust anchor group inclusions, as described in {{authenticating-party-configuration}}. Each TrustAnchorRange structure describes a trust anchor range, as defined in {{trust-anchor-ranges}}.
 
 ~~~
 struct {
