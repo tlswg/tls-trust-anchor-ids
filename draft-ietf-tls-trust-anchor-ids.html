@@ -26,8 +26,8 @@
     platformdirs 4.9.6
     pycountry 24.6.1
     PyYAML 6.0.3
-    requests 2.32.5
-    wcwidth 0.6.0
+    requests 2.33.1
+    wcwidth 0.7.0
 -->
 <link href="draft-ietf-tls-trust-anchor-ids.xml" rel="alternate" type="application/rfc+xml">
 <link href="#copyright" rel="license">
@@ -1052,7 +1052,7 @@ svg :is([fill="white"], [fill^="#fff"]) {
 </tr></thead>
 <tfoot><tr>
 <td class="left">Beck, et al.</td>
-<td class="center">Expires 2 November 2026</td>
+<td class="center">Expires 6 November 2026</td>
 <td class="right">[Page]</td>
 </tr></tfoot>
 </table>
@@ -1065,12 +1065,12 @@ svg :is([fill="white"], [fill^="#fff"]) {
 <dd class="internet-draft">draft-ietf-tls-trust-anchor-ids-latest</dd>
 <dt class="label-published">Published:</dt>
 <dd class="published">
-<time datetime="2026-05-01" class="published">1 May 2026</time>
+<time datetime="2026-05-05" class="published">5 May 2026</time>
     </dd>
 <dt class="label-intended-status">Intended Status:</dt>
 <dd class="intended-status">Standards Track</dd>
 <dt class="label-expires">Expires:</dt>
-<dd class="expires"><time datetime="2026-11-02">2 November 2026</time></dd>
+<dd class="expires"><time datetime="2026-11-06">6 November 2026</time></dd>
 <dt class="label-authors">Authors:</dt>
 <dd class="authors">
 <div class="author">
@@ -1132,7 +1132,7 @@ svg :is([fill="white"], [fill^="#fff"]) {
         time. It is inappropriate to use Internet-Drafts as reference
         material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
 <p id="section-boilerplate.1-4">
-        This Internet-Draft will expire on 2 November 2026.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+        This Internet-Draft will expire on 6 November 2026.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="copyright">
@@ -1913,10 +1913,9 @@ TODO fill in an example
         <h3 id="name-intermediate-elision">
 <a href="#section-8.5" class="section-number selfRef">8.5. </a><a href="#name-intermediate-elision" class="section-name selfRef">Intermediate Elision</a>
         </h3>
-<p id="section-8.5-1">In my PKIs, root CAs issue shorter-lived intermediate certificates which, in turn, issue end-entity certificates. This comes at a bandwidth cost: the TLS handshake includes an extra certificate, which includes a public key, signature, and X.509 metadata. Post-quantum signature algorithms will dramatically increase this cost. ML-DSA-65 <span>[<a href="#FIPS204" class="cite xref">FIPS204</a>]</span>, for example, has a total public key and signature size of 5,261 bytes.<a href="#section-8.5-1" class="pilcrow">¶</a></p>
-<p id="section-8.5-2"><span>[<a href="#I-D.ietf-tls-cert-abridge" class="cite xref">I-D.ietf-tls-cert-abridge</a>]</span> predistributes a specific set of intermediate CA certificates to relying parties so that these certificates can be omitted from TLS connections, as a compression scheme. Negotiating intermediate CAs as short-lived trust anchors also achieves this effect, but is usable by more relying parties than the specific intermediate set accommodates.<a href="#section-8.5-2" class="pilcrow">¶</a></p>
-<p id="section-8.5-3">In this model, a CA operator provides authenticating parties with two certification paths: a longer path ending at a long-lived root and shorter path the other ending at a short-lived root. Relying parties trust both the long-lived root and the most recent short-lived root. The authenticating party sends the shorter path when possible, falling back to the longer path when the relying party’s short-lived root is stale.<a href="#section-8.5-3" class="pilcrow">¶</a></p>
-<p id="section-8.5-4">This achieves the same effect with a simpler and more flexible, general-purpose mechanism.<a href="#section-8.5-4" class="pilcrow">¶</a></p>
+<p id="section-8.5-1">In many PKIs, root CAs issue shorter-lived intermediate certificates which, in turn, issue end-entity certificates. This comes at a bandwidth cost: the TLS handshake includes an extra certificate, which includes a public key, signature, and X.509 metadata. Post-quantum signature algorithms will dramatically increase this cost. ML-DSA-65 <span>[<a href="#FIPS204" class="cite xref">FIPS204</a>]</span>, for example, has a total public key and signature size of 5,261 bytes.<a href="#section-8.5-1" class="pilcrow">¶</a></p>
+<p id="section-8.5-2">Trust anchor negotiation can avoid this size cost. Relying parties predistribute intermediate CAs and configure them as short-lived trust anchors. Authenticating parties can then send shorter paths to those relying parties.<a href="#section-8.5-2" class="pilcrow">¶</a></p>
+<p id="section-8.5-3">More generally, a CA operator provides authenticating parties with two certification paths: a longer path ending at a long-lived root and shorter path the other ending at a short-lived root. Relying parties trust both the long-lived root and the most recent short-lived root. The authenticating party sends the shorter path when possible, falling back to the longer path when the relying party’s short-lived root is stale.<a href="#section-8.5-3" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="conflicting-relying-party-requirements">
@@ -2339,10 +2338,6 @@ TODO fill in an example
 <dt id="I-D.ietf-plants-merkle-tree-certs">[I-D.ietf-plants-merkle-tree-certs]</dt>
         <dd>
 <span class="refAuthor">Benjamin, D.</span>, <span class="refAuthor">O'Brien, D.</span>, <span class="refAuthor">Westerbaan, B.</span>, <span class="refAuthor">Valenta, L.</span>, and <span class="refAuthor">F. Valsorda</span>, <span class="refTitle">"Merkle Tree Certificates"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-ietf-plants-merkle-tree-certs-03</span>, <time datetime="2026-04-20" class="refDate">20 April 2026</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-ietf-plants-merkle-tree-certs-03">https://datatracker.ietf.org/doc/html/draft-ietf-plants-merkle-tree-certs-03</a>&gt;</span>. </dd>
-<dd class="break"></dd>
-<dt id="I-D.ietf-tls-cert-abridge">[I-D.ietf-tls-cert-abridge]</dt>
-        <dd>
-<span class="refAuthor">Jackson, D.</span>, <span class="refTitle">"Abridged Compression for WebPKI Certificates"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-ietf-tls-cert-abridge-02</span>, <time datetime="2024-09-16" class="refDate">16 September 2024</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-ietf-tls-cert-abridge-02">https://datatracker.ietf.org/doc/html/draft-ietf-tls-cert-abridge-02</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 <dt id="MOZILLA-ROOTS">[MOZILLA-ROOTS]</dt>
         <dd>

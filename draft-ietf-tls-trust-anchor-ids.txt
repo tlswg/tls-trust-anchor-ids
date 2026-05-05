@@ -5,12 +5,12 @@
 Transport Layer Security                                         B. Beck
 Internet-Draft                                                   OpenSSL
 Intended status: Standards Track                             D. Benjamin
-Expires: 2 November 2026                                      Google LLC
+Expires: 6 November 2026                                      Google LLC
                                                               D. O'Brien
                                                                         
                                                               K. Nekritz
                                                                     Meta
-                                                              1 May 2026
+                                                              5 May 2026
 
 
                       TLS Trust Anchor Identifiers
@@ -61,7 +61,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 2 November 2026.
+   This Internet-Draft will expire on 6 November 2026.
 
 Copyright Notice
 
@@ -1016,7 +1016,7 @@ Table of Contents
 
 8.5.  Intermediate Elision
 
-   In my PKIs, root CAs issue shorter-lived intermediate certificates
+   In many PKIs, root CAs issue shorter-lived intermediate certificates
    which, in turn, issue end-entity certificates.  This comes at a
    bandwidth cost: the TLS handshake includes an extra certificate,
    which includes a public key, signature, and X.509 metadata.  Post-
@@ -1024,23 +1024,18 @@ Table of Contents
    ML-DSA-65 [FIPS204], for example, has a total public key and
    signature size of 5,261 bytes.
 
-   [I-D.ietf-tls-cert-abridge] predistributes a specific set of
-   intermediate CA certificates to relying parties so that these
-   certificates can be omitted from TLS connections, as a compression
-   scheme.  Negotiating intermediate CAs as short-lived trust anchors
-   also achieves this effect, but is usable by more relying parties than
-   the specific intermediate set accommodates.
+   Trust anchor negotiation can avoid this size cost.  Relying parties
+   predistribute intermediate CAs and configure them as short-lived
+   trust anchors.  Authenticating parties can then send shorter paths to
+   those relying parties.
 
-   In this model, a CA operator provides authenticating parties with two
-   certification paths: a longer path ending at a long-lived root and
-   shorter path the other ending at a short-lived root.  Relying parties
-   trust both the long-lived root and the most recent short-lived root.
-   The authenticating party sends the shorter path when possible,
-   falling back to the longer path when the relying party’s short-lived
-   root is stale.
-
-   This achieves the same effect with a simpler and more flexible,
-   general-purpose mechanism.
+   More generally, a CA operator provides authenticating parties with
+   two certification paths: a longer path ending at a long-lived root
+   and shorter path the other ending at a short-lived root.  Relying
+   parties trust both the long-lived root and the most recent short-
+   lived root.  The authenticating party sends the shorter path when
+   possible, falling back to the longer path when the relying party’s
+   short-lived root is stale.
 
 8.6.  Conflicting Relying Party Requirements
 
@@ -1483,13 +1478,6 @@ Table of Contents
               certs-03, 20 April 2026,
               <https://datatracker.ietf.org/doc/html/draft-ietf-plants-
               merkle-tree-certs-03>.
-
-   [I-D.ietf-tls-cert-abridge]
-              Jackson, D., "Abridged Compression for WebPKI
-              Certificates", Work in Progress, Internet-Draft, draft-
-              ietf-tls-cert-abridge-02, 16 September 2024,
-              <https://datatracker.ietf.org/doc/html/draft-ietf-tls-
-              cert-abridge-02>.
 
    [MOZILLA-ROOTS]
               Mozilla, "Mozilla Included CA Certificate List", 30 August
