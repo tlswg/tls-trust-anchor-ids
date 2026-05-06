@@ -91,7 +91,7 @@ func main() {
 	props := CertificatePropertyList{
 		TrustAnchorID: []uint64{32473, 1},
 		TrustAnchorGroupInclusions: []TrustAnchorRange{
-			{Base: []uint64{32473, 2}, Min: 100, Max: 200},
+			{Base: []uint64{2187, 2}, Min: 100, Max: 200},
 			{Base: []uint64{32473, 3}, Min: 42, Max: math.MaxUint64},
 		},
 	}

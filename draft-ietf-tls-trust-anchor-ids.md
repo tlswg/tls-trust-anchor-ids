@@ -468,13 +468,13 @@ The following is an example file with a certification path containing an end-ent
 
 * A `trust_anchor_id` property of `32473.1`
 * A `trust_anchor_group_inclusions` property with two group inclusions:
-  * `32473.2.100` to `32473.2.200`
+  * `2187.2.100` to `2187.2.200`
   * `32473.3.42` to `32473.3.MAX`
 
 ~~~
 -----BEGIN CERTIFICATE PROPERTIES-----
-ADgAAAAEgf1ZAQABACwAKgSB/VkCAAAAAAAAAGQAAAAAAAAAyASB/VkDAAAAAAAA
-ACr//////////w==
+ADcAAAAEgf1ZAQABACsAKQORCwIAAAAAAAAAZAAAAAAAAADIBIH9WQMAAAAAAAAA
+Kv//////////
 -----END CERTIFICATE PROPERTIES-----
 -----BEGIN CERTIFICATE-----
 MIIBVzCB/6ADAgECAgkAh7Uv5X8pplkwCgYIKoZIzj0EAwIwGjEYMBYGA1UEAwwP
