@@ -464,17 +464,36 @@ CertificatePropertyLists are encoded using the "CERTIFICATE PROPERTIES" label. T
 
 Certificates are encoded as in {{Section 5.1 of !RFC7468}}, except DER {{X690}} MUST be used.
 
-The following is an example file with a certification path containing an end-entity certificate and an intermediate certificate.
+The following is an example file with a certification path containing an end-entity certificate and an intermediate certificate. The example CertificatePropertyList encodes:
+
+* A `trust_anchor_id` property of `32473.1`
+* A `trust_anchor_group_inclusions` property with two group inclusions:
+  * `2187.2.100` to `2187.2.200`
+  * `32473.3.42` to `32473.3.MAX`
 
 ~~~
 -----BEGIN CERTIFICATE PROPERTIES-----
-TODO fill in an example
+ADcAAAAEgf1ZAQABACsAKQORCwIAAAAAAAAAZAAAAAAAAADIBIH9WQMAAAAAAAAA
+Kv//////////
 -----END CERTIFICATE PROPERTIES-----
 -----BEGIN CERTIFICATE-----
-TODO fill in an example
+MIIBVzCB/6ADAgECAgkAh7Uv5X8pplkwCgYIKoZIzj0EAwIwGjEYMBYGA1UEAwwP
+SW50ZXJtZWRpYXRlIENBMB4XDTI2MDUwNTIxMzg1NVoXDTI3MDUwNTIxMzg1NVow
+FjEUMBIGA1UEAwwLZXhhbXBsZS5jb20wWTATBgcqhkjOPQIBBggqhkjOPQMBBwNC
+AAT5mg5z0464cE7rtEpTeSPFNlRUBjxqycdb4rvNkG3Fbd1R2IRo7zYOi5SP3S7L
+C4r5Hw+IiDq5X2nQT1w5ympeozIwMDAJBgNVHRMEAjAAMAsGA1UdDwQEAwIHgDAW
+BgNVHREEDzANggtleGFtcGxlLmNvbTAKBggqhkjOPQQDAgNHADBEAiBRdPrVpQtJ
+s+J9DFhT1Db6QmIZFfjFFKQ88B0gFezyfAIgSwIxntwrPFYagfK6vPcRpDxG2oLV
+LkfnP5v1SPjOsMY=
 -----END CERTIFICATE-----
 -----BEGIN CERTIFICATE-----
-TODO fill in an example
+MIIBRTCB7KADAgECAgkAkaBeQj6ZErAwCgYIKoZIzj0EAwIwEjEQMA4GA1UEAwwH
+Um9vdCBDQTAeFw0yNjA1MDUyMTM4MzJaFw0zMTA1MDQyMTM4MzJaMBoxGDAWBgNV
+BAMMD0ludGVybWVkaWF0ZSBDQTBZMBMGByqGSM49AgEGCCqGSM49AwEHA0IABJEH
+0D77iyFv01I/4sEqUaoUel50BBwsWSYrH/LtO6cdGI28NyzMyFuYrE6UCRusgAKo
+XBmWjHEGJmoDPoAy2t+jIzAhMA8GA1UdEwEB/wQFMAMBAf8wDgYDVR0PAQH/BAQD
+AgEGMAoGCCqGSM49BAMCA0gAMEUCIBWtPiDwXXEvbgy2+nu/w4MRBNsQ3hbVWyJT
+ITN+1R6WAiEA2AfGBy3Hz8oYY5wPldIndrXjntCzzSEduB6pEvYQZWo=
 -----END CERTIFICATE-----
 ~~~
 
