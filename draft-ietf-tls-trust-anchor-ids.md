@@ -727,7 +727,17 @@ IANA is requested to create the following entry in the SMI Security for PKIX Cer
 
 ## CertificatePropertyType Registry
 
-[[TODO: Establish a CertificatePropertyType registry.]]
+IANA is requested to create the "CertificatePropertyType" registry within the "Transport Layer Security (TLS) Extensions" group. The initial entries in the registry are as follows:
+
+| Decimal | Description                   | References |
+|---------|-------------------------------|------------|
+| 0       | trust_anchor_id               | [this-RFC] |
+| 1       | trust_anchor_group_inclusions | [this-RFC] |
+
+New values are allocated according to the following process:
+
+* Values in the range 0-65279 are assigned via Specification Required {{!RFC8126}}.
+* Values in the range 65280-65535 are reserved for Private Use {{!RFC8129}}.
 
 --- back
 
