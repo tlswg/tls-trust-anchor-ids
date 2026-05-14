@@ -5,12 +5,12 @@
 Transport Layer Security                                         B. Beck
 Internet-Draft                                                   OpenSSL
 Intended status: Standards Track                             D. Benjamin
-Expires: 8 November 2026                                      Google LLC
+Expires: 15 November 2026                                     Google LLC
                                                               D. O'Brien
                                                                         
                                                               K. Nekritz
                                                                     Meta
-                                                              7 May 2026
+                                                             14 May 2026
 
 
                       TLS Trust Anchor Identifiers
@@ -61,7 +61,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 8 November 2026.
+   This Internet-Draft will expire on 15 November 2026.
 
 Copyright Notice
 
@@ -1400,7 +1400,27 @@ Table of Contents
 
 11.4.  CertificatePropertyType Registry
 
-   [[TODO: Establish a CertificatePropertyType registry.]]
+   IANA is requested to create the "CertificatePropertyType" registry
+   within the "Transport Layer Security (TLS) Extensions" group.  The
+   initial entries in the registry are as follows:
+
+         +=========+===============================+============+
+         | Decimal | Description                   | References |
+         +=========+===============================+============+
+         | 0       | trust_anchor_id               | [this-RFC] |
+         +---------+-------------------------------+------------+
+         | 1       | trust_anchor_group_inclusions | [this-RFC] |
+         +---------+-------------------------------+------------+
+
+                                 Table 4
+
+   New values are allocated according to the following process:
+
+   *  Values in the range 0-65279 are assigned via Specification
+      Required [RFC8126].
+
+   *  Values in the range 65280-65535 are reserved for Private Use
+      [RFC8129].
 
 12.  References
 
@@ -1446,6 +1466,16 @@ Table of Contents
    [RFC7468]  Josefsson, S. and S. Leonard, "Textual Encodings of PKIX,
               PKCS, and CMS Structures", RFC 7468, DOI 10.17487/RFC7468,
               April 2015, <https://www.rfc-editor.org/rfc/rfc7468>.
+
+   [RFC8126]  Cotton, M., Leiba, B., and T. Narten, "Guidelines for
+              Writing an IANA Considerations Section in RFCs", BCP 26,
+              RFC 8126, DOI 10.17487/RFC8126, June 2017,
+              <https://www.rfc-editor.org/rfc/rfc8126>.
+
+   [RFC8129]  Jain, A., Kinder, N., and N. McCallum, "Authentication
+              Indicator in Kerberos Tickets", RFC 8129,
+              DOI 10.17487/RFC8129, March 2017,
+              <https://www.rfc-editor.org/rfc/rfc8129>.
 
    [RFC8174]  Leiba, B., "Ambiguity of Uppercase vs Lowercase in RFC
               2119 Key Words", BCP 14, RFC 8174, DOI 10.17487/RFC8174,
