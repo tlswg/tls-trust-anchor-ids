@@ -657,6 +657,14 @@ IANA is requested to create the following entry in the TLS ExtensionType Values 
 |-------|----------------|----------------|-----------|-------------|------------|
 | TBD   | trust_anchors  | CH, EE, CR, CT | N         | Y           | [this-RFC] |
 
+## Service Parameter Key Updates
+
+IANA is requested to create the following entry in the DNS SVCB Service Parameter Keys (SvcParamKeys) registry, defined by {{!RFC9460}}:
+
+| Number | Name              | Meaning                        | Format Reference | Change Controller |
+|--------|-------------------|--------------------------------|------------------|-------------------|
+| TBD    | tls-trust-anchors | Available trust anchors in TLS | [this-RFC]       | IETF              |
+
 ## Media Type Updates
 
 IANA is requested to create the following entry in the "Media Types" registry, defined in {{!RFC6838}}:
