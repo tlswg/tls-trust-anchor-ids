@@ -5,12 +5,12 @@
 Transport Layer Security                                         B. Beck
 Internet-Draft                                                   OpenSSL
 Intended status: Standards Track                             D. Benjamin
-Expires: 15 November 2026                                     Google LLC
+Expires: 27 December 2026                                     Google LLC
                                                               D. O'Brien
                                                                         
                                                               K. Nekritz
                                                                     Meta
-                                                             14 May 2026
+                                                            25 June 2026
 
 
                       TLS Trust Anchor Identifiers
@@ -61,7 +61,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 15 November 2026.
+   This Internet-Draft will expire on 27 December 2026.
 
 Copyright Notice
 
@@ -122,9 +122,10 @@ Table of Contents
        10.2.4.  Targeting TLS Interception
    11. IANA Considerations
      11.1.  TLS ExtensionType Updates
-     11.2.  Media Type Updates
-     11.3.  PKIX Registry Updates
-     11.4.  CertificatePropertyType Registry
+     11.2.  Service Parameter Key Updates
+     11.3.  Media Type Updates
+     11.4.  PKIX Registry Updates
+     11.5.  CertificatePropertyType Registry
    12. References
      12.1.  Normative References
      12.2.  Informative References
@@ -902,7 +903,7 @@ Table of Contents
    -----END CERTIFICATE-----
 
    The IANA registration for this media type is described in
-   Section 11.2.
+   Section 11.3.
 
 7.4.  ACME Extension
 
@@ -1331,7 +1332,24 @@ Table of Contents
 
                                  Table 1
 
-11.2.  Media Type Updates
+11.2.  Service Parameter Key Updates
+
+   IANA is requested to create the following entry in the DNS SVCB
+   Service Parameter Keys (SvcParamKeys) registry, defined by [RFC9460]:
+
+   +========+===================+===========+============+============+
+   | Number | Name              | Meaning   | Format     | Change     |
+   |        |                   |           | Reference  | Controller |
+   +========+===================+===========+============+============+
+   | TBD    | tls-trust-anchors | Available | [this-RFC] | IETF       |
+   |        |                   | trust     |            |            |
+   |        |                   | anchors   |            |            |
+   |        |                   | in TLS    |            |            |
+   +--------+-------------------+-----------+------------+------------+
+
+                                 Table 2
+
+11.3.  Media Type Updates
 
    IANA is requested to create the following entry in the "Media Types"
    registry, defined in [RFC6838]:
@@ -1374,7 +1392,7 @@ Table of Contents
 
    Change controller:  IETF
 
-11.3.  PKIX Registry Updates
+11.4.  PKIX Registry Updates
 
    IANA is requested to create the following entry in the SMI Security
    for PKIX Module Identifier registry, defined by [RFC7299]:
@@ -1385,7 +1403,7 @@ Table of Contents
            | TBD     | id-mod-trustAnchorIDs-2025 | [this-RFC] |
            +---------+----------------------------+------------+
 
-                                  Table 2
+                                  Table 3
 
    IANA is requested to create the following entry in the SMI Security
    for PKIX Certificate Extension registry, defined by [RFC7299]:
@@ -1396,9 +1414,9 @@ Table of Contents
               | TBD     | id-pe-trustAnchorID | [this-RFC] |
               +---------+---------------------+------------+
 
-                                 Table 3
+                                 Table 4
 
-11.4.  CertificatePropertyType Registry
+11.5.  CertificatePropertyType Registry
 
    IANA is requested to create the "CertificatePropertyType" registry
    within the "Transport Layer Security (TLS) Extensions" group.  The
@@ -1412,7 +1430,7 @@ Table of Contents
          | 1       | trust_anchor_group_inclusions | [this-RFC] |
          +---------+-------------------------------+------------+
 
-                                 Table 4
+                                 Table 5
 
    New values are allocated according to the following process:
 
@@ -1530,9 +1548,9 @@ Table of Contents
               Benjamin, D., O'Brien, D., Westerbaan, B., Valenta, L.,
               and F. Valsorda, "Merkle Tree Certificates", Work in
               Progress, Internet-Draft, draft-ietf-plants-merkle-tree-
-              certs-03, 20 April 2026,
+              certs-04, 24 May 2026,
               <https://datatracker.ietf.org/doc/html/draft-ietf-plants-
-              merkle-tree-certs-03>.
+              merkle-tree-certs-04>.
 
    [MOZILLA-ROOTS]
               Mozilla, "Mozilla Included CA Certificate List", 30 August
