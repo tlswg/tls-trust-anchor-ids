@@ -5,12 +5,12 @@
 Transport Layer Security                                         B. Beck
 Internet-Draft                                                   OpenSSL
 Intended status: Standards Track                             D. Benjamin
-Expires: 27 December 2026                                     Google LLC
+Expires: 12 January 2027                                      Google LLC
                                                               D. O'Brien
                                                                         
                                                               K. Nekritz
                                                                     Meta
-                                                            25 June 2026
+                                                            11 July 2026
 
 
                       TLS Trust Anchor Identifiers
@@ -61,7 +61,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 27 December 2026.
+   This Internet-Draft will expire on 12 January 2027.
 
 Copyright Notice
 
@@ -1438,7 +1438,7 @@ Table of Contents
       Required [RFC8126].
 
    *  Values in the range 65280-65535 are reserved for Private Use
-      [RFC8129].
+      [RFC8126].
 
 12.  References
 
@@ -1489,11 +1489,6 @@ Table of Contents
               Writing an IANA Considerations Section in RFCs", BCP 26,
               RFC 8126, DOI 10.17487/RFC8126, June 2017,
               <https://www.rfc-editor.org/rfc/rfc8126>.
-
-   [RFC8129]  Jain, A., Kinder, N., and N. McCallum, "Authentication
-              Indicator in Kerberos Tickets", RFC 8129,
-              DOI 10.17487/RFC8129, March 2017,
-              <https://www.rfc-editor.org/rfc/rfc8129>.
 
    [RFC8174]  Leiba, B., "Ambiguity of Uppercase vs Lowercase in RFC
               2119 Key Words", BCP 14, RFC 8174, DOI 10.17487/RFC8174,
@@ -1548,9 +1543,9 @@ Table of Contents
               Benjamin, D., O'Brien, D., Westerbaan, B., Valenta, L.,
               and F. Valsorda, "Merkle Tree Certificates", Work in
               Progress, Internet-Draft, draft-ietf-plants-merkle-tree-
-              certs-04, 24 May 2026,
+              certs-05, 6 July 2026,
               <https://datatracker.ietf.org/doc/html/draft-ietf-plants-
-              merkle-tree-certs-04>.
+              merkle-tree-certs-05>.
 
    [MOZILLA-ROOTS]
               Mozilla, "Mozilla Included CA Certificate List", 30 August
