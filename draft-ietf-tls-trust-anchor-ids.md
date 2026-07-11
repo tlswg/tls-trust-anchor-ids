@@ -745,7 +745,7 @@ IANA is requested to create the "CertificatePropertyType" registry within the "T
 New values are allocated according to the following process:
 
 * Values in the range 0-65279 are assigned via Specification Required {{!RFC8126}}.
-* Values in the range 65280-65535 are reserved for Private Use {{!RFC8129}}.
+* Values in the range 65280-65535 are reserved for Private Use {{!RFC8126}}.
 
 --- back
 
