@@ -24,7 +24,7 @@
     Jinja2 3.1.6
     lxml 6.1.1
     natsort 8.4.0
-    platformdirs 4.10.0
+    platformdirs 4.10.1
     pycountry 24.6.1
     PyYAML 6.0.3
     requests 2.33.1
@@ -1051,7 +1051,7 @@ svg {
 </tr></thead>
 <tfoot><tr>
 <td class="left">Beck, et al.</td>
-<td class="center">Expires 12 January 2027</td>
+<td class="center">Expires 19 January 2027</td>
 <td class="right">[Page]</td>
 </tr></tfoot>
 </table>
@@ -1064,12 +1064,12 @@ svg {
 <dd class="internet-draft">draft-ietf-tls-trust-anchor-ids-latest</dd>
 <dt class="label-published">Published:</dt>
 <dd class="published">
-<time datetime="2026-07-11" class="published">11 July 2026</time>
+<time datetime="2026-07-18" class="published">18 July 2026</time>
     </dd>
 <dt class="label-intended-status">Intended Status:</dt>
 <dd class="intended-status">Standards Track</dd>
 <dt class="label-expires">Expires:</dt>
-<dd class="expires"><time datetime="2027-01-12">12 January 2027</time></dd>
+<dd class="expires"><time datetime="2027-01-19">19 January 2027</time></dd>
 <dt class="label-authors">Authors:</dt>
 <dd class="authors">
 <div class="author">
@@ -1131,7 +1131,7 @@ svg {
         time. It is inappropriate to use Internet-Drafts as reference
         material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
 <p id="section-boilerplate.1-4">
-        This Internet-Draft will expire on 12 January 2027.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+        This Internet-Draft will expire on 19 January 2027.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="copyright">
@@ -1352,8 +1352,8 @@ svg {
       <h2 id="name-introduction">
 <a href="#section-1" class="section-number selfRef">1. </a><a href="#name-introduction" class="section-name selfRef">Introduction</a>
       </h2>
-<p id="section-1-1">TLS <span>[<a href="#RFC8446" class="cite xref">RFC8446</a>]</span> authentication uses X.509 certificates <span>[<a href="#RFC5280" class="cite xref">RFC5280</a>]</span> to associate the <em>authenticating party's</em> TLS key with its application identifiers, such as DNS names. These associations are signed by some certification authority (CA). The peer, or <em>relying party</em>, curates a set of CAs that are trusted to only sign correct associations, which allows it to rely on the TLS to authenticate application identifiers. Typically the authenticating party is the server and the relying party is the client.<a href="#section-1-1" class="pilcrow">¶</a></p>
-<p id="section-1-2">An authenticating party may need to interoperate with relying parties that trust different sets of CAs. <span><a href="https://rfc-editor.org/rfc/rfc8446#section-4.2.4" class="relref">Section 4.2.4</a> of [<a href="#RFC8446" class="cite xref">RFC8446</a>]</span> defines the <code>certificate_authorities</code> extension to accommodate this. It allows the authenticating party to provision multiple certificates and select the one that will allow the relying party to accept its TLS key. This is analogous to parameter negotiation elsewhere in TLS.<a href="#section-1-2" class="pilcrow">¶</a></p>
+<p id="section-1-1">TLS <span>[<a href="#RFC9846" class="cite xref">RFC9846</a>]</span> authentication uses X.509 certificates <span>[<a href="#RFC5280" class="cite xref">RFC5280</a>]</span> to associate the <em>authenticating party's</em> TLS key with its application identifiers, such as DNS names. These associations are signed by some certification authority (CA). The peer, or <em>relying party</em>, curates a set of CAs that are trusted to only sign correct associations, which allows it to rely on the TLS to authenticate application identifiers. Typically the authenticating party is the server and the relying party is the client.<a href="#section-1-1" class="pilcrow">¶</a></p>
+<p id="section-1-2">An authenticating party may need to interoperate with relying parties that trust different sets of CAs. <span><a href="https://rfc-editor.org/rfc/rfc9846#section-4.3.4" class="relref">Section 4.3.4</a> of [<a href="#RFC9846" class="cite xref">RFC9846</a>]</span> defines the <code>certificate_authorities</code> extension to accommodate this. It allows the authenticating party to provision multiple certificates and select the one that will allow the relying party to accept its TLS key. This is analogous to parameter negotiation elsewhere in TLS.<a href="#section-1-2" class="pilcrow">¶</a></p>
 <p id="section-1-3">However, <code>certificate_authorities</code>'s size is impractical for some applications. Existing PKIs may have many CAs, and existing CAs may have long X.509 names. As of August 2023, the Mozilla CA Certificate Program <span>[<a href="#MOZILLA-ROOTS" class="cite xref">MOZILLA-ROOTS</a>]</span> contained 144 CAs, with an average name length of around 100 bytes. Such TLS deployments often do not use trust anchor negotiation at all.<a href="#section-1-3" class="pilcrow">¶</a></p>
 <p id="section-1-4">Without a negotiation mechanism, the authenticating party must obtain a single certificate that simultaneously satisfies all relying parties. This is challenging when relying parties are diverse. PKI transitions, including those necessary for user security, naturally lead to relying party diversity, so the result is that service availability conflicts with security and overall PKI evolution:<a href="#section-1-4" class="pilcrow">¶</a></p>
 <ul class="normal">
@@ -1391,7 +1391,7 @@ svg {
 "SHOULD NOT", "RECOMMENDED", "NOT RECOMMENDED", "MAY", and "OPTIONAL" in this
 document are to be interpreted as described in BCP 14 <span>[<a href="#RFC2119" class="cite xref">RFC2119</a>]</span> <span>[<a href="#RFC8174" class="cite xref">RFC8174</a>]</span>
 when, and only when, they appear in all capitals, as shown here.<a href="#section-2-1" class="pilcrow">¶</a></p>
-<p id="section-2-2">This document additionally uses the TLS presentation language, defined in <span><a href="https://rfc-editor.org/rfc/rfc8446#section-3" class="relref">Section 3</a> of [<a href="#RFC8446" class="cite xref">RFC8446</a>]</span>, and ASN.1, defined in <span>[<a href="#X680" class="cite xref">X680</a>]</span>.<a href="#section-2-2" class="pilcrow">¶</a></p>
+<p id="section-2-2">This document additionally uses the TLS presentation language, defined in <span><a href="https://rfc-editor.org/rfc/rfc9846#section-3" class="relref">Section 3</a> of [<a href="#RFC9846" class="cite xref">RFC9846</a>]</span>, and ASN.1, defined in <span>[<a href="#X680" class="cite xref">X680</a>]</span>.<a href="#section-2-2" class="pilcrow">¶</a></p>
 <div id="terminology-and-roles">
 <section id="section-2.1">
         <h3 id="name-terminology-and-roles">
@@ -1589,7 +1589,7 @@ TrustAnchorID AvailableTrustAnchorList&lt;1..2^16-1&gt;;
         <h3 id="name-certificate-selection">
 <a href="#section-4.2" class="section-number selfRef">4.2. </a><a href="#name-certificate-selection" class="section-name selfRef">Certificate Selection</a>
         </h3>
-<p id="section-4.2-1">A <code>trust_anchors</code> extension in the ClientHello or CertificateRequest is processed similarly to the <code>certificate_authorities</code> extension. The relying party indicates some set of supported trust anchors in the ClientHello or CertificateRequest <code>trust_anchors</code> extension. The authenticating party then selects a certificate from its candidate certification paths (see <a href="#authenticating-party-configuration" class="auto internal xref">Section 3.2</a>), as described in <span><a href="https://rfc-editor.org/rfc/rfc8446#section-4.4.2.2" class="relref">Section 4.4.2.2</a> of [<a href="#RFC8446" class="cite xref">RFC8446</a>]</span> and <span><a href="https://rfc-editor.org/rfc/rfc8446#section-4.4.2.3" class="relref">Section 4.4.2.3</a> of [<a href="#RFC8446" class="cite xref">RFC8446</a>]</span>. This process is extended as follows:<a href="#section-4.2-1" class="pilcrow">¶</a></p>
+<p id="section-4.2-1">A <code>trust_anchors</code> extension in the ClientHello or CertificateRequest is processed similarly to the <code>certificate_authorities</code> extension. The relying party indicates some set of supported trust anchors in the ClientHello or CertificateRequest <code>trust_anchors</code> extension. The authenticating party then selects a certificate from its candidate certification paths (see <a href="#authenticating-party-configuration" class="auto internal xref">Section 3.2</a>), as described in <span><a href="https://rfc-editor.org/rfc/rfc9846#section-4.5.1.2" class="relref">Section 4.5.1.2</a> of [<a href="#RFC9846" class="cite xref">RFC9846</a>]</span>. This process is extended as follows:<a href="#section-4.2-1" class="pilcrow">¶</a></p>
 <p id="section-4.2-2">If the ClientHello or CertificateRequest contains a <code>trust_anchors</code> extension, the authenticating party SHOULD send a certification path such that either:<a href="#section-4.2-2" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-4.2-3.1">
@@ -1602,7 +1602,7 @@ TrustAnchorID AvailableTrustAnchorList&lt;1..2^16-1&gt;;
 <p id="section-4.2-4">If the ClientHello or CertificateRequest contains both <code>trust_anchors</code> and <code>certificate_authorities</code>, certification paths that satisfy either extension's criteria may be used. This additionally applies to future extensions which play a similar role.<a href="#section-4.2-4" class="pilcrow">¶</a></p>
 <p id="section-4.2-5">If no certification paths satisfy either extension, the authenticating party MAY return a <code>handshake_failure</code> alert, or choose among fallback certification paths without considering <code>trust_anchors</code> or <code>certification_authorities</code>. See <a href="#retry-mechanism" class="auto internal xref">Section 4.3</a> for additional guidance on selecting a fallback when the ClientHello contains <code>trust_anchors</code>.<a href="#section-4.2-5" class="pilcrow">¶</a></p>
 <p id="section-4.2-6">Sending a fallback allows the authenticating party to retain support for relying parties that do not implement any form of trust anchor negotiation. In this case, the authenticating party must find a sufficiently ubiquitous trust anchor, if one exists. However, only those relying parties need to be considered in this ubiquity determination. Updated relying parties may continue to evolve without restricting fallback certificate selection.<a href="#section-4.2-6" class="pilcrow">¶</a></p>
-<p id="section-4.2-7">If the authenticating party sends a certification path that matches the relying party's <code>trust_anchors</code> extension, as described in <a href="#certificate-selection" class="auto internal xref">Section 4.2</a>, the authenticating party MUST send an empty <code>trust_anchors</code> extension in the first CertificateEntry of the Certificate message. In this case, the <code>certificate_list</code> flexibility described in <span><a href="https://rfc-editor.org/rfc/rfc8446#section-4.4.2" class="relref">Section 4.4.2</a> of [<a href="#RFC8446" class="cite xref">RFC8446</a>]</span> no longer applies. The <code>certificate_list</code> MUST contain a complete certification path, issued by the matching trust anchor, correctly ordered and with no extraneous certificates. That is, each certificate MUST certify the one immediately preceding it, and the trust anchor MUST certify the final certificate. The authenticating party MUST NOT send the <code>trust_anchors</code> extension in the Certificate message in other situations.<a href="#section-4.2-7" class="pilcrow">¶</a></p>
+<p id="section-4.2-7">If the authenticating party sends a certification path that matches the relying party's <code>trust_anchors</code> extension, as described in <a href="#certificate-selection" class="auto internal xref">Section 4.2</a>, the authenticating party MUST send an empty <code>trust_anchors</code> extension in the first CertificateEntry of the Certificate message. In this case, the <code>certificate_list</code> flexibility described in <span><a href="https://rfc-editor.org/rfc/rfc9846#section-4.5.1" class="relref">Section 4.5.1</a> of [<a href="#RFC9846" class="cite xref">RFC9846</a>]</span> no longer applies. The <code>certificate_list</code> MUST contain a complete certification path, issued by the matching trust anchor, correctly ordered and with no extraneous certificates. That is, each certificate MUST certify the one immediately preceding it, and the trust anchor MUST certify the final certificate. The authenticating party MUST NOT send the <code>trust_anchors</code> extension in the Certificate message in other situations.<a href="#section-4.2-7" class="pilcrow">¶</a></p>
 <p id="section-4.2-8">If a relying party receives this extension in the Certificate message, it MAY choose to disable path building <span>[<a href="#RFC4158" class="cite xref">RFC4158</a>]</span> and validate the peer's certificate list as pre-built certification path. Doing so avoids the unpredictable behavior of path-building, and helps ensure CAs and authenticating parties do not inadvertently provision incorrect paths.<a href="#section-4.2-8" class="pilcrow">¶</a></p>
 </section>
 </div>
@@ -1618,7 +1618,7 @@ TrustAnchorID AvailableTrustAnchorList&lt;1..2^16-1&gt;;
             <p id="section-4.3-3.1.1">Have a trust anchor ID, and<a href="#section-4.3-3.1.1" class="pilcrow">¶</a></p>
 </li>
           <li class="normal" id="section-4.3-3.2">
-            <p id="section-4.3-3.2.1">Satisfy the conditions in <span><a href="https://rfc-editor.org/rfc/rfc8446#section-4.4.2.2" class="relref">Section 4.4.2.2</a> of [<a href="#RFC8446" class="cite xref">RFC8446</a>]</span>, with the exception of <code>certification_authorities</code>, and any future extensions that play a similar role<a href="#section-4.3-3.2.1" class="pilcrow">¶</a></p>
+            <p id="section-4.3-3.2.1">Satisfy the conditions in <span><a href="https://rfc-editor.org/rfc/rfc9846#section-4.5.1.2" class="relref">Section 4.5.1.2</a> of [<a href="#RFC9846" class="cite xref">RFC9846</a>]</span>, with the exception of <code>certification_authorities</code>, and any future extensions that play a similar role<a href="#section-4.3-3.2.1" class="pilcrow">¶</a></p>
 </li>
         </ul>
 <p id="section-4.3-4">If this collection is non-empty, the server sends a <code>trust_anchors</code> extension in EncryptedExtensions, containing the corresponding trust anchor IDs in preference order.<a href="#section-4.3-4" class="pilcrow">¶</a></p>
@@ -1759,7 +1759,7 @@ example.net.  7200  IN SVCB 3 server.example.net. (
       </h2>
 <p id="section-7-1">As described in <a href="#authenticating-party-configuration" class="auto internal xref">Section 3.2</a>, certification paths participating in this mechanism must be configured with a trust anchor ID. This section introduces a RECOMMENDED extensible CertificatePropertyList structure for representing this and other additional properties of a certification path. CertificatePropertyLists may be used as part of authenticating party configuration, and for CAs to communicate additional properties during certificate issuance.<a href="#section-7-1" class="pilcrow">¶</a></p>
 <p id="section-7-2">The extensibility aims to simplify application deployment as PKI mechanisms evolve. When certificate issuance and application software is updated to pass this structure to the underlying TLS implementation, new properties may be transparently defined without changes to certificate and configuration management.<a href="#section-7-2" class="pilcrow">¶</a></p>
-<p id="section-7-3">A CertificatePropertyList is defined using the TLS presentation language (<span><a href="https://rfc-editor.org/rfc/rfc8446#section-3" class="relref">Section 3</a> of [<a href="#RFC8446" class="cite xref">RFC8446</a>]</span>) below:<a href="#section-7-3" class="pilcrow">¶</a></p>
+<p id="section-7-3">A CertificatePropertyList is defined using the TLS presentation language (<span><a href="https://rfc-editor.org/rfc/rfc9846#section-3" class="relref">Section 3</a> of [<a href="#RFC9846" class="cite xref">RFC9846</a>]</span>) below:<a href="#section-7-3" class="pilcrow">¶</a></p>
 <div class="lang-tls-presentation sourcecode" id="section-7-4">
 <pre>
 enum {
@@ -1989,7 +1989,7 @@ ITN+1R6WAiEA2AfGBy3Hz8oYY5wPldIndrXjntCzzSEduB6pEvYQZWo=
         <h3 id="name-relying-parties">
 <a href="#section-9.1" class="section-number selfRef">9.1. </a><a href="#name-relying-parties" class="section-name selfRef">Relying Parties</a>
         </h3>
-<p id="section-9.1-1">The <code>trust_anchors</code> extension is analogous to the <code>certificate_authorities</code> extension (<span><a href="https://rfc-editor.org/rfc/rfc8446#section-4.2.4" class="relref">Section 4.2.4</a> of [<a href="#RFC8446" class="cite xref">RFC8446</a>]</span>), but more size-efficient. Like <code>certificate_authorities</code>, <code>trust_anchors</code> reveals some information about the relying party's trust anchors. However, unlike <code>certificate_authorities</code>, <code>trust_anchors</code> allows a relying party to only reveal a trust anchor in response to the authenticating party's list, which reduces the fingerprinting exposure. This section provides guidance for a relying party to configure this mechanism, based on its privacy goals.<a href="#section-9.1-1" class="pilcrow">¶</a></p>
+<p id="section-9.1-1">The <code>trust_anchors</code> extension is analogous to the <code>certificate_authorities</code> extension (<span><a href="https://rfc-editor.org/rfc/rfc9846#section-4.3.4" class="relref">Section 4.3.4</a> of [<a href="#RFC9846" class="cite xref">RFC9846</a>]</span>), but more size-efficient. Like <code>certificate_authorities</code>, <code>trust_anchors</code> reveals some information about the relying party's trust anchors. However, unlike <code>certificate_authorities</code>, <code>trust_anchors</code> allows a relying party to only reveal a trust anchor in response to the authenticating party's list, which reduces the fingerprinting exposure. This section provides guidance for a relying party to configure this mechanism, based on its privacy goals.<a href="#section-9.1-1" class="pilcrow">¶</a></p>
 <p id="section-9.1-2">When using this extension, a relying party's trust anchors may be divided into three categories:<a href="#section-9.1-2" class="pilcrow">¶</a></p>
 <ol start="1" type="1" class="normal type-1" id="section-9.1-3">
 <li id="section-9.1-3.1">
@@ -2040,7 +2040,7 @@ ITN+1R6WAiEA2AfGBy3Hz8oYY5wPldIndrXjntCzzSEduB6pEvYQZWo=
         <h3 id="name-trust-anchor-negotiation">
 <a href="#section-10.2" class="section-number selfRef">10.2. </a><a href="#name-trust-anchor-negotiation" class="section-name selfRef">Trust Anchor Negotiation</a>
         </h3>
-<p id="section-10.2-1">Both the <code>trust_anchors</code> and <code>certificate_authorities</code> (<span><a href="https://rfc-editor.org/rfc/rfc8446#section-4.2.4" class="relref">Section 4.2.4</a> of [<a href="#RFC8446" class="cite xref">RFC8446</a>]</span>) extensions implement trust anchor negotiation, so security considerations are largely unchanged from <code>certificate_authorities</code>. This section discusses security considerations for trust anchor negotiation in general.<a href="#section-10.2-1" class="pilcrow">¶</a></p>
+<p id="section-10.2-1">Both the <code>trust_anchors</code> and <code>certificate_authorities</code> (<span><a href="https://rfc-editor.org/rfc/rfc9846#section-4.3.4" class="relref">Section 4.3.4</a> of [<a href="#RFC9846" class="cite xref">RFC9846</a>]</span>) extensions implement trust anchor negotiation, so security considerations are largely unchanged from <code>certificate_authorities</code>. This section discusses security considerations for trust anchor negotiation in general.<a href="#section-10.2-1" class="pilcrow">¶</a></p>
 <div id="relying-party-policies">
 <section id="section-10.2.1">
           <h4 id="name-relying-party-policies">
@@ -2094,7 +2094,7 @@ ITN+1R6WAiEA2AfGBy3Hz8oYY5wPldIndrXjntCzzSEduB6pEvYQZWo=
         <h3 id="name-tls-extensiontype-updates">
 <a href="#section-11.1" class="section-number selfRef">11.1. </a><a href="#name-tls-extensiontype-updates" class="section-name selfRef">TLS ExtensionType Updates</a>
         </h3>
-<p id="section-11.1-1">IANA is requested to create the following entry in the TLS ExtensionType Values registry, defined by <span>[<a href="#RFC8446" class="cite xref">RFC8446</a>]</span>:<a href="#section-11.1-1" class="pilcrow">¶</a></p>
+<p id="section-11.1-1">IANA is requested to create the following entry in the TLS ExtensionType Values registry, originally created in <span>[<a href="#RFC4366" class="cite xref">RFC4366</a>]</span>:<a href="#section-11.1-1" class="pilcrow">¶</a></p>
 <table class="center" id="table-1">
           <caption><a href="#table-1" class="selfRef">Table 1</a></caption>
 <thead>
@@ -2386,10 +2386,6 @@ ITN+1R6WAiEA2AfGBy3Hz8oYY5wPldIndrXjntCzzSEduB6pEvYQZWo=
         <dd>
 <span class="refAuthor">Leiba, B.</span>, <span class="refTitle">"Ambiguity of Uppercase vs Lowercase in RFC 2119 Key Words"</span>, <span class="seriesInfo">BCP 14</span>, <span class="seriesInfo">RFC 8174</span>, <span class="seriesInfo">DOI 10.17487/RFC8174</span>, <time datetime="2017-05" class="refDate">May 2017</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc8174">https://www.rfc-editor.org/rfc/rfc8174</a>&gt;</span>. </dd>
 <dd class="break"></dd>
-<dt id="RFC8446">[RFC8446]</dt>
-        <dd>
-<span class="refAuthor">Rescorla, E.</span>, <span class="refTitle">"The Transport Layer Security (TLS) Protocol Version 1.3"</span>, <span class="seriesInfo">RFC 8446</span>, <span class="seriesInfo">DOI 10.17487/RFC8446</span>, <time datetime="2018-08" class="refDate">August 2018</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc8446">https://www.rfc-editor.org/rfc/rfc8446</a>&gt;</span>. </dd>
-<dd class="break"></dd>
 <dt id="RFC8555">[RFC8555]</dt>
         <dd>
 <span class="refAuthor">Barnes, R.</span>, <span class="refAuthor">Hoffman-Andrews, J.</span>, <span class="refAuthor">McCarney, D.</span>, and <span class="refAuthor">J. Kasten</span>, <span class="refTitle">"Automatic Certificate Management Environment (ACME)"</span>, <span class="seriesInfo">RFC 8555</span>, <span class="seriesInfo">DOI 10.17487/RFC8555</span>, <time datetime="2019-03" class="refDate">March 2019</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc8555">https://www.rfc-editor.org/rfc/rfc8555</a>&gt;</span>. </dd>
@@ -2405,6 +2401,10 @@ ITN+1R6WAiEA2AfGBy3Hz8oYY5wPldIndrXjntCzzSEduB6pEvYQZWo=
 <dt id="RFC9460">[RFC9460]</dt>
         <dd>
 <span class="refAuthor">Schwartz, B.</span>, <span class="refAuthor">Bishop, M.</span>, and <span class="refAuthor">E. Nygren</span>, <span class="refTitle">"Service Binding and Parameter Specification via the DNS (SVCB and HTTPS Resource Records)"</span>, <span class="seriesInfo">RFC 9460</span>, <span class="seriesInfo">DOI 10.17487/RFC9460</span>, <time datetime="2023-11" class="refDate">November 2023</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc9460">https://www.rfc-editor.org/rfc/rfc9460</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC9846">[RFC9846]</dt>
+        <dd>
+<span class="refAuthor">Rescorla, E.</span>, <span class="refTitle">"The Transport Layer Security (TLS) Protocol Version 1.3"</span>, <span class="seriesInfo">RFC 9846</span>, <span class="seriesInfo">DOI 10.17487/RFC9846</span>, <time datetime="2026-07" class="refDate">July 2026</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc9846">https://www.rfc-editor.org/rfc/rfc9846</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 <dt id="X680">[X680]</dt>
         <dd>
@@ -2438,6 +2438,10 @@ ITN+1R6WAiEA2AfGBy3Hz8oYY5wPldIndrXjntCzzSEduB6pEvYQZWo=
 <dt id="MOZILLA-ROOTS">[MOZILLA-ROOTS]</dt>
         <dd>
 <span class="refAuthor">Mozilla</span>, <span class="refTitle">"Mozilla Included CA Certificate List"</span>, <time datetime="2023-08-30" class="refDate">30 August 2023</time>, <span>&lt;<a href="https://wiki.mozilla.org/CA/Included_Certificates">https://wiki.mozilla.org/CA/Included_Certificates</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC4366">[RFC4366]</dt>
+        <dd>
+<span class="refAuthor">Blake-Wilson, S.</span>, <span class="refAuthor">Nystrom, M.</span>, <span class="refAuthor">Hopwood, D.</span>, <span class="refAuthor">Mikkelsen, J.</span>, and <span class="refAuthor">T. Wright</span>, <span class="refTitle">"Transport Layer Security (TLS) Extensions"</span>, <span class="seriesInfo">RFC 4366</span>, <span class="seriesInfo">DOI 10.17487/RFC4366</span>, <time datetime="2006-04" class="refDate">April 2006</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc4366">https://www.rfc-editor.org/rfc/rfc4366</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 <dt id="RFC6962">[RFC6962]</dt>
         <dd>

@@ -5,12 +5,12 @@
 Transport Layer Security                                         B. Beck
 Internet-Draft                                                   OpenSSL
 Intended status: Standards Track                             D. Benjamin
-Expires: 12 January 2027                                      Google LLC
+Expires: 19 January 2027                                      Google LLC
                                                               D. O'Brien
                                                                         
                                                               K. Nekritz
                                                                     Meta
-                                                            11 July 2026
+                                                            18 July 2026
 
 
                       TLS Trust Anchor Identifiers
@@ -61,7 +61,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 12 January 2027.
+   This Internet-Draft will expire on 19 January 2027.
 
 Copyright Notice
 
@@ -135,7 +135,7 @@ Table of Contents
 
 1.  Introduction
 
-   TLS [RFC8446] authentication uses X.509 certificates [RFC5280] to
+   TLS [RFC9846] authentication uses X.509 certificates [RFC5280] to
    associate the _authenticating party's_ TLS key with its application
    identifiers, such as DNS names.  These associations are signed by
    some certification authority (CA).  The peer, or _relying party_,
@@ -145,7 +145,7 @@ Table of Contents
    server and the relying party is the client.
 
    An authenticating party may need to interoperate with relying parties
-   that trust different sets of CAs.  Section 4.2.4 of [RFC8446] defines
+   that trust different sets of CAs.  Section 4.3.4 of [RFC9846] defines
    the certificate_authorities extension to accommodate this.  It allows
    the authenticating party to provision multiple certificates and
    select the one that will allow the relying party to accept its TLS
@@ -216,7 +216,7 @@ Table of Contents
    capitals, as shown here.
 
    This document additionally uses the TLS presentation language,
-   defined in Section 3 of [RFC8446], and ASN.1, defined in [X680].
+   defined in Section 3 of [RFC9846], and ASN.1, defined in [X680].
 
 2.1.  Terminology and Roles
 
@@ -462,8 +462,7 @@ Table of Contents
    ClientHello or CertificateRequest trust_anchors extension.  The
    authenticating party then selects a certificate from its candidate
    certification paths (see Section 3.2), as described in
-   Section 4.4.2.2 of [RFC8446] and Section 4.4.2.3 of [RFC8446].  This
-   process is extended as follows:
+   Section 4.5.1.2 of [RFC9846].  This process is extended as follows:
 
    If the ClientHello or CertificateRequest contains a trust_anchors
    extension, the authenticating party SHOULD send a certification path
@@ -500,7 +499,7 @@ Table of Contents
    Section 4.2, the authenticating party MUST send an empty
    trust_anchors extension in the first CertificateEntry of the
    Certificate message.  In this case, the certificate_list flexibility
-   described in Section 4.4.2 of [RFC8446] no longer applies.  The
+   described in Section 4.5.1 of [RFC9846] no longer applies.  The
    certificate_list MUST contain a complete certification path, issued
    by the matching trust anchor, correctly ordered and with no
    extraneous certificates.  That is, each certificate MUST certify the
@@ -530,7 +529,7 @@ Table of Contents
 
    *  Have a trust anchor ID, and
 
-   *  Satisfy the conditions in Section 4.4.2.2 of [RFC8446], with the
+   *  Satisfy the conditions in Section 4.5.1.2 of [RFC9846], with the
       exception of certification_authorities, and any future extensions
       that play a similar role
 
@@ -784,7 +783,7 @@ Table of Contents
    changes to certificate and configuration management.
 
    A CertificatePropertyList is defined using the TLS presentation
-   language (Section 3 of [RFC8446]) below:
+   language (Section 3 of [RFC9846]) below:
 
    enum {
        trust_anchor_id(0),
@@ -1110,7 +1109,7 @@ Table of Contents
 9.1.  Relying Parties
 
    The trust_anchors extension is analogous to the
-   certificate_authorities extension (Section 4.2.4 of [RFC8446]), but
+   certificate_authorities extension (Section 4.3.4 of [RFC9846]), but
    more size-efficient.  Like certificate_authorities, trust_anchors
    reveals some information about the relying party's trust anchors.
    However, unlike certificate_authorities, trust_anchors allows a
@@ -1205,8 +1204,8 @@ Table of Contents
 
 10.2.  Trust Anchor Negotiation
 
-   Both the trust_anchors and certificate_authorities (Section 4.2.4 of
-   [RFC8446]) extensions implement trust anchor negotiation, so security
+   Both the trust_anchors and certificate_authorities (Section 4.3.4 of
+   [RFC9846]) extensions implement trust anchor negotiation, so security
    considerations are largely unchanged from certificate_authorities.
    This section discusses security considerations for trust anchor
    negotiation in general.
@@ -1318,7 +1317,7 @@ Table of Contents
 11.1.  TLS ExtensionType Updates
 
    IANA is requested to create the following entry in the TLS
-   ExtensionType Values registry, defined by [RFC8446]:
+   ExtensionType Values registry, originally created in [RFC4366]:
 
    +=======+===============+===+===========+=============+============+
    | Value | Extension     |TLS| DTLS-Only | Recommended | Reference  |
@@ -1494,10 +1493,6 @@ Table of Contents
               2119 Key Words", BCP 14, RFC 8174, DOI 10.17487/RFC8174,
               May 2017, <https://www.rfc-editor.org/rfc/rfc8174>.
 
-   [RFC8446]  Rescorla, E., "The Transport Layer Security (TLS) Protocol
-              Version 1.3", RFC 8446, DOI 10.17487/RFC8446, August 2018,
-              <https://www.rfc-editor.org/rfc/rfc8446>.
-
    [RFC8555]  Barnes, R., Hoffman-Andrews, J., McCarney, D., and J.
               Kasten, "Automatic Certificate Management Environment
               (ACME)", RFC 8555, DOI 10.17487/RFC8555, March 2019,
@@ -1517,6 +1512,10 @@ Table of Contents
               and Parameter Specification via the DNS (SVCB and HTTPS
               Resource Records)", RFC 9460, DOI 10.17487/RFC9460,
               November 2023, <https://www.rfc-editor.org/rfc/rfc9460>.
+
+   [RFC9846]  Rescorla, E., "The Transport Layer Security (TLS) Protocol
+              Version 1.3", RFC 9846, DOI 10.17487/RFC9846, July 2026,
+              <https://www.rfc-editor.org/rfc/rfc9846>.
 
    [X680]     ITU-T, "Information technology - Abstract Syntax Notation
               One (ASN.1): Specification of basic notation", ISO/
@@ -1550,6 +1549,11 @@ Table of Contents
    [MOZILLA-ROOTS]
               Mozilla, "Mozilla Included CA Certificate List", 30 August
               2023, <https://wiki.mozilla.org/CA/Included_Certificates>.
+
+   [RFC4366]  Blake-Wilson, S., Nystrom, M., Hopwood, D., Mikkelsen, J.,
+              and T. Wright, "Transport Layer Security (TLS)
+              Extensions", RFC 4366, DOI 10.17487/RFC4366, April 2006,
+              <https://www.rfc-editor.org/rfc/rfc4366>.
 
    [RFC6962]  Laurie, B., Langley, A., and E. Kasper, "Certificate
               Transparency", RFC 6962, DOI 10.17487/RFC6962, June 2013,
