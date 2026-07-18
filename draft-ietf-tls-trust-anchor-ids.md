@@ -104,9 +104,9 @@ Additionally, to support TLS clients with many trusted certification authorities
 
 # Introduction
 
-TLS {{!RFC8446}} authentication uses X.509 certificates {{!RFC5280}} to associate the *authenticating party's* TLS key with its application identifiers, such as DNS names. These associations are signed by some certification authority (CA). The peer, or *relying party*, curates a set of CAs that are trusted to only sign correct associations, which allows it to rely on the TLS to authenticate application identifiers. Typically the authenticating party is the server and the relying party is the client.
+TLS {{!RFC9846}} authentication uses X.509 certificates {{!RFC5280}} to associate the *authenticating party's* TLS key with its application identifiers, such as DNS names. These associations are signed by some certification authority (CA). The peer, or *relying party*, curates a set of CAs that are trusted to only sign correct associations, which allows it to rely on the TLS to authenticate application identifiers. Typically the authenticating party is the server and the relying party is the client.
 
-An authenticating party may need to interoperate with relying parties that trust different sets of CAs. {{Section 4.2.4 of RFC8446}} defines the `certificate_authorities` extension to accommodate this. It allows the authenticating party to provision multiple certificates and select the one that will allow the relying party to accept its TLS key. This is analogous to parameter negotiation elsewhere in TLS.
+An authenticating party may need to interoperate with relying parties that trust different sets of CAs. {{Section 4.3.4 of RFC9846}} defines the `certificate_authorities` extension to accommodate this. It allows the authenticating party to provision multiple certificates and select the one that will allow the relying party to accept its TLS key. This is analogous to parameter negotiation elsewhere in TLS.
 
 However, `certificate_authorities`'s size is impractical for some applications. Existing PKIs may have many CAs, and existing CAs may have long X.509 names. As of August 2023, the Mozilla CA Certificate Program {{MOZILLA-ROOTS}} contained 144 CAs, with an average name length of around 100 bytes. Such TLS deployments often do not use trust anchor negotiation at all.
 
@@ -135,7 +135,7 @@ The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD",
 document are to be interpreted as described in BCP 14 {{!RFC2119}} {{!RFC8174}}
 when, and only when, they appear in all capitals, as shown here.
 
-This document additionally uses the TLS presentation language, defined in {{Section 3 of !RFC8446}}, and ASN.1, defined in {{X680}}.
+This document additionally uses the TLS presentation language, defined in {{Section 3 of !RFC9846}}, and ASN.1, defined in {{X680}}.
 
 ## Terminology and Roles
 
@@ -262,7 +262,7 @@ When the extension is sent in Certificate, the `extension_data` MUST be empty an
 
 ## Certificate Selection
 
-A `trust_anchors` extension in the ClientHello or CertificateRequest is processed similarly to the `certificate_authorities` extension. The relying party indicates some set of supported trust anchors in the ClientHello or CertificateRequest `trust_anchors` extension. The authenticating party then selects a certificate from its candidate certification paths (see {{authenticating-party-configuration}}), as described in {{Section 4.4.2.2 of RFC8446}} and {{Section 4.4.2.3 of RFC8446}}. This process is extended as follows:
+A `trust_anchors` extension in the ClientHello or CertificateRequest is processed similarly to the `certificate_authorities` extension. The relying party indicates some set of supported trust anchors in the ClientHello or CertificateRequest `trust_anchors` extension. The authenticating party then selects a certificate from its candidate certification paths (see {{authenticating-party-configuration}}), as described in {{Section 4.5.1.2 of RFC9846}}. This process is extended as follows:
 
 If the ClientHello or CertificateRequest contains a `trust_anchors` extension, the authenticating party SHOULD send a certification path such that either:
 
@@ -276,7 +276,7 @@ If no certification paths satisfy either extension, the authenticating party MAY
 
 Sending a fallback allows the authenticating party to retain support for relying parties that do not implement any form of trust anchor negotiation. In this case, the authenticating party must find a sufficiently ubiquitous trust anchor, if one exists. However, only those relying parties need to be considered in this ubiquity determination. Updated relying parties may continue to evolve without restricting fallback certificate selection.
 
-If the authenticating party sends a certification path that matches the relying party's `trust_anchors` extension, as described in {{certificate-selection}}, the authenticating party MUST send an empty `trust_anchors` extension in the first CertificateEntry of the Certificate message. In this case, the `certificate_list` flexibility described in {{Section 4.4.2 of !RFC8446}} no longer applies. The `certificate_list` MUST contain a complete certification path, issued by the matching trust anchor, correctly ordered and with no extraneous certificates. That is, each certificate MUST certify the one immediately preceding it, and the trust anchor MUST certify the final certificate. The authenticating party MUST NOT send the `trust_anchors` extension in the Certificate message in other situations.
+If the authenticating party sends a certification path that matches the relying party's `trust_anchors` extension, as described in {{certificate-selection}}, the authenticating party MUST send an empty `trust_anchors` extension in the first CertificateEntry of the Certificate message. In this case, the `certificate_list` flexibility described in {{Section 4.5.1 of !RFC9846}} no longer applies. The `certificate_list` MUST contain a complete certification path, issued by the matching trust anchor, correctly ordered and with no extraneous certificates. That is, each certificate MUST certify the one immediately preceding it, and the trust anchor MUST certify the final certificate. The authenticating party MUST NOT send the `trust_anchors` extension in the Certificate message in other situations.
 
 If a relying party receives this extension in the Certificate message, it MAY choose to disable path building {{!RFC4158}} and validate the peer's certificate list as pre-built certification path. Doing so avoids the unpredictable behavior of path-building, and helps ensure CAs and authenticating parties do not inadvertently provision incorrect paths.
 
@@ -287,7 +287,7 @@ When the relying party is a client, it may choose not to send its full trust anc
 To accommodate this, when receiving a ClientHello with `trust_anchors`, the server collects all candidate certification paths which:
 
 * Have a trust anchor ID, and
-* Satisfy the conditions in {{Section 4.4.2.2 of RFC8446}}, with the exception of `certification_authorities`, and any future extensions that play a similar role
+* Satisfy the conditions in {{Section 4.5.1.2 of RFC9846}}, with the exception of `certification_authorities`, and any future extensions that play a similar role
 
 If this collection is non-empty, the server sends a `trust_anchors` extension in EncryptedExtensions, containing the corresponding trust anchor IDs in preference order.
 
@@ -401,7 +401,7 @@ As described in {{authenticating-party-configuration}}, certification paths part
 
 The extensibility aims to simplify application deployment as PKI mechanisms evolve. When certificate issuance and application software is updated to pass this structure to the underlying TLS implementation, new properties may be transparently defined without changes to certificate and configuration management.
 
-A CertificatePropertyList is defined using the TLS presentation language ({{Section 3 of !RFC8446}}) below:
+A CertificatePropertyList is defined using the TLS presentation language ({{Section 3 of !RFC9846}}) below:
 
 ~~~ tls-presentation
 enum {
@@ -577,7 +577,7 @@ Trust anchor negotiation reduces this conflict, provided the pinning relying par
 
 ## Relying Parties
 
-The `trust_anchors` extension is analogous to the `certificate_authorities` extension ({{Section 4.2.4 of RFC8446}}), but more size-efficient. Like `certificate_authorities`, `trust_anchors` reveals some information about the relying party's trust anchors. However, unlike `certificate_authorities`, `trust_anchors` allows a relying party to only reveal a trust anchor in response to the authenticating party's list, which reduces the fingerprinting exposure. This section provides guidance for a relying party to configure this mechanism, based on its privacy goals.
+The `trust_anchors` extension is analogous to the `certificate_authorities` extension ({{Section 4.3.4 of RFC9846}}), but more size-efficient. Like `certificate_authorities`, `trust_anchors` reveals some information about the relying party's trust anchors. However, unlike `certificate_authorities`, `trust_anchors` allows a relying party to only reveal a trust anchor in response to the authenticating party's list, which reduces the fingerprinting exposure. This section provides guidance for a relying party to configure this mechanism, based on its privacy goals.
 
 When using this extension, a relying party's trust anchors may be divided into three categories:
 
@@ -615,7 +615,7 @@ If the authenticating party has provisioned certification paths with incorrect t
 
 ## Trust Anchor Negotiation
 
-Both the `trust_anchors` and `certificate_authorities` ({{Section 4.2.4 of !RFC8446}}) extensions implement trust anchor negotiation, so security considerations are largely unchanged from `certificate_authorities`. This section discusses security considerations for trust anchor negotiation in general.
+Both the `trust_anchors` and `certificate_authorities` ({{Section 4.3.4 of !RFC9846}}) extensions implement trust anchor negotiation, so security considerations are largely unchanged from `certificate_authorities`. This section discusses security considerations for trust anchor negotiation in general.
 
 ### Relying Party Policies
 
@@ -651,7 +651,7 @@ If the attacker targets any clients that enforce Certificate Transparency {{?RFC
 
 ## TLS ExtensionType Updates
 
-IANA is requested to create the following entry in the TLS ExtensionType Values registry, defined by {{RFC8446}}:
+IANA is requested to create the following entry in the TLS ExtensionType Values registry, originally created in {{?RFC4366}}:
 
 | Value | Extension Name | TLS 1.3        | DTLS-Only | Recommended | Reference  |
 |-------|----------------|----------------|-----------|-------------|------------|
