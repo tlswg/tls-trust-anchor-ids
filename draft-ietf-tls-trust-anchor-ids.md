@@ -206,11 +206,13 @@ The following procedure can be used to perform this check. It succeeds if the ra
 
 Authenticating parties are configured with one or more candidate certification paths to present in TLS, in some preference order. This preference order is used when multiple candidate paths are usable for a connection. For example, the authenticating party may prefer candidates that minimize message size or have more performant private keys.
 
-Each candidate path that participates in this protocol must be configured with two properties:
+Each candidate path that participates in this protocol must be configured with the following properties:
 
 * The trust anchor ID for its corresponding trust anchor.
 
 * Optionally, a list of *trust anchor group inclusions*. A trust anchor group inclusion is a trust anchor range ({{trust-anchor-ranges}}) that describes some trust anchor groups also containing the path's trust anchor.
+
+* Optionally, a *negotiation optional* flag ({{negotiation-optional-property}}), indicating the path may be selected even when the relying party did not request its trust anchor.
 
 These properties allow certificate selection (see {{certificate-selection}}) to consider this path when a relying party advertises a matching trust anchor ID. It is RECOMMENDED, though not required, that this information come from the CA. {{certificate-properties}} defines a RECOMMENDED format for this information, along with an optional ACME {{!RFC8555}} extension for CAs to send it.
 
@@ -272,7 +274,7 @@ If the ClientHello or CertificateRequest contains a `trust_anchors` extension, t
 
 If the ClientHello or CertificateRequest contains both `trust_anchors` and `certificate_authorities`, certification paths that satisfy either extension's criteria may be used. This additionally applies to future extensions which play a similar role.
 
-If no certification paths satisfy either extension, the authenticating party MAY return a `handshake_failure` alert, or choose among fallback certification paths without considering `trust_anchors` or `certification_authorities`. See {{retry-mechanism}} for additional guidance on selecting a fallback when the ClientHello contains `trust_anchors`.
+If no certification paths satisfy either extension, the authenticating party MAY return a `handshake_failure` alert, or choose among fallback certification paths without considering `trust_anchors` or `certification_authorities`. However, a certification path that participates in this protocol (see {{authenticating-party-configuration}}) SHOULD NOT be chosen as a fallback unless it has the `negotiation_optional` property ({{negotiation-optional-property}}); absent that property, such a path is used only when the relying party requested its trust anchor. See {{retry-mechanism}} for additional guidance on selecting a fallback when the ClientHello contains `trust_anchors`.
 
 Sending a fallback allows the authenticating party to retain support for relying parties that do not implement any form of trust anchor negotiation. In this case, the authenticating party must find a sufficiently ubiquitous trust anchor, if one exists. However, only those relying parties need to be considered in this ubiquity determination. Updated relying parties may continue to evolve without restricting fallback certificate selection.
 
@@ -407,6 +409,7 @@ A CertificatePropertyList is defined using the TLS presentation language ({{Sect
 enum {
     trust_anchor_id(0),
     trust_anchor_group_inclusions(1),
+    negotiation_optional(2),
     (2^16-1)
 } CertificatePropertyType;
 
@@ -420,10 +423,11 @@ CertificateProperty CertificatePropertyList<0..2^16-1>;
 
 The entries in a CertificatePropertyList MUST be sorted numerically by `type` and MUST NOT contain values with a duplicate `type`. Inputs that do not satisfy these invariants are syntax errors and MUST be rejected by parsers.
 
-This document defines two properties:
+This document defines three properties:
 
 * `trust_anchor_id`, defined in {{trust-anchor-id-property}}
 * `trust_anchor_group_inclusions`, defined in {{trust-anchor-group-inclusions-property}}
+* `negotiation_optional`, defined in {{negotiation-optional-property}}
 
 Future documents MAY define other properties for use with other mechanisms. Such a document MUST define the format of the `data` field and how authenticating parties interpret the property. Authenticating parties MUST ignore properties with unrecognized CertificatePropertyType values.
 
@@ -444,6 +448,12 @@ struct {
 
 TrustAnchorRange TrustAnchorRangeList<1..2^16-1>;
 ~~~
+
+## Negotiation Optional Property
+
+By default, an authenticating party SHOULD use a certification path that participates in this protocol (see {{authenticating-party-configuration}}) only when the relying party requested the path's trust anchor through a trust anchor negotiation mechanism, such as the `trust_anchors` extension or the `certificate_authorities` extension. When the path has the `negotiation_optional` property, the authenticating party MAY use it even when no such mechanism requested its trust anchor, for example as a fallback (see {{certificate-selection}}).
+
+The `negotiation_optional` property's `data` field MUST be empty.
 
 ## Media Type
 
@@ -470,11 +480,12 @@ The following is an example file with a certification path containing an end-ent
 * A `trust_anchor_group_inclusions` property with two group inclusions:
   * `2187.2.100` to `2187.2.200`
   * `32473.3.42` to `32473.3.MAX`
+* A `negotiation_optional` property
 
 ~~~
 -----BEGIN CERTIFICATE PROPERTIES-----
-ADcAAAAEgf1ZAQABACsAKQORCwIAAAAAAAAAZAAAAAAAAADIBIH9WQMAAAAAAAAA
-Kv//////////
+ADsAAAAEgf1ZAQABACsAKQORCwIAAAAAAAAAZAAAAAAAAADIBIH9WQMAAAAAAAAA
+Kv//////////AAIAAA==
 -----END CERTIFICATE PROPERTIES-----
 -----BEGIN CERTIFICATE-----
 MIIBVzCB/6ADAgECAgkAh7Uv5X8pplkwCgYIKoZIzj0EAwIwGjEYMBYGA1UEAwwP
@@ -741,6 +752,7 @@ IANA is requested to create the "CertificatePropertyType" registry within the "T
 |---------|-------------------------------|------------|
 | 0       | trust_anchor_id               | [this-RFC] |
 | 1       | trust_anchor_group_inclusions | [this-RFC] |
+| 2       | negotiation_optional          | [this-RFC] |
 
 New values are allocated according to the following process:
 
