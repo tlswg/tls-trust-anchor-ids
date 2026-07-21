@@ -98,7 +98,7 @@ informative:
 
 This document defines the TLS Trust Anchors extension, a mechanism for relying parties to convey trusted certification authorities. It describes individual certification authorities more succinctly than the TLS Certificate Authorities extension.
 
-Additionally, to support TLS clients with many trusted certification authorities, it supports a mode where servers describe their available certification paths and the client selects from them. Servers may describe this during connection setup, or in DNS for lower latency.
+Additionally, to support TLS clients with many trusted certification authorities, it supports a mode where servers describe their available certification paths and the client selects from them. Servers may describe this during connection setup.
 
 --- middle
 
@@ -123,8 +123,6 @@ To address this, this document introduces Trust Anchor Identifiers (Trust Anchor
 2. {{tls-extension}} defines a TLS extension that communicates the relying party's requested trust anchors using trust anchor IDs. IDs that represent individual trust anchors can mitigate long X.509 names. IDs that represent groups of trust anchors can mitigate large trust anchor lists.
 
 3. {{retry-mechanism}} defines a retry mechanism that, when the relying party is a TLS client, can mitigate signaling failures. The server provides its available trust anchors alongside its certificate, so that the client can retry on mismatch. This can further mitigate large trust anchor lists by allowing the client to initially omit some trust anchors or use an otherwise too broad trust anchor group. However, this mitigation can come at the cost of additional round trips in some cases.
-
-4. {{dns-service-parameter}}, finally, allows TLS servers to advertise their available trust anchors in HTTPS or SVCB {{!RFC9460}} DNS records. When the above options are insufficient, TLS clients can request an accurate initial subset and avoid a retry penalty.
 
 Together, they reduce the size costs of trust anchor negotiation, supporting flexible and robust PKIs for more applications.
 
@@ -282,7 +280,7 @@ If a relying party receives this extension in the Certificate message, it MAY ch
 
 ## Retry Mechanism
 
-When the relying party is a client, it may choose not to send its full trust anchor ID list due to fingerprinting risks (see {{privacy-considerations}}), or because the list is too large. The client MAY send a subset of supported trust anchors, or an empty list. This subset may be determined by, possibly outdated, prior knowledge about the server, such as {{dns-service-parameter}} or past connections.
+When the relying party is a client, it may choose not to send its full trust anchor ID list due to fingerprinting risks (see {{privacy-considerations}}), or because the list is too large. The client MAY send a subset of supported trust anchors, or an empty list. This subset may be determined by, possibly outdated, prior knowledge about the server, such as past connections, or information obtained from other services.
 
 To accommodate this, when receiving a ClientHello with `trust_anchors`, the server collects all candidate certification paths which:
 
@@ -299,7 +297,7 @@ Clients SHOULD retry at most once per connection attempt.
 
 [[TODO: Retrying in a new connection is expensive and cannot be done from within the TLS stack in most implementations. Consider handshake modifications to instead retry within the same connection. https://github.com/tlswg/tls-trust-anchor-ids/issues/53 ]]
 
-This mechanism allows the connection to recover from a certificate selection failure, e.g. due to the client not revealing its full preference list, at additional latency cost. {{dns-service-parameter}} describes an optimization which can avoid this cost.
+This mechanism allows the connection to recover from a certificate selection failure, e.g. due to the client not revealing its full preference list, at additional latency cost.
 
 This mechanism also allows servers to safely send fallback certificates that may not be as ubiquitously acceptable. Without some form of trust anchor negotiation, servers are limited to selecting certification paths that are ubiquitously trusted in all supported clients. This often means sending extra cross-certificates to target the lowest common denominator at a bandwidth cost. If the ClientHello contains `trust_anchors`, the server MAY opportunistically send a less ubiquitous, more bandwidth-efficient path based on local heuristics, with the expectation that the client will retry when the heuristics fail.
 
@@ -353,47 +351,6 @@ This can be mitigated in one several ways:
 * If the authenticating party's preferences place the correct candidate path (issued by a newer trust anchor) ahead of misinterpreted one (issued by the removed trust anchor), the correct candidate will still be chosen.
 
 * When the relying party is a client, any remaining signaling errors can be corrected with the retry mechanism described in {{retry-mechanism}}.
-
-# DNS Service Parameter
-
-This section defines the `tls-trust-anchors` SvcParamKey {{!RFC9460}}. TLS servers can use this to advertise their available trust anchors in DNS, and aid the client in formulating its `trust_anchors` extension (see {{retry-mechanism}}). This allows TLS deployments to support clients with many trust anchors without incurring the overhead of a reconnect.
-
-## Syntax
-
-The `tls-trust-anchors` parameter contains an ordered list of one or more trust anchor IDs, in server preference order.
-
-The presentation `value` of the SvcParamValue is a non-empty comma-separated list ({{Appendix A.1 of RFC9460}}). Each element of the list is a trust anchor ID in the ASCII representation defined in {{trust-anchor-ids}}. Any other `value` is a syntax error. To enable simpler parsing, this SvcParam MUST NOT contain escape sequences.
-
-The wire format of the SvcParamValue is determined by prefixing each trust anchor ID with its length as a single octet, then concatenating each of these length-value pairs to form the SvcParamValue. These pairs MUST exactly fill the SvcParamValue; otherwise, the SvcParamValue is malformed.
-
-For example, if a TLS server has three available certification paths issued by `32473.1`, `32473.2.1`, and `32473.2.2`, respectively, the DNS record in presentation syntax may be:
-
-~~~ dns-rr
-example.net.  7200  IN SVCB 3 server.example.net. (
-    tls-trust-anchors=32473.1,32473.2.1,32473.2.2 )
-~~~
-
-The wire format of the SvcParamValue would be the 17 octets below. In the example, the octets comprising each trust anchor ID are placed on separate lines for clarity
-
-~~~
-0x04, 0x81, 0xfd, 0x59, 0x01,
-0x05, 0x81, 0xfd, 0x59, 0x02, 0x01,
-0x05, 0x81, 0xfd, 0x59, 0x02, 0x02,
-~~~
-
-## Configuring Services
-
-Services SHOULD include the trust anchor ID for each of their available certification paths, in preference order, in the `tls-trust-anchors` of their HTTPS or SVCB endpoints. As TLS configuration is updated, services SHOULD update the DNS record to match. The mechanism for this is out of scope for this document, but services are RECOMMENDED to automate this process.
-
-Services MAY have certification paths without trust anchor IDs, but those paths will not participate in this mechanism.
-
-## Client Behavior
-
-When connecting to a service endpoint whose HTTPS or SVCB record contains the `tls-trust-anchors` parameter, the client first computes the intersection between its configured trust anchors and the server's provided list. If this intersection is non-empty, the client MAY use it to determine the `trust_anchors` extension in the ClientHello (see {{retry-mechanism}}).
-
-If doing so, the client MAY send a subset of this intersection to meet size constraints, but SHOULD offer multiple options. This reduces the chance of a reconnection if, for example, the first option in the intersection uses a signature algorithm that the client doesn't support, or if the TLS server and DNS configuration are out of sync.
-
-Although this service parameter is intended to reduce trust anchor mismatches, mismatches may still occur in some scenarios. Clients and servers MUST continue to implement the provisions described in {{retry-mechanism}}, even when using this service parameter.
 
 # Certificate Properties {#certificate-properties}
 
@@ -595,15 +552,15 @@ Trust anchor IDs sent in response to the authenticating party can only be observ
 
 Trust anchor IDs sent unconditionally can be observed passively. This mode is analogous to the `certificate_authorities` extension. Relying parties SHOULD NOT unconditionally advertise trust anchor lists that are unique to an individual user. Rather, unconditionally-advertised lists SHOULD be empty or computed only from the trust anchors common to the relying party's anonymity set ({{Section 3.3 of !RFC6973}}).
 
-Relying parties SHOULD determine which trust anchors participate in this mechanism, and whether to advertise them unconditionally or conditionally, based on their privacy goals. PKIs that reliably use the DNS service parameter ({{dns-service-parameter}}) can rely on conditional advertisement for stronger privacy properties without a round-trip penalty.
+Relying parties SHOULD determine which trust anchors participate in this mechanism, and whether to advertise them unconditionally or conditionally, based on their privacy goals.
 
-Additionally, a relying party that computes the `trust_anchors` extension based on prior state may allow observers to correlate across connections. Relying parties SHOULD NOT maintain such state across connections that are intended to be uncorrelated. As above, implementing the DNS service parameter can avoid a round-trip penalty without such state.
+Additionally, a relying party that computes the `trust_anchors` extension based on prior state may allow observers to correlate across connections. Relying parties SHOULD NOT maintain such state across connections that are intended to be uncorrelated.
 
 ## Authenticating Parties
 
-If the authenticating party is a server, the mechanisms in {{dns-service-parameter}} and {{retry-mechanism}} enumerate the trust anchors for the server's available certification paths. This mechanism assumes they are not sensitive. Servers SHOULD NOT use this mechanism to negotiate certification paths with sensitive trust anchors.
+If the authenticating party is a server, the mechanisms in {{retry-mechanism}} enumerate the trust anchors for the server's available certification paths. This mechanism assumes they are not sensitive. Servers SHOULD NOT use this mechanism to negotiate certification paths with sensitive trust anchors.
 
-In servers that host multiple services, this protocol only enumerates certification paths for the requested service. If, for example, a server uses the `server_name` extension to select services, the addition to EncryptedExtensions in {{retry-mechanism}} is expected to be filtered by `server_name`. Likewise, the DNS parameter in {{dns-service-parameter}} only contains information for the corresponding service. In both cases, co-located services are not revealed.
+In servers that host multiple services, this protocol only enumerates certification paths for the requested service. If, for example, a server uses the `server_name` extension to select services, the addition to EncryptedExtensions in {{retry-mechanism}} is expected to be filtered by `server_name`. This ensures that co-located services are not revealed.
 
 The above does not apply if the authenticating party is a client. This protocol does not enumerate the available certification paths for a client.
 
@@ -656,14 +613,6 @@ IANA is requested to create the following entry in the TLS ExtensionType Values 
 | Value | Extension Name | TLS 1.3        | DTLS-Only | Recommended | Reference  |
 |-------|----------------|----------------|-----------|-------------|------------|
 | TBD   | trust_anchors  | CH, EE, CR, CT | N         | Y           | [this-RFC] |
-
-## Service Parameter Key Updates
-
-IANA is requested to create the following entry in the DNS SVCB Service Parameter Keys (SvcParamKeys) registry, defined by {{!RFC9460}}:
-
-| Number | Name              | Meaning                        | Format Reference | Change Controller |
-|--------|-------------------|--------------------------------|------------------|-------------------|
-| TBD    | tls-trust-anchors | Available trust anchors in TLS | [this-RFC]       | IETF              |
 
 ## Media Type Updates
 
