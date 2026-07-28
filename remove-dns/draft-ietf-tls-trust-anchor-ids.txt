@@ -5,12 +5,12 @@
 Transport Layer Security                                         B. Beck
 Internet-Draft                                                   OpenSSL
 Intended status: Standards Track                             D. Benjamin
-Expires: 22 January 2027                                      Google LLC
+Expires: 29 January 2027                                      Google LLC
                                                               D. O'Brien
                                                                         
                                                               K. Nekritz
                                                                     Meta
-                                                            21 July 2026
+                                                            28 July 2026
 
 
                       TLS Trust Anchor Identifiers
@@ -60,7 +60,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 22 January 2027.
+   This Internet-Draft will expire on 29 January 2027.
 
 Copyright Notice
 
@@ -511,8 +511,8 @@ Table of Contents
    Section 8), or because the list is too large.  The client MAY send a
    subset of supported trust anchors, or an empty list.  This subset may
    be determined by, possibly outdated, prior knowledge about the
-   server, such as past connections, or information obtained from other
-   services.
+   server, such as past connections or information obtained from other
+   sources.
 
    To accommodate this, when receiving a ClientHello with trust_anchors,
    the server collects all candidate certification paths which:
