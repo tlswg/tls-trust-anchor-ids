@@ -10,8 +10,7 @@
 <meta content="Devon O'Brien" name="author">
 <meta content="Kyle Nekritz" name="author">
 <meta content="
-       This document defines the TLS Trust Anchors extension, a mechanism for relying parties to convey trusted certification authorities. It describes individual certification authorities more succinctly than the TLS Certificate Authorities extension. 
-       Additionally, to support TLS clients with many trusted certification authorities, it supports a mode where servers describe their available certification paths and the client selects from them. Servers may describe this during connection setup. 
+       This document defines the TLS Trust Anchors extension, a mechanism for relying parties to convey trusted certification authorities. It describes certification authorities more succinctly than the TLS Certificate Authorities extension. 
     " name="description">
 <meta content="xml2rfc 3.34.0" name="generator">
 <meta content="draft-ietf-tls-trust-anchor-ids-latest" name="ietf.draft">
@@ -1093,8 +1092,7 @@ svg {
 <h1 id="title">TLS Trust Anchor Identifiers</h1>
 <section id="section-abstract">
       <h2 id="abstract"><a href="#abstract" class="selfRef">Abstract</a></h2>
-<p id="section-abstract-1">This document defines the TLS Trust Anchors extension, a mechanism for relying parties to convey trusted certification authorities. It describes individual certification authorities more succinctly than the TLS Certificate Authorities extension.<a href="#section-abstract-1" class="pilcrow">¶</a></p>
-<p id="section-abstract-2">Additionally, to support TLS clients with many trusted certification authorities, it supports a mode where servers describe their available certification paths and the client selects from them. Servers may describe this during connection setup.<a href="#section-abstract-2" class="pilcrow">¶</a></p>
+<p id="section-abstract-1">This document defines the TLS Trust Anchors extension, a mechanism for relying parties to convey trusted certification authorities. It describes certification authorities more succinctly than the TLS Certificate Authorities extension.<a href="#section-abstract-1" class="pilcrow">¶</a></p>
 </section>
 <section class="note rfcEditorRemove" id="section-note.1">
       <h2 id="name-about-this-document">
@@ -1943,7 +1941,7 @@ ITN+1R6WAiEA2AfGBy3Hz8oYY5wPldIndrXjntCzzSEduB6pEvYQZWo=
         <h3 id="name-authenticating-parties">
 <a href="#section-8.2" class="section-number selfRef">8.2. </a><a href="#name-authenticating-parties" class="section-name selfRef">Authenticating Parties</a>
         </h3>
-<p id="section-8.2-1">If the authenticating party is a server, the mechanisms in <a href="#retry-mechanism" class="auto internal xref">Section 4.3</a> enumerate the trust anchors for the server's available certification paths. This mechanism assumes they are not sensitive. Servers SHOULD NOT use this mechanism to negotiate certification paths with sensitive trust anchors.<a href="#section-8.2-1" class="pilcrow">¶</a></p>
+<p id="section-8.2-1">If the authenticating party is a server, the mechanism in <a href="#retry-mechanism" class="auto internal xref">Section 4.3</a> enumerates the trust anchors for the server's available certification paths. This assumes these trust anchors are not sensitive. Servers SHOULD NOT use this mechanism to negotiate certification paths with sensitive trust anchors.<a href="#section-8.2-1" class="pilcrow">¶</a></p>
 <p id="section-8.2-2">In servers that host multiple services, this protocol only enumerates certification paths for the requested service. If, for example, a server uses the <code>server_name</code> extension to select services, the addition to EncryptedExtensions in <a href="#retry-mechanism" class="auto internal xref">Section 4.3</a> is expected to be filtered by <code>server_name</code>. This ensures that co-located services are not revealed.<a href="#section-8.2-2" class="pilcrow">¶</a></p>
 <p id="section-8.2-3">The above does not apply if the authenticating party is a client. This protocol does not enumerate the available certification paths for a client.<a href="#section-8.2-3" class="pilcrow">¶</a></p>
 </section>
