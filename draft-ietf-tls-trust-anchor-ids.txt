@@ -5,12 +5,12 @@
 Transport Layer Security                                         B. Beck
 Internet-Draft                                                   OpenSSL
 Intended status: Standards Track                             D. Benjamin
-Expires: 19 January 2027                                      Google LLC
+Expires: 30 January 2027                                      Google LLC
                                                               D. O'Brien
                                                                         
                                                               K. Nekritz
                                                                     Meta
-                                                            18 July 2026
+                                                            29 July 2026
 
 
                       TLS Trust Anchor Identifiers
@@ -61,7 +61,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 19 January 2027.
+   This Internet-Draft will expire on 30 January 2027.
 
 Copyright Notice
 
@@ -99,8 +99,9 @@ Table of Contents
    7.  Certificate Properties
      7.1.  Trust Anchor ID Property
      7.2.  Trust Anchor Group Inclusions Property
-     7.3.  Media Type
-     7.4.  ACME Extension
+     7.3.  Negotiation Optional Property
+     7.4.  Media Type
+     7.5.  ACME Extension
    8.  Use Cases
      8.1.  Making Use of Newly-Trusted CAs
      8.2.  Removing Untrustworthy CAs
@@ -362,7 +363,7 @@ Table of Contents
    private keys.
 
    Each candidate path that participates in this protocol must be
-   configured with two properties:
+   configured with the following properties:
 
    *  The trust anchor ID for its corresponding trust anchor.
 
@@ -370,6 +371,10 @@ Table of Contents
       anchor group inclusion is a trust anchor range (Section 3.1) that
       describes some trust anchor groups also containing the path's
       trust anchor.
+
+   *  Optionally, a _negotiation optional_ flag (Section 7.3),
+      indicating the path may be selected even when the relying party
+      did not request its trust anchor.
 
    These properties allow certificate selection (see Section 4.2) to
    consider this path when a relying party advertises a matching trust
@@ -482,9 +487,13 @@ Table of Contents
    If no certification paths satisfy either extension, the
    authenticating party MAY return a handshake_failure alert, or choose
    among fallback certification paths without considering trust_anchors
-   or certification_authorities.  See Section 4.3 for additional
-   guidance on selecting a fallback when the ClientHello contains
-   trust_anchors.
+   or certification_authorities.  However, a certification path that
+   participates in this protocol (see Section 3.2) SHOULD NOT be chosen
+   as a fallback unless it has the negotiation_optional property
+   (Section 7.3); absent that property, such a path is used only when
+   the relying party requested its trust anchor.  See Section 4.3 for
+   additional guidance on selecting a fallback when the ClientHello
+   contains trust_anchors.
 
    Sending a fallback allows the authenticating party to retain support
    for relying parties that do not implement any form of trust anchor
@@ -788,6 +797,7 @@ Table of Contents
    enum {
        trust_anchor_id(0),
        trust_anchor_group_inclusions(1),
+       negotiation_optional(2),
        (2^16-1)
    } CertificatePropertyType;
 
@@ -803,11 +813,13 @@ Table of Contents
    that do not satisfy these invariants are syntax errors and MUST be
    rejected by parsers.
 
-   This document defines two properties:
+   This document defines three properties:
 
    *  trust_anchor_id, defined in Section 7.1
 
    *  trust_anchor_group_inclusions, defined in Section 7.2
+
+   *  negotiation_optional, defined in Section 7.3
 
    Future documents MAY define other properties for use with other
    mechanisms.  Such a document MUST define the format of the data field
@@ -838,7 +850,20 @@ Table of Contents
 
    TrustAnchorRange TrustAnchorRangeList<1..2^16-1>;
 
-7.3.  Media Type
+7.3.  Negotiation Optional Property
+
+   By default, an authenticating party SHOULD use a certification path
+   that participates in this protocol (see Section 3.2) only when the
+   relying party requested the path's trust anchor through a trust
+   anchor negotiation mechanism, such as the trust_anchors extension or
+   the certificate_authorities extension.  When the path has the
+   negotiation_optional property, the authenticating party MAY use it
+   even when no such mechanism requested its trust anchor, for example
+   as a fallback (see Section 4.2).
+
+   The negotiation_optional property's data field MUST be empty.
+
+7.4.  Media Type
 
    A certification path with its associated CertificatePropertyList may
    be represented in a PEM [RFC7468] structure in a file of type
@@ -877,9 +902,11 @@ Table of Contents
 
       -  32473.3.42 to 32473.3.MAX
 
+   *  A negotiation_optional property
+
    -----BEGIN CERTIFICATE PROPERTIES-----
-   ADcAAAAEgf1ZAQABACsAKQORCwIAAAAAAAAAZAAAAAAAAADIBIH9WQMAAAAAAAAA
-   Kv//////////
+   ADsAAAAEgf1ZAQABACsAKQORCwIAAAAAAAAAZAAAAAAAAADIBIH9WQMAAAAAAAAA
+   Kv//////////AAIAAA==
    -----END CERTIFICATE PROPERTIES-----
    -----BEGIN CERTIFICATE-----
    MIIBVzCB/6ADAgECAgkAh7Uv5X8pplkwCgYIKoZIzj0EAwIwGjEYMBYGA1UEAwwP
@@ -904,9 +931,9 @@ Table of Contents
    The IANA registration for this media type is described in
    Section 11.3.
 
-7.4.  ACME Extension
+7.5.  ACME Extension
 
-   The format defined in Section 7.3 can be used with ACME's alternate
+   The format defined in Section 7.4 can be used with ACME's alternate
    format mechanism (see Section 7.4.2 of [RFC8555]) as follows.  When
    downloading certificates, a supporting client SHOULD include
    "application/pem-certificate-chain-with-properties" in its HTTP
@@ -1369,7 +1396,7 @@ Table of Contents
 
    Interoperability considerations:  None
 
-   Published specification:  [this-RFC, Section 7.3]
+   Published specification:  [this-RFC, Section 7.4]
 
    Applications that use this media type:  ACME clients and servers,
       HTTP servers, other applications that need to be configured with a
@@ -1427,6 +1454,8 @@ Table of Contents
          | 0       | trust_anchor_id               | [this-RFC] |
          +---------+-------------------------------+------------+
          | 1       | trust_anchor_group_inclusions | [this-RFC] |
+         +---------+-------------------------------+------------+
+         | 2       | negotiation_optional          | [this-RFC] |
          +---------+-------------------------------+------------+
 
                                  Table 5
