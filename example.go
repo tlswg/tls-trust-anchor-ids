@@ -14,6 +14,7 @@ import (
 const (
 	propertyTrustAnchorID              = 0
 	propertyTrustAnchorGroupInclusions = 1
+	propertyNegotiationOptional        = 2
 )
 
 type TrustAnchorID []uint64
@@ -51,6 +52,7 @@ type TrustAnchorRange struct {
 type CertificatePropertyList struct {
 	TrustAnchorID              TrustAnchorID
 	TrustAnchorGroupInclusions []TrustAnchorRange
+	NegotiationOptional        bool
 }
 
 func (l *CertificatePropertyList) Marshal() ([]byte, error) {
@@ -83,6 +85,10 @@ func (l *CertificatePropertyList) Marshal() ([]byte, error) {
 				})
 			})
 		}
+		if l.NegotiationOptional {
+			props.AddUint16(propertyNegotiationOptional)
+			props.AddUint16LengthPrefixed(func(child *cryptobyte.Builder) {})
+		}
 	})
 	return b.Bytes()
 }
@@ -94,6 +100,7 @@ func main() {
 			{Base: []uint64{2187, 2}, Min: 100, Max: 200},
 			{Base: []uint64{32473, 3}, Min: 42, Max: math.MaxUint64},
 		},
+		NegotiationOptional: true,
 	}
 	b, err := props.Marshal()
 	if err != nil {
