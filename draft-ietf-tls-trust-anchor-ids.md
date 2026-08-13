@@ -216,19 +216,7 @@ Authenticating parties MAY have candidate certification paths without these asso
 
 ## Relying Party Configuration
 
-Relying parties are configured with one or more supported trust anchors. Each trust anchor that participates in this protocol must have an associated trust anchor ID.
-
-When trust anchors are represented as X.509 certificates, the X.509 trust anchor ID extension MAY be used to carry this ID. The trust anchor ID extension has an `extnID` of `id-pe-trustAnchorID` and an `extnValue` containing a DER-encoded TrustAnchorID structure, defined below. The TrustAnchorID is the trust anchor ID's ASN.1 representation, described in {{trust-anchor-ids}}. This extension MUST be non-critical.
-
-~~~ asn.1
-id-pe-trustAnchorID OBJECT IDENTIFIER ::=
-    { iso(1) identified-organization(3) dod(6) internet(1)
-      security(5) mechanisms(5) pkix(7) id-pe(1) TBD }
-
-TrustAnchorID ::= RELATIVE-OID
-~~~
-
-Relying parties MAY instead or additionally configure trust anchor IDs via some application-specific out-of-band information.
+Relying parties are configured with one or more supported trust anchors. Each trust anchor that participates in this protocol MUST have an associated trust anchor ID that identifies it. In this document, the ID is expected to be configured separately from the trust anchor for compatibility with existing PKIs. Future certificate profiles MAY define representations where the trust anchor ID is encoded directly in the trsust anchor.
 
 Relying parties MAY additionally be configured with trust anchor groups that include their trust anchors. When authenticating parties are known to be configured with corresponding inclusion lists ({{authenticating-party-configuration}}), this can further reduce the size of messages sent by the relying party.
 
@@ -677,20 +665,6 @@ Author:
 Change controller:
 : IETF
 
-## PKIX Registry Updates
-
-IANA is requested to create the following entry in the SMI Security for PKIX Module Identifier registry, defined by {{!RFC7299}}:
-
-| Decimal | Description                 | References |
-|---------|-----------------------------|------------|
-| TBD     | id-mod-trustAnchorIDs-2025  | [this-RFC] |
-
-IANA is requested to create the following entry in the SMI Security for PKIX Certificate Extension registry, defined by {{!RFC7299}}:
-
-| Decimal | Description         | References |
-|---------|---------------------|------------|
-| TBD     | id-pe-trustAnchorID | [this-RFC] |
-
 ## CertificatePropertyType Registry
 
 IANA is requested to create the "CertificatePropertyType" registry within the "Transport Layer Security (TLS) Extensions" group. The initial entries in the registry are as follows:
@@ -707,40 +681,6 @@ New values are allocated according to the following process:
 * Values in the range 65280-65535 are reserved for Private Use {{!RFC8126}}.
 
 --- back
-
-# ASN.1 Module
-
-~~~ asn.1
-TrustAnchorIDs-2025
-    { iso(1) identified-organization(3) dod(6) internet(1)
-      security(5) mechanisms(5) pkix(7) id-mod(0)
-      id-mod-trustAnchorIDs-2025(TBD) }
-
-DEFINITIONS EXPLICIT TAGS ::=
-BEGIN
-
-IMPORTS
-    EXTENSION
-    FROM PKIX-CommonTypes-2009 -- From [RFC5912]
-    { iso(1) identified-organization(3) dod(6)
-      internet(1) security(5) mechanisms(5) pkix(7)
-      id-mod(0) id-mod-pkixCommon-02(57) };
-
--- Trust Anchor IDs Certificate Extension
-
-ext-TrustAnchorID EXTENSION ::= {
-    SYNTAX TrustAnchorID
-    IDENTIFIED BY id-pe-trustAnchorID
-    CRITICALITY { FALSE } }
-
-id-pe-trustAnchorID OBJECT IDENTIFIER ::=
-    { iso(1) identified-organization(3) dod(6) internet(1)
-      security(5) mechanisms(5) pkix(7) id-pe(1) TBD }
-
-TrustAnchorID ::= RELATIVE-OID
-
-END
-~~~
 
 # Acknowledgements
 {:numbered="false"}
