@@ -5,12 +5,12 @@
 Transport Layer Security                                         B. Beck
 Internet-Draft                                                   OpenSSL
 Intended status: Standards Track                             D. Benjamin
-Expires: 13 February 2027                                     Google LLC
+Expires: 15 February 2027                                     Google LLC
                                                               D. O'Brien
                                                                         
                                                               K. Nekritz
                                                                     Meta
-                                                          12 August 2026
+                                                          14 August 2026
 
 
                       TLS Trust Anchor Identifiers
@@ -55,7 +55,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 13 February 2027.
+   This Internet-Draft will expire on 15 February 2027.
 
 Copyright Notice
 
@@ -89,7 +89,7 @@ Table of Contents
    6.  Certificate Properties
      6.1.  Trust Anchor ID Property
      6.2.  Trust Anchor Group Inclusions Property
-     6.3.  Negotiation Optional Property
+     6.3.  Trust Anchor Negotiation Property
      6.4.  Media Type
      6.5.  ACME Extension
    7.  Use Cases
@@ -356,9 +356,9 @@ Table of Contents
       describes some trust anchor groups also containing the path's
       trust anchor.
 
-   *  Optionally, a _negotiation optional_ flag (Section 6.3),
-      indicating the path may be selected even when the relying party
-      did not request its trust anchor.
+   *  Optionally, a _trust anchor negotiation_ flag (Section 6.3),
+      indicating the path SHOULD only selected even when the relying
+      party request its issuing CA.
 
    These properties allow certificate selection (see Section 4.2) to
    consider this path when a relying party advertises a matching trust
@@ -473,9 +473,9 @@ Table of Contents
    among fallback certification paths without considering trust_anchors
    or certification_authorities.  However, a certification path that
    participates in this protocol (see Section 3.2) SHOULD NOT be chosen
-   as a fallback unless it has the negotiation_optional property
-   (Section 6.3); absent that property, such a path is used only when
-   the relying party requested its trust anchor.  See Section 4.3 for
+   as a fallback if it has the trust_anchor_negotiation property
+   (Section 6.3); with that property, such a path is used only when the
+   relying party requested its trust anchor.  See Section 4.3 for
    additional guidance on selecting a fallback when the ClientHello
    contains trust_anchors.
 
@@ -707,7 +707,7 @@ Table of Contents
    enum {
        trust_anchor_id(0),
        trust_anchor_group_inclusions(1),
-       negotiation_optional(2),
+       trust_anchor_negotiation(2),
        (2^16-1)
    } CertificatePropertyType;
 
@@ -729,7 +729,7 @@ Table of Contents
 
    *  trust_anchor_group_inclusions, defined in Section 6.2
 
-   *  negotiation_optional, defined in Section 6.3
+   *  trust_anchor_negotiation, defined in Section 6.3
 
    Future documents MAY define other properties for use with other
    mechanisms.  Such a document MUST define the format of the data field
@@ -760,18 +760,15 @@ Table of Contents
 
    TrustAnchorRange TrustAnchorRangeList<1..2^16-1>;
 
-6.3.  Negotiation Optional Property
+6.3.  Trust Anchor Negotiation Property
 
-   By default, an authenticating party SHOULD use a certification path
-   that participates in this protocol (see Section 3.2) only when the
-   relying party requested the path's trust anchor through a trust
-   anchor negotiation mechanism, such as the trust_anchors extension or
-   the certificate_authorities extension.  When the path has the
-   negotiation_optional property, the authenticating party MAY use it
-   even when no such mechanism requested its trust anchor, for example
-   as a fallback (see Section 4.2).
+   The trust_anchor_negotiation property's data field MUST be empty.
 
-   The negotiation_optional property's data field MUST be empty.
+   When a candidate certification path has this property, the
+   authenticating party SHOULD NOT select it as a fallback when the
+   path's issuer cannot be matched against the relying party.  When a
+   candidate path lacks this property, the authenticating party MAY use
+   it as a fallback.  See also Section 4.2.
 
 6.4.  Media Type
 
@@ -812,7 +809,7 @@ Table of Contents
 
       -  32473.3.42 to 32473.3.MAX
 
-   *  A negotiation_optional property
+   *  A trust_anchor_negotiation property
 
    -----BEGIN CERTIFICATE PROPERTIES-----
    ADsAAAAEgf1ZAQABACsAKQORCwIAAAAAAAAAZAAAAAAAAADIBIH9WQMAAAAAAAAA
@@ -1342,7 +1339,7 @@ Table of Contents
          +---------+-------------------------------+------------+
          | 1       | trust_anchor_group_inclusions | [this-RFC] |
          +---------+-------------------------------+------------+
-         | 2       | negotiation_optional          | [this-RFC] |
+         | 2       | trust_anchor_negotiation      | [this-RFC] |
          +---------+-------------------------------+------------+
 
                                  Table 4
