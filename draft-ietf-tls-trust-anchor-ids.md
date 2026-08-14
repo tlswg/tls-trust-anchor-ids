@@ -485,8 +485,6 @@ All paths include `trust_anchor_id` properties describing their corresponding is
 
 For other connections, the TLS software needs to determine fallback paths. Although both 1B and 2B lack the `trust_anchor_negotiation` property, the authenticating party knows that CA2 is more ubiquitously trusted among its supported relying parties than CA1. It configures its TLS software to use CA2 as the source of the fallback path, and so only path 2B will be used as fallback.
 
-This combines configuration from both the ACME server and authenticating party. Within the scope of _one_ ACME order, the ACME server can return appropriate fallbacks based on the specific issuing CAs in the order. However, _across_ ACME orders, only the authenticating party knows which orders are combined, so it is best suited to select between them.
-
 # Use Cases
 
 `trust_anchors`, like `certificate_authorities`, implements trust anchor negotiation. That is, it allows an authenticating party to incorporate relying party trust anchors into certificate selection. `trust_anchors` allows a wider range of TLS applications to use trust anchor negotiation, notably those that would be unable to use `certificate_authorities` due to size or privacy limitations.
