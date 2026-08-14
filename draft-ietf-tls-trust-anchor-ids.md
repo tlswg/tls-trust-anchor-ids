@@ -110,7 +110,7 @@ Without a negotiation mechanism, the authenticating party must obtain a single c
 
 * For an authenticating party to use a CA in its single certificate, all supported relying parties must trust the CA. PKI transitions then become difficult when authenticating parties support older, unupdated relying parties. This impacts both new keys from existing CA operators and new CA operators.
 
-* When a relying party must remove no longer trustworthy CAs, rotate CA keys, or otherwise update to meet new security requirements, it will differ from older versions and potentially other relying parties. This adds to relying party diversity and the challenges that authenticating parties and CAs face. The relying party must then choose between compromising on user security or burdening the rest of the ecosystem, potentially impacting availability in the process.
+* When a relying party must remove no longer trustworthy CAs, rotate CA keys, add new CAs, or otherwise update to meet new security requirements, it will differ from older versions and potentially other relying parties. This adds to relying party diversity and the challenges that authenticating parties and CAs face. The relying party must then choose between compromising on user security or burdening the rest of the ecosystem, potentially impacting availability in the process.
 
 However, `certificate_authorities`'s size is impractical for some applications. Existing PKIs may have many CAs, and existing CAs may have long X.509 names. As of August 2023, the Mozilla CA Certificate Program {{MOZILLA-ROOTS}} contained 144 CAs, with an average name length of around 100 bytes. Such TLS deployments often do not use trust anchor negotiation at all.
 
