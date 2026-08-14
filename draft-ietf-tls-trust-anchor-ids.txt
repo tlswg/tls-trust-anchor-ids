@@ -115,12 +115,10 @@ Table of Contents
    10. IANA Considerations
      10.1.  TLS ExtensionType Updates
      10.2.  Media Type Updates
-     10.3.  PKIX Registry Updates
-     10.4.  CertificatePropertyType Registry
+     10.3.  CertificatePropertyType Registry
    11. References
      11.1.  Normative References
      11.2.  Informative References
-   Appendix A.  ASN.1 Module
    Acknowledgements
    Authors' Addresses
 
@@ -379,25 +377,12 @@ Table of Contents
 3.3.  Relying Party Configuration
 
    Relying parties are configured with one or more supported trust
-   anchors.  Each trust anchor that participates in this protocol must
-   have an associated trust anchor ID.
-
-   When trust anchors are represented as X.509 certificates, the X.509
-   trust anchor ID extension MAY be used to carry this ID.  The trust
-   anchor ID extension has an extnID of id-pe-trustAnchorID and an
-   extnValue containing a DER-encoded TrustAnchorID structure, defined
-   below.  The TrustAnchorID is the trust anchor ID's ASN.1
-   representation, described in Section 3.  This extension MUST be non-
-   critical.
-
-   id-pe-trustAnchorID OBJECT IDENTIFIER ::=
-       { iso(1) identified-organization(3) dod(6) internet(1)
-         security(5) mechanisms(5) pkix(7) id-pe(1) TBD }
-
-   TrustAnchorID ::= RELATIVE-OID
-
-   Relying parties MAY instead or additionally configure trust anchor
-   IDs via some application-specific out-of-band information.
+   anchors.  Each trust anchor that participates in this protocol MUST
+   have an associated trust anchor ID that identifies it.  In this
+   document, the ID is expected to be configured separately from the
+   trust anchor for compatibility with existing PKIs.  Future
+   certificate profiles MAY define representations where the trust
+   anchor ID is encoded directly in the trust anchor.
 
    Relying parties MAY additionally be configured with trust anchor
    groups that include their trust anchors.  When authenticating parties
@@ -1306,31 +1291,7 @@ Table of Contents
 
    Change controller:  IETF
 
-10.3.  PKIX Registry Updates
-
-   IANA is requested to create the following entry in the SMI Security
-   for PKIX Module Identifier registry, defined by [RFC7299]:
-
-           +=========+============================+============+
-           | Decimal | Description                | References |
-           +=========+============================+============+
-           | TBD     | id-mod-trustAnchorIDs-2025 | [this-RFC] |
-           +---------+----------------------------+------------+
-
-                                  Table 2
-
-   IANA is requested to create the following entry in the SMI Security
-   for PKIX Certificate Extension registry, defined by [RFC7299]:
-
-              +=========+=====================+============+
-              | Decimal | Description         | References |
-              +=========+=====================+============+
-              | TBD     | id-pe-trustAnchorID | [this-RFC] |
-              +---------+---------------------+------------+
-
-                                 Table 3
-
-10.4.  CertificatePropertyType Registry
+10.3.  CertificatePropertyType Registry
 
    IANA is requested to create the "CertificatePropertyType" registry
    within the "Transport Layer Security (TLS) Extensions" group.  The
@@ -1346,7 +1307,7 @@ Table of Contents
          | 2       | trust_anchor_negotiation      | [this-RFC] |
          +---------+-------------------------------+------------+
 
-                                 Table 4
+                                 Table 2
 
    New values are allocated according to the following process:
 
@@ -1392,10 +1353,6 @@ Table of Contents
               Considerations for Internet Protocols", RFC 6973,
               DOI 10.17487/RFC6973, July 2013,
               <https://www.rfc-editor.org/rfc/rfc6973>.
-
-   [RFC7299]  Housley, R., "Object Identifier Registry for the PKIX
-              Working Group", RFC 7299, DOI 10.17487/RFC7299, July 2014,
-              <https://www.rfc-editor.org/rfc/rfc7299>.
 
    [RFC7468]  Josefsson, S. and S. Leonard, "Textual Encodings of PKIX,
               PKCS, and CMS Structures", RFC 7468, DOI 10.17487/RFC7468,
@@ -1479,38 +1436,6 @@ Table of Contents
               Adrian, D., "How to distrust a CA without any certificate
               errors", March 2025,
               <https://dadrian.io/blog/posts/sct-not-after/>.
-
-Appendix A.  ASN.1 Module
-
-   TrustAnchorIDs-2025
-       { iso(1) identified-organization(3) dod(6) internet(1)
-         security(5) mechanisms(5) pkix(7) id-mod(0)
-         id-mod-trustAnchorIDs-2025(TBD) }
-
-   DEFINITIONS EXPLICIT TAGS ::=
-   BEGIN
-
-   IMPORTS
-       EXTENSION
-       FROM PKIX-CommonTypes-2009 -- From [RFC5912]
-       { iso(1) identified-organization(3) dod(6)
-         internet(1) security(5) mechanisms(5) pkix(7)
-         id-mod(0) id-mod-pkixCommon-02(57) };
-
-   -- Trust Anchor IDs Certificate Extension
-
-   ext-TrustAnchorID EXTENSION ::= {
-       SYNTAX TrustAnchorID
-       IDENTIFIED BY id-pe-trustAnchorID
-       CRITICALITY { FALSE } }
-
-   id-pe-trustAnchorID OBJECT IDENTIFIER ::=
-       { iso(1) identified-organization(3) dod(6) internet(1)
-         security(5) mechanisms(5) pkix(7) id-pe(1) TBD }
-
-   TrustAnchorID ::= RELATIVE-OID
-
-   END
 
 Acknowledgements
 

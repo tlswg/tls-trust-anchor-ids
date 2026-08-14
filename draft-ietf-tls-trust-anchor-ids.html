@@ -1297,10 +1297,7 @@ svg {
                 <p id="section-toc.1-1.10.2.2.1"><a href="#section-10.2" class="auto internal xref">10.2</a>.  <a href="#name-media-type-updates" class="internal xref">Media Type Updates</a></p>
 </li>
               <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.10.2.3">
-                <p id="section-toc.1-1.10.2.3.1"><a href="#section-10.3" class="auto internal xref">10.3</a>.  <a href="#name-pkix-registry-updates" class="internal xref">PKIX Registry Updates</a></p>
-</li>
-              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.10.2.4">
-                <p id="section-toc.1-1.10.2.4.1"><a href="#section-10.4" class="auto internal xref">10.4</a>.  <a href="#name-certificatepropertytype-reg" class="internal xref">CertificatePropertyType Registry</a></p>
+                <p id="section-toc.1-1.10.2.3.1"><a href="#section-10.3" class="auto internal xref">10.3</a>.  <a href="#name-certificatepropertytype-reg" class="internal xref">CertificatePropertyType Registry</a></p>
 </li>
             </ul>
 </li>
@@ -1316,13 +1313,10 @@ svg {
             </ul>
 </li>
           <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.12">
-            <p id="section-toc.1-1.12.1"><a href="#appendix-A" class="auto internal xref">Appendix A</a>.  <a href="#name-asn1-module" class="internal xref">ASN.1 Module</a></p>
+            <p id="section-toc.1-1.12.1"><a href="#appendix-A" class="auto internal xref"></a><a href="#name-acknowledgements" class="internal xref">Acknowledgements</a></p>
 </li>
           <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.13">
-            <p id="section-toc.1-1.13.1"><a href="#appendix-B" class="auto internal xref"></a><a href="#name-acknowledgements" class="internal xref">Acknowledgements</a></p>
-</li>
-          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.14">
-            <p id="section-toc.1-1.14.1"><a href="#appendix-C" class="auto internal xref"></a><a href="#name-authors-addresses" class="internal xref">Authors' Addresses</a></p>
+            <p id="section-toc.1-1.13.1"><a href="#appendix-B" class="auto internal xref"></a><a href="#name-authors-addresses" class="internal xref">Authors' Addresses</a></p>
 </li>
         </ul>
 </nav>
@@ -1519,20 +1513,9 @@ when, and only when, they appear in all capitals, as shown here.<a href="#sectio
         <h3 id="name-relying-party-configuration">
 <a href="#section-3.3" class="section-number selfRef">3.3. </a><a href="#name-relying-party-configuration" class="section-name selfRef">Relying Party Configuration</a>
         </h3>
-<p id="section-3.3-1">Relying parties are configured with one or more supported trust anchors. Each trust anchor that participates in this protocol must have an associated trust anchor ID.<a href="#section-3.3-1" class="pilcrow">¶</a></p>
-<p id="section-3.3-2">When trust anchors are represented as X.509 certificates, the X.509 trust anchor ID extension MAY be used to carry this ID. The trust anchor ID extension has an <code>extnID</code> of <code>id-pe-trustAnchorID</code> and an <code>extnValue</code> containing a DER-encoded TrustAnchorID structure, defined below. The TrustAnchorID is the trust anchor ID's ASN.1 representation, described in <a href="#trust-anchor-ids" class="auto internal xref">Section 3</a>. This extension MUST be non-critical.<a href="#section-3.3-2" class="pilcrow">¶</a></p>
-<div class="lang-asn.1 sourcecode" id="section-3.3-3">
-<pre>
-id-pe-trustAnchorID OBJECT IDENTIFIER ::=
-    { iso(1) identified-organization(3) dod(6) internet(1)
-      security(5) mechanisms(5) pkix(7) id-pe(1) TBD }
-
-TrustAnchorID ::= RELATIVE-OID
-</pre><a href="#section-3.3-3" class="pilcrow">¶</a>
-</div>
-<p id="section-3.3-4">Relying parties MAY instead or additionally configure trust anchor IDs via some application-specific out-of-band information.<a href="#section-3.3-4" class="pilcrow">¶</a></p>
-<p id="section-3.3-5">Relying parties MAY additionally be configured with trust anchor groups that include their trust anchors. When authenticating parties are known to be configured with corresponding inclusion lists (<a href="#authenticating-party-configuration" class="auto internal xref">Section 3.2</a>), this can further reduce the size of messages sent by the relying party.<a href="#section-3.3-5" class="pilcrow">¶</a></p>
-<p id="section-3.3-6">Relying parties MAY support trust anchors without associated trust anchor IDs, but such trust anchors will not participate in this protocol. Those trust anchors MAY participate in other trust anchor negotiation protocols, such as the <code>certificate_authorities</code> extension.<a href="#section-3.3-6" class="pilcrow">¶</a></p>
+<p id="section-3.3-1">Relying parties are configured with one or more supported trust anchors. Each trust anchor that participates in this protocol MUST have an associated trust anchor ID that identifies it. In this document, the ID is expected to be configured separately from the trust anchor for compatibility with existing PKIs. Future certificate profiles MAY define representations where the trust anchor ID is encoded directly in the trust anchor.<a href="#section-3.3-1" class="pilcrow">¶</a></p>
+<p id="section-3.3-2">Relying parties MAY additionally be configured with trust anchor groups that include their trust anchors. When authenticating parties are known to be configured with corresponding inclusion lists (<a href="#authenticating-party-configuration" class="auto internal xref">Section 3.2</a>), this can further reduce the size of messages sent by the relying party.<a href="#section-3.3-2" class="pilcrow">¶</a></p>
+<p id="section-3.3-3">Relying parties MAY support trust anchors without associated trust anchor IDs, but such trust anchors will not participate in this protocol. Those trust anchors MAY participate in other trust anchor negotiation protocols, such as the <code>certificate_authorities</code> extension.<a href="#section-3.3-3" class="pilcrow">¶</a></p>
 </section>
 </div>
 </section>
@@ -2167,57 +2150,14 @@ ITN+1R6WAiEA2AfGBy3Hz8oYY5wPldIndrXjntCzzSEduB6pEvYQZWo=
 </dl>
 </section>
 </div>
-<div id="pkix-registry-updates">
+<div id="certificatepropertytype-registry">
 <section id="section-10.3">
-        <h3 id="name-pkix-registry-updates">
-<a href="#section-10.3" class="section-number selfRef">10.3. </a><a href="#name-pkix-registry-updates" class="section-name selfRef">PKIX Registry Updates</a>
+        <h3 id="name-certificatepropertytype-reg">
+<a href="#section-10.3" class="section-number selfRef">10.3. </a><a href="#name-certificatepropertytype-reg" class="section-name selfRef">CertificatePropertyType Registry</a>
         </h3>
-<p id="section-10.3-1">IANA is requested to create the following entry in the SMI Security for PKIX Module Identifier registry, defined by <span>[<a href="#RFC7299" class="cite xref">RFC7299</a>]</span>:<a href="#section-10.3-1" class="pilcrow">¶</a></p>
+<p id="section-10.3-1">IANA is requested to create the "CertificatePropertyType" registry within the "Transport Layer Security (TLS) Extensions" group. The initial entries in the registry are as follows:<a href="#section-10.3-1" class="pilcrow">¶</a></p>
 <table class="center" id="table-2">
           <caption><a href="#table-2" class="selfRef">Table 2</a></caption>
-<thead>
-            <tr>
-              <th class="text-left" rowspan="1" colspan="1">Decimal</th>
-              <th class="text-left" rowspan="1" colspan="1">Description</th>
-              <th class="text-left" rowspan="1" colspan="1">References</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td class="text-left" rowspan="1" colspan="1">TBD</td>
-              <td class="text-left" rowspan="1" colspan="1">id-mod-trustAnchorIDs-2025</td>
-              <td class="text-left" rowspan="1" colspan="1">[this-RFC]</td>
-            </tr>
-          </tbody>
-        </table>
-<p id="section-10.3-3">IANA is requested to create the following entry in the SMI Security for PKIX Certificate Extension registry, defined by <span>[<a href="#RFC7299" class="cite xref">RFC7299</a>]</span>:<a href="#section-10.3-3" class="pilcrow">¶</a></p>
-<table class="center" id="table-3">
-          <caption><a href="#table-3" class="selfRef">Table 3</a></caption>
-<thead>
-            <tr>
-              <th class="text-left" rowspan="1" colspan="1">Decimal</th>
-              <th class="text-left" rowspan="1" colspan="1">Description</th>
-              <th class="text-left" rowspan="1" colspan="1">References</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td class="text-left" rowspan="1" colspan="1">TBD</td>
-              <td class="text-left" rowspan="1" colspan="1">id-pe-trustAnchorID</td>
-              <td class="text-left" rowspan="1" colspan="1">[this-RFC]</td>
-            </tr>
-          </tbody>
-        </table>
-</section>
-</div>
-<div id="certificatepropertytype-registry">
-<section id="section-10.4">
-        <h3 id="name-certificatepropertytype-reg">
-<a href="#section-10.4" class="section-number selfRef">10.4. </a><a href="#name-certificatepropertytype-reg" class="section-name selfRef">CertificatePropertyType Registry</a>
-        </h3>
-<p id="section-10.4-1">IANA is requested to create the "CertificatePropertyType" registry within the "Transport Layer Security (TLS) Extensions" group. The initial entries in the registry are as follows:<a href="#section-10.4-1" class="pilcrow">¶</a></p>
-<table class="center" id="table-4">
-          <caption><a href="#table-4" class="selfRef">Table 4</a></caption>
 <thead>
             <tr>
               <th class="text-left" rowspan="1" colspan="1">Decimal</th>
@@ -2243,13 +2183,13 @@ ITN+1R6WAiEA2AfGBy3Hz8oYY5wPldIndrXjntCzzSEduB6pEvYQZWo=
             </tr>
           </tbody>
         </table>
-<p id="section-10.4-3">New values are allocated according to the following process:<a href="#section-10.4-3" class="pilcrow">¶</a></p>
+<p id="section-10.3-3">New values are allocated according to the following process:<a href="#section-10.3-3" class="pilcrow">¶</a></p>
 <ul class="normal">
-<li class="normal" id="section-10.4-4.1">
-            <p id="section-10.4-4.1.1">Values in the range 0-65279 are assigned via Specification Required <span>[<a href="#RFC8126" class="cite xref">RFC8126</a>]</span>.<a href="#section-10.4-4.1.1" class="pilcrow">¶</a></p>
+<li class="normal" id="section-10.3-4.1">
+            <p id="section-10.3-4.1.1">Values in the range 0-65279 are assigned via Specification Required <span>[<a href="#RFC8126" class="cite xref">RFC8126</a>]</span>.<a href="#section-10.3-4.1.1" class="pilcrow">¶</a></p>
 </li>
-          <li class="normal" id="section-10.4-4.2">
-            <p id="section-10.4-4.2.1">Values in the range 65280-65535 are reserved for Private Use <span>[<a href="#RFC8126" class="cite xref">RFC8126</a>]</span>.<a href="#section-10.4-4.2.1" class="pilcrow">¶</a></p>
+          <li class="normal" id="section-10.3-4.2">
+            <p id="section-10.3-4.2.1">Values in the range 65280-65535 are reserved for Private Use <span>[<a href="#RFC8126" class="cite xref">RFC8126</a>]</span>.<a href="#section-10.3-4.2.1" class="pilcrow">¶</a></p>
 </li>
         </ul>
 </section>
@@ -2290,10 +2230,6 @@ ITN+1R6WAiEA2AfGBy3Hz8oYY5wPldIndrXjntCzzSEduB6pEvYQZWo=
 <dt id="RFC6973">[RFC6973]</dt>
         <dd>
 <span class="refAuthor">Cooper, A.</span>, <span class="refAuthor">Tschofenig, H.</span>, <span class="refAuthor">Aboba, B.</span>, <span class="refAuthor">Peterson, J.</span>, <span class="refAuthor">Morris, J.</span>, <span class="refAuthor">Hansen, M.</span>, and <span class="refAuthor">R. Smith</span>, <span class="refTitle">"Privacy Considerations for Internet Protocols"</span>, <span class="seriesInfo">RFC 6973</span>, <span class="seriesInfo">DOI 10.17487/RFC6973</span>, <time datetime="2013-07" class="refDate">July 2013</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc6973">https://www.rfc-editor.org/rfc/rfc6973</a>&gt;</span>. </dd>
-<dd class="break"></dd>
-<dt id="RFC7299">[RFC7299]</dt>
-        <dd>
-<span class="refAuthor">Housley, R.</span>, <span class="refTitle">"Object Identifier Registry for the PKIX Working Group"</span>, <span class="seriesInfo">RFC 7299</span>, <span class="seriesInfo">DOI 10.17487/RFC7299</span>, <time datetime="2014-07" class="refDate">July 2014</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc7299">https://www.rfc-editor.org/rfc/rfc7299</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 <dt id="RFC7468">[RFC7468]</dt>
         <dd>
@@ -2377,56 +2313,16 @@ ITN+1R6WAiEA2AfGBy3Hz8oYY5wPldIndrXjntCzzSEduB6pEvYQZWo=
 </div>
 </section>
 </div>
-<div id="asn1-module">
-<section id="appendix-A">
-      <h2 id="name-asn1-module">
-<a href="#appendix-A" class="section-number selfRef">Appendix A. </a><a href="#name-asn1-module" class="section-name selfRef">ASN.1 Module</a>
-      </h2>
-<div class="lang-asn.1 sourcecode" id="appendix-A-1">
-<pre>
-TrustAnchorIDs-2025
-    { iso(1) identified-organization(3) dod(6) internet(1)
-      security(5) mechanisms(5) pkix(7) id-mod(0)
-      id-mod-trustAnchorIDs-2025(TBD) }
-
-DEFINITIONS EXPLICIT TAGS ::=
-BEGIN
-
-IMPORTS
-    EXTENSION
-    FROM PKIX-CommonTypes-2009 -- From [RFC5912]
-    { iso(1) identified-organization(3) dod(6)
-      internet(1) security(5) mechanisms(5) pkix(7)
-      id-mod(0) id-mod-pkixCommon-02(57) };
-
--- Trust Anchor IDs Certificate Extension
-
-ext-TrustAnchorID EXTENSION ::= {
-    SYNTAX TrustAnchorID
-    IDENTIFIED BY id-pe-trustAnchorID
-    CRITICALITY { FALSE } }
-
-id-pe-trustAnchorID OBJECT IDENTIFIER ::=
-    { iso(1) identified-organization(3) dod(6) internet(1)
-      security(5) mechanisms(5) pkix(7) id-pe(1) TBD }
-
-TrustAnchorID ::= RELATIVE-OID
-
-END
-</pre><a href="#appendix-A-1" class="pilcrow">¶</a>
-</div>
-</section>
-</div>
 <div id="acknowledgements">
-<section id="appendix-B">
+<section id="appendix-A">
       <h2 id="name-acknowledgements">
 <a href="#name-acknowledgements" class="section-name selfRef">Acknowledgements</a>
       </h2>
-<p id="appendix-B-1">The authors thank Nick Harper, and Emily Stark for many valuable discussions and insights which led to this document. Thanks also to Aaron Gable for providing feedback on ACME extensions.<a href="#appendix-B-1" class="pilcrow">¶</a></p>
+<p id="appendix-A-1">The authors thank Nick Harper, and Emily Stark for many valuable discussions and insights which led to this document. Thanks also to Aaron Gable for providing feedback on ACME extensions.<a href="#appendix-A-1" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="authors-addresses">
-<section id="appendix-C">
+<section id="appendix-B">
       <h2 id="name-authors-addresses">
 <a href="#name-authors-addresses" class="section-name selfRef">Authors' Addresses</a>
       </h2>
