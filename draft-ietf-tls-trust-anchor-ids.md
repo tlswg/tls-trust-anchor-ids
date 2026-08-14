@@ -96,23 +96,23 @@ informative:
 
 --- abstract
 
-This document defines the TLS Trust Anchors extension, a mechanism for relying parties to convey trusted certification authorities. It describes certification authorities more succinctly than the TLS Certificate Authorities extension.
+This document defines the TLS Trust Anchors extension, a mechanism for a TLS client or server to select a certificate to present based on the peer's trusted certification authorities. It describes certification authorities more succinctly than the TLS Certificate Authorities extension.
 
 --- middle
 
 # Introduction
 
-TLS {{!RFC9846}} authentication uses X.509 certificates {{!RFC5280}} to associate the *authenticating party's* TLS key with its application identifiers, such as DNS names. These associations are signed by some certification authority (CA). The peer, or *relying party*, curates a set of CAs that are trusted to only sign correct associations, which allows it to rely on the TLS to authenticate application identifiers. Typically the authenticating party is the server and the relying party is the client.
+TLS {{!RFC9846}} authentication uses X.509 certificates {{!RFC5280}} to associate the *authenticating party's* TLS key with its application identifiers, such as DNS names. These associations are signed by some certification authority (CA). The peer, or *relying party*, curates a set of CAs that are trusted to only sign correct associations, which allows it to rely on the TLS to authenticate application identifiers. For a TLS server certificate, the authenticating party is the server and the relying party is the client. For a TLS client certificate, the roles are reversed.
 
 An authenticating party may need to interoperate with relying parties that trust different sets of CAs. {{Section 4.3.4 of RFC9846}} defines the `certificate_authorities` extension to accommodate this. It allows the authenticating party to provision multiple certificates and select the one that will allow the relying party to accept its TLS key. This is analogous to parameter negotiation elsewhere in TLS.
-
-However, `certificate_authorities`'s size is impractical for some applications. Existing PKIs may have many CAs, and existing CAs may have long X.509 names. As of August 2023, the Mozilla CA Certificate Program {{MOZILLA-ROOTS}} contained 144 CAs, with an average name length of around 100 bytes. Such TLS deployments often do not use trust anchor negotiation at all.
 
 Without a negotiation mechanism, the authenticating party must obtain a single certificate that simultaneously satisfies all relying parties. This is challenging when relying parties are diverse. PKI transitions, including those necessary for user security, naturally lead to relying party diversity, so the result is that service availability conflicts with security and overall PKI evolution:
 
 * For an authenticating party to use a CA in its single certificate, all supported relying parties must trust the CA. PKI transitions then become difficult when authenticating parties support older, unupdated relying parties. This impacts both new keys from existing CA operators and new CA operators.
 
-* When a relying party must update its policies to meet new security requirements, it adds to relying party diversity and the challenges that authenticating parties and CAs face. The relying party must then choose between compromising on user security or burdening the rest of the ecosystem, potentially impacting availability in the process.
+* When a relying party must remove no longer trustworthy CAs, rotate CA keys, add new CAs, or otherwise update to meet new security requirements, it will differ from older versions and potentially other relying parties. This adds to relying party diversity and the challenges that authenticating parties and CAs face. The relying party must then choose between compromising on user security or burdening the rest of the ecosystem, potentially impacting availability in the process.
+
+However, `certificate_authorities`'s size is impractical for some applications. Existing PKIs may have many CAs, and existing CAs may have long X.509 names. As of August 2023, the Mozilla CA Certificate Program {{MOZILLA-ROOTS}} contained 144 CAs, with an average name length of around 100 bytes. Such TLS deployments often do not use trust anchor negotiation at all.
 
 To address this, this document introduces Trust Anchor Identifiers (Trust Anchor IDs). There are several parts to this mechanism:
 
