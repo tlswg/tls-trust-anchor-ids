@@ -461,13 +461,15 @@ The IANA registration for this media type is described in {{media-type-updates}}
 
 The format defined in {{media-type}} can be used with ACME's alternate format mechanism (see {{Section 7.4.2 of !RFC8555}}) as follows. When downloading certificates, a supporting client SHOULD include "application/pem-certificate-chain-with-properties" in its HTTP Accept header ({{Section 12.5.1 of !RFC9110}}). When a supporting server sees such a header, it MAY then respond with that format to include a CertificatePropertyList with the certification path. This CertificatePropertyList MAY include `trust_anchor_id` and `trust_anchor_group_inclusions` properties for use with this protocol, or other properties defined in another document.
 
-When used with ACME's alternate certificate chain mechanism (see {{Section 7.4.2 of !RFC8555}}), this protocol removes the need for heuristics in determining which path to serve to which relying party. In this case, the ACME SHOULD use the `trust_anchor_negotiation` property to indicate which paths to gate on trust anchor negotiation, and which are possible fallbacks when no trust anchors match.
+When the ACME server provides multiple paths, e.g. with ACME's alternate certificate chain mechanism (see {{Section 7.4.2 of !RFC8555}}), the ACME server SHOULD include the `trust_anchor_negotiation` property on any paths it expects to gate on trust anchor negotiation. It SHOULD omit the property on any paths which are possible fallbacks when no trust anchors match.
 
 The authenticating party MAY override this recommendation. In particular, if the authenticating party combines certification paths from two ACME orders, it might only consider some orders as a source for fallback paths.
 
+When a path is gated on trust anchor negotiation, this protocol removes the need for heuristics in determining which path to serve to which relying party.
+
 ### Example
 
-There are two CA operators, CA1 and CA2. The authenticating party is configured to request certificates from both CA1 and CA2.
+There are two CA operators, CA1 and CA2. The authenticating party is configured to request certificates from ACME servers operated by each of CA1 and CA2.
 
 When the authenticating party requests certificates from CA1, it receives:
 
@@ -483,7 +485,7 @@ All paths include `trust_anchor_id` properties describing their corresponding is
 
 For other connections, the TLS software needs to determine fallback paths. Although both 1B and 2B lack the `trust_anchor_negotiation` property, the authenticating party knows that CA2 is more ubiquitously trusted among its supported relying parties than CA1. It configures its TLS software to use CA2 as the source of the fallback path, and so only path 2B will be used as fallback.
 
-This combines information known to the CAs and to the authenticating party. Within the scope of one ACME order, the ACME server knows which paths chain to issuers that are more appropriate for a fallback. However, only the authenticating party knows it is combining two ACME orders, so it is best suited to select between them.
+This combines configuration from both the ACME server and authenticating party. Within the scope of _one_ ACME order, the ACME server can return appropriate fallbacks based on the specific issuing CAs in the order. However, _across_ ACME orders, only the authenticating party knows which orders are combined, so it is best suited to select between them.
 
 # Use Cases
 
