@@ -216,7 +216,7 @@ Authenticating parties MAY have candidate certification paths without these asso
 
 ## Relying Party Configuration
 
-Relying parties are configured with one or more supported trust anchors. Each trust anchor that participates in this protocol MUST have an associated trust anchor ID that identifies it. In this document, the ID is expected to be configured separately from the trust anchor for compatibility with existing PKIs. Future certificate profiles MAY define representations where the trust anchor ID is encoded directly in the trsust anchor.
+Relying parties are configured with one or more supported trust anchors. Each trust anchor that participates in this protocol MUST have an associated trust anchor ID that identifies it. In this document, the ID is expected to be configured separately from the trust anchor for compatibility with existing PKIs. Future certificate profiles MAY define representations where the trust anchor ID is encoded directly in the trust anchor.
 
 Relying parties MAY additionally be configured with trust anchor groups that include their trust anchors. When authenticating parties are known to be configured with corresponding inclusion lists ({{authenticating-party-configuration}}), this can further reduce the size of messages sent by the relying party.
 
