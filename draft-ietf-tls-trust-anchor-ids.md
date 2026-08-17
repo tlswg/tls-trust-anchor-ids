@@ -154,6 +154,29 @@ Trust anchor:
 Certification path:
 : An ordered list of X.509 certificates starting with the target certificate. Each certificate is issued by the next certificate, except the last, which is issued by a trust anchor.
 
+## Overview
+
+TLS certificate selection (see {{Section 4.5.1.2 of !RFC9846}}) combines information from both the authenticating and relying party:
+
+1. The authenticating party is configured with one or more candidate certification paths.
+
+2. The relying party is configured with one or more supported trust anchors.
+
+3. In the TLS handshake, the relying party sends a ClientHello or CertificateRequest message that describes its preferences.
+
+4. Based on this information, the authenticating party selects the best candidate certification path to present.
+
+To successfully complete the handshake, the authenticating party must select some path that both:
+
+* is issued by one of the relying party's trust anchors and
+* satisfies any other constraints in the TLS protocol, such as whether there is a common signature algorithm
+
+This document defines a mechanism to evaluate the first condition. In particular, it defines:
+
+* How the relying party describes its supported trust anchors ({{relying-party-configuration}})
+* How the authenticating party interprets this description to inform certificate selection ({{authenticating-party-configuration}})
+* For server certificates, a recovery mechanism for signaling failure ({{selection-failure-recovery}})
+
 # Common Structures
 
 This section defines some common structures used in this document:
@@ -232,29 +255,6 @@ It does not contain any of the following IDs:
 * `32473.2.10` (not a child of `base`)
 
 # TLS Extension
-
-## Overview
-
-TLS certificate selection (see {{Section 4.5.1.2 of !RFC9846}}) combines information from both the authenticating and relying party:
-
-1. The authenticating party is configured with one or more candidate certification paths.
-
-2. The relying party is configured with one or more supported trust anchors.
-
-3. In the TLS handshake, the relying party sends a ClientHello or CertificateRequest message that describes its preferences.
-
-4. Based on this information, the authenticating party selects the best candidate certification path to present.
-
-To successfully complete the handshake, the authenticating party must select some path that both:
-
-* is issued by one of the relying party's trust anchors and
-* satisfies any other constraints in the TLS protocol, such as whether there is a common signature algorithm
-
-This document defines a mechanism to evaluate the first condition. In particular, it defines:
-
-* How the relying party describes its supported trust anchors ({{relying-party-configuration}})
-* How the authenticating party interprets this description to inform certificate selection ({{authenticating-party-configuration}})
-* For server certificates, a recovery mechanism for signaling failure ({{selection-failure-recovery}})
 
 ## Extension Syntax
 
