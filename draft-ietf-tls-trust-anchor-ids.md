@@ -299,7 +299,7 @@ The requested trust anchor IDs MAY be determined by collecting the IDs of each p
 If the relying party is a client, it MAY omit trust anchors that it trusts, or signal trust anchors which it does not trust. For example:
 
 * The relying party MAY try to reduce size with a common trust anchor group, but the group contains some untrusted trust anchors.
-* The relying party MAY send a (possibly empty) subset of its trust anchors due to fingerprinting risks (see {{privacy-considerations}}), or size concerns.
+* The relying party MAY send a subset of its trust anchors due to fingerprinting risks (see {{privacy-considerations}}), or size concerns.
 * The relying party MAY send an empty list of trust anchors.
 
 However, it is then possible the server will select an untrusted certificate. Clients that signal extra trust anchors or omit ones SHOULD implement the recovery mechanism described in {{selection-failure-recovery}}. The associated IDs of individual trust anchors are used in recovery.
