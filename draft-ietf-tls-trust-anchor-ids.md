@@ -335,8 +335,6 @@ Sending a fallback allows the authenticating party to retain support for relying
 
 When the authenticating party is a server, {{selection-failure-recovery}} describes an additional requirement for servers that implement this protocol.
 
-{{recommended-tls-credential-model}} describes a RECOMMENDED model for certificate selection.
-
 ## Strict Certification Paths
 
 If, and only if, the authenticating party sends a certification path that matches the relying party's `trust_anchors` extension, the authenticating party MUST send an empty `trust_anchors` extension in the first CertificateEntry of the Certificate message.
@@ -555,35 +553,6 @@ When the authenticating party requests certificates from CA2, it receives:
 All paths include `trust_anchor_id` properties describing their corresponding issuer. The authenticating party's TLS software will consider all four in connections that use the `trust_anchors` extension.
 
 For other connections, the TLS software needs to determine fallback paths. Although both 1B and 2B lack the `trust_anchor_negotiation` property, the authenticating party knows that CA2 is more ubiquitously trusted among its supported relying parties than CA1. It configures its TLS software to use CA2 as the source of the fallback path, and so only path 2B will be used as fallback.
-
-# Recommended TLS Credential Model
-
-The following selection model is RECOMMENDED for authenticating parties:
-
-The authenticating party configures a list of *credentials* in some preference order. For example, the authenticating party might order based on a combination of certification chain size or private key signing performance.
-
-Each credential contains:
-
-* A certification path
-* A TLS private key
-* Trust anchor selection properties (see {{authenticating-party-configuration}})
-* A *trust anchor negotiation* flag, which determines whether this credential requires trust anchor negotiation or is a fallback
-* Any information needed for other TLS extensions, e.g. a stapled OCSP response or Signed Certificate Timestamp ({{Section 4.5.1 of !RFC9846}})
-
-When responding to a TLS ClientHello or CertificateRequest, the authenticating party iterates over its credentials in order from most to least preferred. It checks:
-
-* Whether this credential is suitable for the connection based on application-specific criteria. For example, it may check the `server_name` extension {{?RFC6066}} matches this virtual host.
-* Whether it can complete a handshake with this credential, including the requirements in {{Section 4.5.1.2 of !RFC9846}}.
-* If the trust anchor negotiation flag is set, whether the certification path matches either the relying party's `certificate_authorities` or `trust_anchors` extension. If the flag is unset, it skips this check.
-* Any other checks defined by future protocol extensions.
-
-The authenticating party selects the first credential for which all checks pass and completes the handshake. If no credentials are usable, it aborts the connection with `handshake_failure`.
-
-Credentials SHOULD be ordered from more preferred and more specific to less preferred and more general. In particular, fallbacks when trust anchor negotiation fails SHOULD be placed later in the list, with the trust anchor negotiation flag disabled. The TLS implementation will then first try trust anchor negotiation, then try fallback credentials for legacy clients.
-
-When using CertificatePropertyList, the trust anchor negotiation flag is determined from a combination of the `trust_anchor_negotiation` property and local overrides, as described in {{trust-anchor-negotiation-property}}.
-
-This model can be generalized to include other credential types. For example, a TLS server can evaluate X.509 certificate credentials, raw public key credentials {{?RFC7250}} and PSK credentials {{?RFC9258}} in any preference order. Credentials are conditioned on different checks, depending on type.
 
 # Use Cases
 
