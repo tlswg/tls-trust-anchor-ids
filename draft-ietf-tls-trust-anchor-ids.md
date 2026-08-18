@@ -154,7 +154,7 @@ Trust anchor:
 Certification path:
 : An ordered list of X.509 certificates starting with the target certificate. Each certificate is issued by the next certificate, except the last, which is issued by a trust anchor.
 
-## Overview
+# Overview
 
 TLS certificate selection (see {{Section 4.5.1.2 of !RFC9846}}) combines information from both the authenticating and relying party:
 
@@ -177,17 +177,7 @@ This document defines a mechanism to evaluate the first condition. In particular
 * How the authenticating party interprets this description to inform certificate selection ({{authenticating-party-configuration}})
 * For server certificates, a recovery mechanism for signaling failure ({{selection-failure-recovery}})
 
-# Common Structures
-
-This section defines some common structures used in this document:
-
-Trust Anchor ID:
-: A short, unique identifier. See {{trust-anchor-ids}}.
-
-Trust Anchor Range:
-: A structure that describes a pattern of related trust anchor IDs, defined as children of some parent OID arc. See {{trust-anchor-ranges}}.
-
-## Trust Anchor Identifiers {#trust-anchor-ids}
+# Trust Anchor Identifiers {#trust-anchor-ids}
 
 A trust anchor ID is a short, unique identifier that represents a trust anchor or a group of trust anchors. When a trust anchor ID represents a group of trust anchors, it is known as a *trust anchor group*.
 
@@ -206,53 +196,6 @@ The length of a trust anchor ID's binary representation MUST NOT exceed 255 byte
 A trust anchor ID representing a single trust anchor SHOULD be allocated by the CA operator and be common among relying parties that trust the CA. They MAY be allocated by another party, e.g. when bootstrapping an existing ecosystem, if all parties agree on the ID. In particular, the protocol requires authenticating and relying parties to agree, and the authenticating party's configuration typically comes from the CA.
 
 A trust anchor ID representing a trust anchor group MAY be allocated by any party. However, to be useful, the group requires agreement between relying parties and authenticating parties. {{trust-anchor-groups}} discusses defining trust anchor groups in more detail.
-
-## Trust Anchor Ranges
-
-In parts of this specification, it is useful to describe a set of related trust anchor IDs under a single OID arc. For example, in the versioning construction described in {{versioned-groups}}, it is necessary for authenticating parties to know which trust anchor groups contain some specific IDs.
-
-A *trust anchor range* is a structure that represents a particular pattern of related IDs. It is defined by the following TLS structure:
-
-~~~ tls-presentation
-opaque TrustAnchorID<1..2^8-1>;
-
-struct {
-    TrustAnchorID base;
-    uint64 min;
-    uint64 max;
-} TrustAnchorRange;
-~~~
-
-A trust anchor range is said to *contain* some trust anchor ID, `id`, if the `id`, as a relative OID, is the concatenation of `base` and some integer component between `min` and `max`, inclusive. `max` can be set to 2<sup>64</sup>-1 if there is no upper bound. `min` and `max` can be set to the same value to describe a single ID.
-
-The following procedure can be used to perform this check. It succeeds if the range contains `id` and fails otherwise:
-
-1. Check that `base` does not end in the middle of an OID component. That is, check that the most-significant bit of the last byte of `base` is unset. If it is set, fail the procedure.
-2. Check that `base` is a prefix of `id`. If not, fail the procedure. Let `rest` be `id` with the `base` prefix removed.
-3. Decode `rest` as a minimally-encoded, big-endian, base-128 OID component as follows:
-   1. If `rest` is empty, fail the procedure.
-   2. If the most-significant bit of the last byte of `rest` is set, fail the procedure.
-   3. If the most-significant bit of any other byte of `rest` is unset, fail the procedure.
-   4. If the first byte of `rest` is 0x80, fail the procedure.
-   5. Set `v` to zero. Throughout this procedure, `v` will be less than 2<sup>64</sup>.
-   6. For each byte `b` of `rest`:
-      1. If `v` is greater than or equal to 2<sup>57</sup>, fail the procedure.
-      2. Set `v` to `(v << 7) + (b & 127)`.
-4. Check if `min <= v <= max`. If this is not true, fail the procedure. Otherwise, the procedure succeeds.
-
-For example, the trust anchor range with a `base` of `32473.1`, a `min` of 10, and a `max` of 20 contains the following IDs:
-
-* `32473.1.10`
-* `32473.1.15`
-* `32473.1.20`
-
-It does not contain any of the following IDs:
-
-* `32473.1` (no component after `base`)
-* `32473.1.10.0` (extra components)
-* `32473.1.9` (last component out of range)
-* `32473.1.21` (last component out of range)
-* `32473.2.10` (not a child of `base`)
 
 # TLS Extension
 
@@ -306,20 +249,67 @@ However, it is then possible the server will select an untrusted certificate. Cl
 
 ## Authenticating Party Configuration
 
-The authenticating party compares the requested trust anchor IDs with its candidate certification paths. To do this, each candidate path that participates in this protocol MUST be configured with:
+The authenticating party compares the requested trust anchor IDs with its candidate certification paths. To do this, each candidate certification path that participates in this protocol MUST be configured with:
 
 * The trust anchor ID for the CA that issued this candidate path.
 
-* A (possibly empty) list of *trust anchor group inclusions*. Each trust anchor group inclusion is a trust anchor range ({{trust-anchor-ranges}}) that describes some trust anchor groups also containing the path's trust anchor.
+* A (possibly empty) list of *trust anchor group inclusions*, which describe trust anchor group known to contain the issuing CA.
+
+A CA can be contained in family of related trust anchor groups, e.g. in the versioning construction described in {{versioned-groups}}. To accomodate this, each trust anchor group inclusion describes a pattern of containing groups using a trust anchor range, defined below in {{trust-anchor-ranges}}.
 
 {{certificate-properties}} defines a format to represent these properties. {{acme-extension}} defines how to obtain them from ACME {{!RFC8555}}.
 
 The authenticating party intersects this information with the requested trust anchor IDs to determine if the relying party trusts the issuing CA. A candidate path is said to *match* the requested trust anchor IDs if either:
 
-* The path's trust anchor ID is one of the requested trust anchor IDs.
-* One of the path's trust anchor group inclusions contains some requested trust anchor ID, as described in {{trust-anchor-ranges}}.
+* One of the requested trust anchor IDs is equal to the path's trust anchor ID.
+* One of the requested trust anchor IDs is contained in one of the path's trust anchor group inclusions.
 
 Authenticating parties MAY have candidate certification paths that do not participate in this protocol and lack these properties. These paths MAY participate in other trust anchor negotiation protocols, such as the `certificate_authorities` extension, or they MAY be used as a fallback when no matching issuer is found.
+
+### Trust Anchor Ranges
+
+A *trust anchor range* is a structure that represents a particular pattern of related IDs. It is defined by the following TLS structure:
+
+~~~ tls-presentation
+opaque TrustAnchorID<1..2^8-1>;
+
+struct {
+    TrustAnchorID base;
+    uint64 min;
+    uint64 max;
+} TrustAnchorRange;
+~~~
+
+A trust anchor range is said to *contain* some trust anchor ID, `id`, if the `id`, as a relative OID, is the concatenation of `base` and some integer component between `min` and `max`, inclusive. `max` can be set to 2<sup>64</sup>-1 if there is no upper bound. `min` and `max` can be set to the same value to describe a single ID.
+
+The following procedure can be used to perform this check. It succeeds if the range contains `id` and fails otherwise:
+
+1. Check that `base` does not end in the middle of an OID component. That is, check that the most-significant bit of the last byte of `base` is unset. If it is set, fail the procedure.
+2. Check that `base` is a prefix of `id`. If not, fail the procedure. Let `rest` be `id` with the `base` prefix removed.
+3. Decode `rest` as a minimally-encoded, big-endian, base-128 OID component as follows:
+   1. If `rest` is empty, fail the procedure.
+   2. If the most-significant bit of the last byte of `rest` is set, fail the procedure.
+   3. If the most-significant bit of any other byte of `rest` is unset, fail the procedure.
+   4. If the first byte of `rest` is 0x80, fail the procedure.
+   5. Set `v` to zero. Throughout this procedure, `v` will be less than 2<sup>64</sup>.
+   6. For each byte `b` of `rest`:
+      1. If `v` is greater than or equal to 2<sup>57</sup>, fail the procedure.
+      2. Set `v` to `(v << 7) + (b & 127)`.
+4. Check if `min <= v <= max`. If this is not true, fail the procedure. Otherwise, the procedure succeeds.
+
+For example, the trust anchor range with a `base` of `32473.1`, a `min` of 10, and a `max` of 20 contains the following IDs:
+
+* `32473.1.10`
+* `32473.1.15`
+* `32473.1.20`
+
+It does not contain any of the following IDs:
+
+* `32473.1` (no component after `base`)
+* `32473.1.10.0` (extra components)
+* `32473.1.9` (last component out of range)
+* `32473.1.21` (last component out of range)
+* `32473.2.10` (not a child of `base`)
 
 ## Certificate Selection
 
