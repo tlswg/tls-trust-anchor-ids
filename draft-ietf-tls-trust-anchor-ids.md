@@ -319,7 +319,7 @@ This document extends TLS certificate selection ({{Section 4.5.1.2 of !RFC9846}}
 
 * If the ClientHello or CertificateRequest contains both `trust_anchors` and `certificate_authorities`, certification paths that satisfy either extension's criteria MAY be used. This additionally applies to future extensions which play a similar role.
 
-* If no certification paths satisfy either extension, the authenticating party MAY return a `handshake_failure` alert, or send some fallback certification path, without considering `trust_anchors` or `certificate_authorities`.
+* If no certification paths satisfy either extension, the authenticating party MAY return a `handshake_failure` alert, or send some fallback certificates, without considering `trust_anchors` or `certificate_authorities`.
 
 Sending a fallback allows the authenticating party to retain support for relying parties that do not implement any form of trust anchor negotiation. In this case, the authenticating party must find a sufficiently ubiquitous trust anchor, if one exists. However, only those relying parties need to be considered in this ubiquity determination. Updated relying parties may continue to evolve without restricting fallback certificate selection. {{trust-anchor-negotiation-property}} describes a RECOMMENDED mechanism for determining fallbacks.
 
