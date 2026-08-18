@@ -120,7 +120,7 @@ To address this, this document introduces Trust Anchor Identifiers (Trust Anchor
 
 2. {{tls-extension}} defines a TLS extension that communicates the relying party's requested trust anchors using trust anchor IDs. IDs that represent individual trust anchors can mitigate long X.509 names. IDs that represent groups of trust anchors can mitigate large trust anchor lists.
 
-3. {{selection-failure-recovery}} defines a recovery mechanism that, when the relying party is a TLS client, can mitigate signaling failures. The server provides its available trust anchors alongside its certificate, so that the client can retry on mismatch. This can further mitigate large trust anchor lists by allowing the client to initially omit some trust anchors or use an otherwise too broad trust anchor group. However, this mitigation can come at the cost of additional round trips in some cases.
+3. {{recovery}} defines a recovery mechanism that, when the relying party is a TLS client, can mitigate signaling failures. The server provides its available trust anchors alongside its certificate, so that the client can retry on mismatch. This can further mitigate large trust anchor lists by allowing the client to initially omit some trust anchors or use an otherwise too broad trust anchor group. However, this mitigation can come at the cost of additional round trips in some cases.
 
 Together, they reduce the size costs of trust anchor negotiation, supporting flexible and robust PKIs for more applications.
 
@@ -175,7 +175,7 @@ This document defines a mechanism to evaluate the first condition. In particular
 
 * How the relying party describes its supported trust anchors ({{relying-party-configuration}})
 * How the authenticating party interprets this description to inform certificate selection ({{authenticating-party-configuration}})
-* For server certificates, a recovery mechanism for signaling failure ({{selection-failure-recovery}})
+* For server certificates, a recovery mechanism for signaling failure ({{recovery}})
 
 # Trust Anchor Identifiers {#trust-anchor-ids}
 
@@ -222,7 +222,7 @@ When the `trust_anchors` extension is sent in ClientHello or CertificateRequest,
 
 When the `trust_anchors` extension is sent in Certificate, the `extension_data` MUST be empty. It indicates that the sender sent the certificate because the certificate matched a trust anchor ID sent by the peer. When used in this form, the extension MUST only be sent in the first CertificateEntry. It MUST NOT be sent in subsequent ones. {{strict-certification-paths}} describes this in detail.
 
-When the `trust_anchors` extension is sent in EncryptedExtensions, the `extension_data` is an AvailableTrustAnchorList. It indicates individual trust anchors for which the server has a candidate path, in order of most to least preferred by the server. This list MUST NOT be empty. If the server has no available trust anchors to present, it MUST omit the extension. {{selection-failure-recovery}} describes this in detail.
+When the `trust_anchors` extension is sent in EncryptedExtensions, the `extension_data` is an AvailableTrustAnchorList. It indicates individual trust anchors for which the server has a candidate path, in order of most to least preferred by the server. This list MUST NOT be empty. If the server has no available trust anchors to present, it MUST omit the extension. {{recovery}} describes this in detail.
 
 ## Relying Party Configuration
 
@@ -245,7 +245,7 @@ If the relying party is a client, it MAY omit trust anchors that it trusts, or s
 * The relying party MAY send a subset of its trust anchors due to fingerprinting risks (see {{privacy-considerations}}), or size concerns.
 * The relying party MAY send an empty list of trust anchors.
 
-However, it is then possible the server will select an untrusted certificate. Clients that signal extra trust anchors or omit ones SHOULD implement the recovery mechanism described in {{selection-failure-recovery}}. The associated IDs of individual trust anchors are used in recovery.
+However, it is then possible the server will select an untrusted certificate. Clients that signal extra trust anchors or omit ones SHOULD implement the recovery mechanism described in {{recovery}}. The associated IDs of individual trust anchors are used in recovery.
 
 ## Authenticating Party Configuration
 
@@ -323,7 +323,7 @@ This document extends TLS certificate selection ({{Section 4.5.1.2 of !RFC9846}}
 
 Sending a fallback allows the authenticating party to retain support for relying parties that do not implement any form of trust anchor negotiation. In this case, the authenticating party must find a sufficiently ubiquitous trust anchor, if one exists. However, only those relying parties need to be considered in this ubiquity determination. Updated relying parties may continue to evolve without restricting fallback certificate selection. {{trust-anchor-negotiation-property}} describes a RECOMMENDED mechanism for determining fallbacks.
 
-When the authenticating party is a server, {{selection-failure-recovery}} describes an additional requirement for servers that implement this protocol.
+When the authenticating party is a server, {{recovery}} describes an additional requirement for servers that implement this protocol.
 
 ## Strict Certification Paths
 
@@ -333,7 +333,7 @@ In this case, the `certificate_list` flexibility described in {{Section 4.5.1 of
 
 If a relying party receives this extension in the Certificate message, it MAY choose to disable path building {{!RFC4158}} and validate the peer's certificate list as a pre-built certification path. Doing so avoids the unpredictable behavior of path-building, and helps ensure CAs and authenticating parties do not inadvertently provision incorrect paths.
 
-## Selection Failure Recovery
+## Recovery
 
 If the relying party is a client, it MAY, as described in {{relying-party-configuration}}, request extra trust anchors or omit trusted ones. To accommodate this, this section defines a protocol for recovering from signaling failure in server certificate selection.
 
@@ -377,7 +377,7 @@ Different group definitions trade off size savings, applicability, and coordinat
 
 Conversely, a group that reflects a single relying party vendor can potentially be the only ID sent. However, it may be less generally usable when relying parties differ. Groups reflecting multiple relying party vendors are more broadly usable, but may need to be combined with other IDs in a given relying party. For example, a relying party might send a group containing established CAs common to its ecosystem, and individual IDs for its remaining, not yet as common CAs.
 
-A client relying party MAY send a group containing CAs it does not trust, however it SHOULD then be prepared to recover (see {{selection-failure-recovery}}) in case of signaling failure.
+A client relying party MAY send a group containing CAs it does not trust, however it SHOULD then be prepared to recover (see {{recovery}}) in case of signaling failure.
 
 The matching process described in {{authenticating-party-configuration}} can be implemented generically for any trust anchor group. This allows deployments to tailor their group allocation based on their needs, without requiring software updates in authenticating parties. Where feasible, deployments SHOULD use groups that are more broadly applicable and require lower coordination overhead.
 
@@ -403,7 +403,7 @@ This can be mitigated in one several ways:
 
 * If the authenticating party's preferences place the correct candidate path (issued by a newer trust anchor) ahead of misinterpreted one (issued by the removed trust anchor), the correct candidate will still be chosen.
 
-* When the relying party is a client, any remaining signaling errors can be corrected with the recovery mechanism described in {{selection-failure-recovery}}.
+* When the relying party is a client, any remaining signaling errors can be corrected with the recovery mechanism described in {{recovery}}.
 
 # Certificate Properties {#certificate-properties}
 
@@ -638,7 +638,7 @@ Additionally, a relying party that computes the `trust_anchors` extension based 
 
 ## Authenticating Parties
 
-If the authenticating party is a server, the `trust_anchors` extension in EncryptedExtensions enumerates the trust anchors for the server's available certification paths. (See {{selection-failure-recovery}}.) This assumes these trust anchors are not sensitive. Servers SHOULD NOT use this mechanism to negotiate certification paths with sensitive trust anchors.
+If the authenticating party is a server, the `trust_anchors` extension in EncryptedExtensions enumerates the trust anchors for the server's available certification paths. (See {{recovery}}.) This assumes these trust anchors are not sensitive. Servers SHOULD NOT use this mechanism to negotiate certification paths with sensitive trust anchors.
 
 In servers that host multiple services, this protocol only enumerates certification paths for the requested service. If, for example, a server uses the `server_name` extension to select services, this list is expected to be filtered by `server_name`. This ensures that co-located services are not revealed.
 
