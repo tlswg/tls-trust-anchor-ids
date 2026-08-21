@@ -197,6 +197,12 @@ A trust anchor ID representing a single trust anchor SHOULD be allocated by the 
 
 A trust anchor ID representing a trust anchor group MAY be allocated by any party. However, to be useful, the group requires agreement between relying parties and authenticating parties. {{trust-anchor-groups}} discusses defining trust anchor groups in more detail.
 
+When embedded in a TLS structure, a trust anchor ID uses the TrustAnchorID structure defined below. The contents of the TrustAnchorID, after the one-byte length prefix, are the binary representation of the trust anchor ID.
+
+~~~ tls-presentation
+opaque TrustAnchorID<1..2^8-1>;
+~~~
+
 # TLS Extension
 
 ## Extension Syntax
@@ -271,8 +277,6 @@ Authenticating parties MAY have candidate certification paths that do not partic
 A *trust anchor range* is a structure that represents a particular pattern of related IDs. It is defined by the following TLS structure:
 
 ~~~ tls-presentation
-opaque TrustAnchorID<1..2^8-1>;
-
 struct {
     TrustAnchorID base;
     uint64 min;
