@@ -46,6 +46,7 @@ author:
 normative:
   X680:
        title: "Information technology - Abstract Syntax Notation One (ASN.1): Specification of basic notation"
+       target: https://www.itu.int/rec/T-REC-X.680
        date: 2021
        author:
          org: ITU-T
@@ -53,7 +54,8 @@ normative:
          ISO/IEC: 8824-1:2021
 
   X690:
-       title: "Information technology - ASN.1 encoding Rules: Specification of Basic Encoding Rules (BER), Canonical Encoding Rules (CER) and Distinguished Encoding Rules (DER)"
+       title: "Information technology - ASN.1 encoding rules: Specification of Basic Encoding Rules (BER), Canonical Encoding Rules (CER) and Distinguished Encoding Rules (DER)"
+       target: https://www.itu.int/rec/T-REC-X.690
        date: 2021
        author:
          org: ITU-T
