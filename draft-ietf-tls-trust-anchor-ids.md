@@ -261,61 +261,87 @@ The authenticating party compares the requested trust anchor IDs with its candid
 
 * The trust anchor ID for the CA that issued this candidate path.
 
-* A (possibly empty) list of *trust anchor group inclusions*, which describe trust anchor groups known to contain the issuing CA.
+* The trust anchor groups known to contain the issuing CA. The CA can be contained in a family of related trust anchor groups, such as in {{versioned-groups}}. To accomodate this, the IDs of the containing groups are described with a list of *trust anchor ID patterns*, defined below in {{trust-anchor-id-patterns}}. Note these patterns specify the IDs of the groups, not their contents.
 
 {{certificate-properties}} defines a format to represent these properties. {{acme-extension}} defines how to obtain them from ACME {{!RFC8555}}.
-
-A CA can be contained in a family of related trust anchor groups, e.g. in the versioning construction described in {{versioned-groups}}. To accomodate this, each trust anchor group inclusion describes a pattern of containing groups using a trust anchor range, defined below in {{trust-anchor-ranges}}.
 
 The authenticating party intersects this information with the requested trust anchor IDs to determine if the relying party trusts the issuing CA. A candidate path is said to *match* the requested trust anchor IDs if either:
 
 * One of the requested trust anchor IDs is equal to the path's trust anchor ID.
-* One of the requested trust anchor IDs is contained in one of the path's trust anchor group inclusions.
+* One of the requested trust anchor IDs is contained in one of the path's trust anchor group patterns.
 
 Authenticating parties MAY have candidate certification paths that do not participate in this protocol and lack these properties. These paths MAY participate in other trust anchor negotiation protocols, such as the `certificate_authorities` extension, or they MAY be used as a fallback when no matching issuer is found.
 
-### Trust Anchor Ranges
+### Trust Anchor ID Patterns
 
-A *trust anchor range* is a structure that represents a particular pattern of related IDs. It is defined by the following TLS structure:
+A *trust anchor ID pattern* specifies a collection of related IDs. In this document, the IDs matched by a pattern are always the IDs of trust anchor groups. It is a sequence of pairs of non-negative 64-bit integers, `min` and `max`. A pattern is said to *contain* some trust anchor ID if both of the following are true:
 
-~~~ tls-presentation
-struct {
-    TrustAnchorID base;
-    uint64 min;
-    uint64 max;
-} TrustAnchorRange;
+1. The number of components of the trust anchor ID, as a relative OID, is equal to the number of pairs in the pattern.
+2. Each component of the trust anchor ID, as a relative OID, is between `min` and `max`, inclusive, of the corresponding pair in the pattern.
+
+A trust anchor ID pattern can be represented in text as follows:
+
+1. Represent each `min` and `max` pair as:
+   * if `min` equals `max`, `min` as a single decimal integer
+   * if `max` is not 2<sup>64</sup>-1, the concatenation of "{", `min` as a decimal integer, "-", `max` as a decimal integer, and "}"
+   * if `max` is 2<sup>64</sup>-1, the concatenation of "{", `min` as a decimal integer, and "-}"
+2. Concatenate the representations of each pair, separating each by ".".
+
+A trust anchor ID pattern is represented as a byte string by concatenating the `min` and `max` values of each pair, in order. Each value is encoded as described in paragraph 8.19.2 of {{X690}}. That is, each value is encoded in variable-length, big-endian, base-128 encoding. Each base-128 digit is in the seven least significant bits of each byte. The most significant bit of each byte is unset for the final byte and set for all other bytes. Values are encoded in the fewest number of non-zero bytes needed.
+
+Given this byte representation, the following two procedures can be used to check if an ID is contained in the pattern:
+
+To remove a base-128 integer from a byte string, `in`:
+
+1. Set `v` to zero.
+2. If the first byte of `in` is 0x80, fail the procedure. The value was not minimally-encoded.
+3. While `in` is not empty:
+   1. Remove the first byte `in`. Let `b` be the value removed.
+   2. If `v` is greater than or equal to 2<sup>57</sup>, fail the procedure. The value exceeds 2<sup>64</sup>-1.
+   3. Set `v` to `(v << 7) | (b & 127)`. That is, multiply `v` by 128 and add the seven least significant bits of `v`.
+   4. If the most significant bit of `b` is zero, exit the procedure and return `v`.
+4. Fail the procedure. The value was truncated.
+
+To check if a trust anchor ID pattern, `pattern`, contains a trust anchor ID `id`, both in their byte representations:
+
+1. While `pattern` is not empty:
+   1. Remove a base-128 integer from `pattern`. Let `min` be the value removed.
+   2. Remove a base-128 integer from `pattern`. Let `max` be the value removed.
+   3. Remove a base-128 integer from `id`. Let `v` be the value removed.
+   4. If any of the above subroutines fail, or if `v` is not between `min` and `max`, inclusive, fail the procedure.
+2. If `id` is not empty, fail the procedure. Otherwise, the procedure succeeds.
+
+
+For example, `32473.{123-456}.{789-}` is a pattern that matches three-component IDs, where the first component must be 32473, the second must be between 123 and 456, and the final component must be at least 789. The byte string representation is:
+
+~~~
+  // component[0].min = 32473
+  0x81, 0xfd, 0x59,
+  // component[0].max = 32473
+  0x81, 0xfd, 0x59,
+  // component[1].min = 123
+  0x7b,
+  // component[1].max = 456
+  0x83, 0x48,
+  // component[2].min = 789
+  0x86, 0x15,
+  // component[2].max = 2^64-1
+  0x81, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x7f,
 ~~~
 
-A trust anchor range is said to *contain* some trust anchor ID, `id`, if the `id`, as a relative OID, is the concatenation of `base` and some integer component between `min` and `max`, inclusive. `max` can be set to 2<sup>64</sup>-1 if there is no upper bound. `min` and `max` can be set to the same value to describe a single ID.
+It contains the following IDs:
 
-The following procedure can be used to perform this check. It succeeds if the range contains `id` and fails otherwise:
-
-1. Check that `base` does not end in the middle of an OID component. That is, check that the most-significant bit of the last byte of `base` is unset. If it is set, fail the procedure.
-2. Check that `base` is a prefix of `id`. If not, fail the procedure. Let `rest` be `id` with the `base` prefix removed.
-3. Decode `rest` as a minimally-encoded, big-endian, base-128 OID component as follows:
-   1. If `rest` is empty, fail the procedure.
-   2. If the most-significant bit of the last byte of `rest` is set, fail the procedure.
-   3. If the most-significant bit of any other byte of `rest` is unset, fail the procedure.
-   4. If the first byte of `rest` is 0x80, fail the procedure.
-   5. Set `v` to zero. Throughout this procedure, `v` will be less than 2<sup>64</sup>.
-   6. For each byte `b` of `rest`:
-      1. If `v` is greater than or equal to 2<sup>57</sup>, fail the procedure.
-      2. Set `v` to `(v << 7) + (b & 127)`.
-4. Check if `min <= v <= max`. If this is not true, fail the procedure. Otherwise, the procedure succeeds.
-
-For example, the trust anchor range with a `base` of `32473.1`, a `min` of 10, and a `max` of 20 contains the following IDs:
-
-* `32473.1.10`
-* `32473.1.15`
-* `32473.1.20`
+* `32473.123.789`
+* `32473.300.900`
+* `32473.456.99999`
 
 It does not contain any of the following IDs:
 
-* `32473.1` (no component after `base`)
-* `32473.1.10.0` (extra components)
-* `32473.1.9` (last component out of range)
-* `32473.1.21` (last component out of range)
-* `32473.2.10` (not a child of `base`)
+* `32473.123` (too few components)
+* `32473.123.789.0` (too many components)
+* `32474.123.789` (first component out of range)
+* `32473.500.789` (second component out of range)
+* `32473.123.700` (third component out of range)
 
 ## Certificate Selection
 
@@ -393,11 +419,11 @@ Over time, a group may become out-of-date, making it describe current relying pa
 
 A versioned sequence of trust anchor groups is identified by a OID arc. Each group has an ID of this OID arc, with a non-negative integer version number component appended. For example, versioned groups using the OID arc `32473.2` would have IDs `32473.2.0`, `32473.2.1`, `32473.2.2`, and so on. When defining a new group version, the version component is incremented.
 
-The trust anchor group inclusion for a candidate path is a trust anchor range ({{trust-anchor-ranges}}) determined as follows:
+Each candidate path is then configured with the versioned groups that contain it. These groups are described by a trust anchor ID pattern ({{trust-anchor-id-patterns}}) as follows:
 
-* At issuance, if the trust anchor is no longer in the latest group version, the range's `min` and `max` values are the first and last version that include the trust anchor, respectively.
-
-* At issuance, if the trust anchor is in the latest group version, the range's `min` value is the first version that includes the trust anchor, and its `max` value is 2<sup>64</sup>-1.
+1. Let `base` be the OID arc that identifies the sequence. Let `min` be the first version that includes the trust anchor.
+2. At issuance, if the trust anchor is no longer in the latest group version, let `max` be the last version that includes the trust anchor. The pattern is `base.{min-max}`.
+3. At issuance, if the trust anchor is in the latest group version, the pattern is `base.{min-}`. That is, the last component has a `max` of 2<sup>64</sup>-1.
 
 In the second case, the range contains not-yet-defined group versions, so there is a potential signaling error. Suppose, after issuance, a new group version is defined without the trust anchor. The unlimited upper bound is now incorrect. A relying party might not trust this trust anchor, while sending this new group version. However, the authenticating party will misinterpret the certificate as compatible based on its stale information. Such signaling errors may result in the wrong certificate being selected.
 
@@ -422,7 +448,7 @@ A CertificatePropertyList is defined using the TLS presentation language ({{Sect
 ~~~ tls-presentation
 enum {
     trust_anchor_id(0),
-    trust_anchor_group_inclusions(1),
+    trust_anchor_groups(1),
     trust_anchor_negotiation(2),
     (2^16-1)
 } CertificatePropertyType;
@@ -440,21 +466,23 @@ The entries in a CertificatePropertyList MUST be sorted numerically by `type` an
 This document defines three properties:
 
 * `trust_anchor_id`, defined in {{trust-anchor-id-property}}
-* `trust_anchor_group_inclusions`, defined in {{trust-anchor-group-inclusions-property}}
+* `trust_anchor_groups`, defined in {{trust-anchor-groups-property}}
 * `trust_anchor_negotiation`, defined in {{trust-anchor-negotiation-property}}
 
 Future documents MAY define other properties for use with other mechanisms. Such a document MUST define the format of the `data` field and how authenticating parties interpret the property. Authenticating parties MUST ignore properties with unrecognized CertificatePropertyType values.
 
 ## Trust Anchor ID Property
 
-The `trust_anchor_id` property's `data` field contains the binary representation of the trust anchor ID of the certification path's trust anchor, as described in {{authenticating-party-configuration}}.
+The `trust_anchor_id` property's `data` field contains the binary representation of the trust anchor ID of the certification path's trust anchor, as described in {{authenticating-party-configuration}}. The binary representation is encoded directly into the `data` field with no additional length prefix.
 
-## Trust Anchor Group Inclusions Property
+## Trust Anchor Groups Property
 
-The `trust_anchor_group_inclusions` property's `data` field contains a TrustAnchorRangeList structure, defined below. The TrustAnchorRangeList structure describes the certification path's trust anchor group inclusions, as described in {{authenticating-party-configuration}}. Each TrustAnchorRange structure describes a trust anchor range, as defined in {{trust-anchor-ranges}}.
+The `trust_anchor_groups` property's `data` field contains a TrustAnchorIDPatternList structure, defined below. Its value is the certification path's trust anchor group patterns, as described in {{authenticating-party-configuration}} and {{trust-anchor-id-patterns}}.
 
 ~~~ tls-presentation
-TrustAnchorRange TrustAnchorRangeList<1..2^16-1>;
+opaque TrustAnchorIDPattern<0..2^8-1>;
+
+TrustAnchorIDPattern TrustAnchorIDPatternList<1..2^16-1>;
 ~~~
 
 ## Trust Anchor Negotiation Property
@@ -463,7 +491,7 @@ The `trust_anchor_negotiation` property's `data` field MUST be empty.
 
 When a candidate certification path has this property, the authenticating party SHOULD NOT select it as a fallback when the path's issuer cannot be matched against the relying party. When a candidate path lacks this property, the authenticating party MAY use it as a fallback. See also {{certificate-selection}}.
 
-A path without the `trust_anchor_negotiation` property MAY still participate in this protocol and include the `trust_anchor_id` and `trust_anchor_group_inclusions` properties. In particular, the authenticating party MAY still choose to condition the path on trust anchor negotiation.
+A path without the `trust_anchor_negotiation` property MAY still participate in this protocol and include the `trust_anchor_id` and `trust_anchor_groups` properties. In particular, the authenticating party MAY still choose to condition the path on trust anchor negotiation.
 
 {{acme-extension}} discusses how an ACME server might set this property, as well as examples where the authenticating party might override this recommendation.
 
@@ -489,15 +517,15 @@ Certificates are encoded as in {{Section 5.1 of !RFC7468}}, except DER {{X690}} 
 The following is an example file with a certification path containing an end-entity certificate and an intermediate certificate. The example CertificatePropertyList encodes:
 
 * A `trust_anchor_id` property of `32473.1`
-* A `trust_anchor_group_inclusions` property with two group inclusions:
-  * `2187.2.100` to `2187.2.200`
-  * `32473.3.42` to `32473.3.MAX`
+* A `trust_anchor_groups` property with two patterns:
+  * `2187.2.{100-200}`
+  * `32473.3.{42-}.{100-200}`
 * A `trust_anchor_negotiation` property
 
 ~~~
 -----BEGIN CERTIFICATE PROPERTIES-----
-ADsAAAAEgf1ZAQABACsAKQORCwIAAAAAAAAAZAAAAAAAAADIBIH9WQMAAAAAAAAA
-Kv//////////AAIAAA==
+ADMAAAAEgf1ZAQABACMAIQmRC5ELAgJkgUgWgf1Zgf1ZAwMqgf//////////f2SB
+SAACAAA=
 -----END CERTIFICATE PROPERTIES-----
 -----BEGIN CERTIFICATE-----
 MIIBVzCB/6ADAgECAgkAh7Uv5X8pplkwCgYIKoZIzj0EAwIwGjEYMBYGA1UEAwwP
@@ -524,7 +552,7 @@ The IANA registration for this media type is described in {{media-type-updates}}
 
 ## ACME Extension
 
-The format defined in {{media-type}} can be used with ACME's alternate format mechanism (see {{Section 7.4.2 of !RFC8555}}) as follows. When downloading certificates, a supporting client SHOULD include "application/pem-certificate-chain-with-properties" in its HTTP Accept header ({{Section 12.5.1 of !RFC9110}}). When a supporting server sees such a header, it MAY then respond with that format to include a CertificatePropertyList with the certification path. This CertificatePropertyList MAY include `trust_anchor_id` and `trust_anchor_group_inclusions` properties for use with this protocol, or other properties defined in another document.
+The format defined in {{media-type}} can be used with ACME's alternate format mechanism (see {{Section 7.4.2 of !RFC8555}}) as follows. When downloading certificates, a supporting client SHOULD include "application/pem-certificate-chain-with-properties" in its HTTP Accept header ({{Section 12.5.1 of !RFC9110}}). When a supporting server sees such a header, it MAY then respond with that format to include a CertificatePropertyList with the certification path. This CertificatePropertyList MAY include `trust_anchor_id` and `trust_anchor_groups` properties for use with this protocol, or other properties defined in another document.
 
 When the ACME server provides multiple paths, e.g. with ACME's alternate certificate chain mechanism (see {{Section 7.4.2 of !RFC8555}}), the ACME server SHOULD include the `trust_anchor_negotiation` property on any paths it expects to gate on trust anchor negotiation. It SHOULD omit the property on any paths which are possible fallbacks when no trust anchors match.
 
@@ -758,11 +786,11 @@ Change controller:
 
 IANA is requested to create the "CertificatePropertyType" registry within the "Transport Layer Security (TLS) Extensions" group. The initial entries in the registry are as follows:
 
-| Decimal | Description                   | References |
-|---------|-------------------------------|------------|
-| 0       | trust_anchor_id               | [this-RFC] |
-| 1       | trust_anchor_group_inclusions | [this-RFC] |
-| 2       | trust_anchor_negotiation      | [this-RFC] |
+| Decimal | Description              | References |
+|---------|--------------------------|------------|
+| 0       | trust_anchor_id          | [this-RFC] |
+| 1       | trust_anchor_groups      | [this-RFC] |
+| 2       | trust_anchor_negotiation | [this-RFC] |
 
 New values are allocated according to the following process:
 
