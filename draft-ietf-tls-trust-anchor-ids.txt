@@ -5,12 +5,12 @@
 Transport Layer Security                                         B. Beck
 Internet-Draft                                                   OpenSSL
 Intended status: Standards Track                             D. Benjamin
-Expires: 15 February 2027                                     Google LLC
+Expires: 5 March 2027                                         Google LLC
                                                               D. O'Brien
                                                                         
                                                               K. Nekritz
                                                                     Meta
-                                                          14 August 2026
+                                                        1 September 2026
 
 
                       TLS Trust Anchor Identifiers
@@ -56,7 +56,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 15 February 2027.
+   This Internet-Draft will expire on 5 March 2027.
 
 Copyright Notice
 
@@ -1447,12 +1447,14 @@ Table of Contents
 
    [X680]     ITU-T, "Information technology - Abstract Syntax Notation
               One (ASN.1): Specification of basic notation", ISO/
-              IEC 8824-1:2021, 2021.
+              IEC 8824-1:2021, 2021,
+              <https://www.itu.int/rec/T-REC-X.680>.
 
-   [X690]     ITU-T, "Information technology - ASN.1 encoding Rules:
+   [X690]     ITU-T, "Information technology - ASN.1 encoding rules:
               Specification of Basic Encoding Rules (BER), Canonical
               Encoding Rules (CER) and Distinguished Encoding Rules
-              (DER)", ISO/IEC 8825-1:2021, 2021.
+              (DER)", ISO/IEC 8825-1:2021, 2021,
+              <https://www.itu.int/rec/T-REC-X.690>.
 
 11.2.  Informative References
 
