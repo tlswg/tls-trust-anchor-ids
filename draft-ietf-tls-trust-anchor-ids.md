@@ -333,7 +333,7 @@ When the authenticating party is a server, {{recovery}} describes an additional 
 
 If, and only if, the authenticating party sends a certification path that matches the relying party's `trust_anchors` extension, the authenticating party MUST send an empty `trust_anchors` extension in the first CertificateEntry of the Certificate message.
 
-In this case, the `certificate_list` flexibility described in {{Section 4.5.1 of !RFC9846}} no longer applies. The `certificate_list` MUST contain a complete certification path, issued by the matching trust anchor, correctly ordered and with no extraneous certificates. That is, each certificate MUST certify the one immediately preceding it, and the trust anchor MUST certify the final certificate. The authenticating party MUST NOT send the `trust_anchors` extension in the Certificate message in other situations.
+In this case, the `certificate_list` flexibility described in {{Section 4.5.1 of !RFC9846}} no longer applies. The `certificate_list` MUST contain a complete certification path, correctly ordered and with no extraneous certificates. That is, each certificate MUST certify the one immediately preceding it, and the path's trust anchor MUST certify the final certificate.
 
 If a relying party receives this extension in the Certificate message, it MAY choose to disable path building {{!RFC4158}} and validate the peer's certificate list as a pre-built certification path. Doing so avoids the unpredictable behavior of path-building, and helps ensure CAs and authenticating parties do not inadvertently provision incorrect paths.
 
