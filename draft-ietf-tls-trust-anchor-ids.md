@@ -226,7 +226,7 @@ A TrustAnchorID structure contains the binary representation of some trust ancho
 
 When the `trust_anchors` extension is sent in ClientHello or CertificateRequest, the `extension_data` is a RequestedTrustAnchorList. It indicates that the sender supports the specified trust anchors or trust anchor groups. The list is unordered, and MAY be empty. {{relying-party-configuration}} describes how the relying party determines this value. {{authenticating-party-configuration}} describes how the authenticating party evaluates this value.
 
-When the `trust_anchors` extension is sent in Certificate, the `extension_data` MUST be empty. It indicates that the sender sent the certificate because the certificate matched a trust anchor ID sent by the peer. When used in this form, the extension MUST only be sent in the first CertificateEntry. It MUST NOT be sent in subsequent ones. {{strict-certification-paths}} describes this in detail.
+When the `trust_anchors` extension is sent in Certificate, the `extension_data` MUST be empty. The extension MUST only be sent in the first CertificateEntry. It indicates that the sender sent the certificate because the certificate matched a trust anchor ID sent by the peer. {{strict-certification-paths}} describes this in detail.
 
 When the `trust_anchors` extension is sent in EncryptedExtensions, the `extension_data` is an AvailableTrustAnchorList. It indicates individual trust anchors for which the server has a candidate path, in order of most to least preferred by the server. This list MUST NOT be empty. If the server has no available trust anchors to present, it MUST omit the extension. {{recovery}} describes this in detail.
 
@@ -243,15 +243,15 @@ Relying parties MAY support trust anchors without associated trust anchor IDs, b
 
 In a TLS connection, the relying party sends its requested trust anchor IDs in the ClientHello message (if a client) or CertificateRequest message (if a server). This communicates a set of supported trust anchors to the authenticating party.
 
-The requested trust anchor IDs MAY be determined by collecting the IDs of each participating trust anchor. Alternatively, a relying party MAY configure a requested list of IDs for individual trust anchors and IDs for trust anchor groups. Using groups can further reduce the size of messages sent by the relying party, but requires that authenticating parties be configured to recognize them. See also {{authenticating-party-configuration}}.
+The requested trust anchor IDs MAY be determined by collecting the associated IDs of each supported trust anchor. Alternatively, a relying party MAY configure a requested list of IDs for individual trust anchors and IDs for trust anchor groups. Using groups can further reduce the size of messages sent by the relying party, but requires that authenticating parties be configured to recognize them. See also {{authenticating-party-configuration}}.
 
-If the relying party is a client, it MAY omit trust anchors that it trusts, or signal trust anchors which it does not trust. For example:
+If the relying party is a client, it is not necessary for the requested trust anchor IDs to be fully accurate. A client MAY omit trust anchors that it trusts or signal trust anchors which it does not trust. This can be useful in several scenarios:
 
-* The relying party MAY try to reduce size with a common trust anchor group, but the group contains some untrusted trust anchors.
-* The relying party MAY send a subset of its trust anchors due to fingerprinting risks (see {{privacy-considerations}}), or size concerns.
-* The relying party MAY send an empty list of trust anchors.
+* The client MAY try to reduce size with a common trust anchor group, but the group contains some untrusted trust anchors. Sending the group would signal the full contents of the group.
+* The client MAY send a (possibly empty) subset of its trust anchors due to fingerprinting risks (see {{privacy-considerations}}) or size concerns.
+* The client MAY send trust anchors it does not trust. This can reduce fingerprinting if, e.g., default instances of the client send this value, but an individual user has configured their software to distrust the CA.
 
-However, it is then possible the server will select an untrusted certificate. Clients that signal extra trust anchors or omit ones SHOULD implement the recovery mechanism described in {{recovery}}. The associated IDs of individual trust anchors are used in recovery.
+If the client list is inaccurate, it is possible the server will select an untrusted certificate. The connection will then fail. Clients that send potentially inaccurate lists SHOULD implement the recovery mechanism described in {{recovery}}. The associated IDs of individual trust anchors are used in recovery. Recovery requires a round-trip, so clients SHOULD send as accurate a list as feasible.
 
 ## Authenticating Party Configuration
 
@@ -259,11 +259,11 @@ The authenticating party compares the requested trust anchor IDs with its candid
 
 * The trust anchor ID for the CA that issued this candidate path.
 
-* A (possibly empty) list of *trust anchor group inclusions*, which describe trust anchor group known to contain the issuing CA.
-
-A CA can be contained in family of related trust anchor groups, e.g. in the versioning construction described in {{versioned-groups}}. To accomodate this, each trust anchor group inclusion describes a pattern of containing groups using a trust anchor range, defined below in {{trust-anchor-ranges}}.
+* A (possibly empty) list of *trust anchor group inclusions*, which describe trust anchor groups known to contain the issuing CA.
 
 {{certificate-properties}} defines a format to represent these properties. {{acme-extension}} defines how to obtain them from ACME {{!RFC8555}}.
+
+A CA can be contained in a family of related trust anchor groups, e.g. in the versioning construction described in {{versioned-groups}}. To accomodate this, each trust anchor group inclusion describes a pattern of containing groups using a trust anchor range, defined below in {{trust-anchor-ranges}}.
 
 The authenticating party intersects this information with the requested trust anchor IDs to determine if the relying party trusts the issuing CA. A candidate path is said to *match* the requested trust anchor IDs if either:
 
@@ -319,11 +319,11 @@ It does not contain any of the following IDs:
 
 This document extends TLS certificate selection ({{Section 4.5.1.2 of !RFC9846}}) as follows:
 
-* If the ClientHello or CertificateRequest contains a `trust_anchors` extension, the authenticating party SHOULD send a certification path that matches the requested trust anchor IDs, as described in {{authenticating-party-configuration}}. If it does so, the authenticating party MUST additionally send an empty `trust_anchors` extension in the first CertificateEntry of the Certificate message. See {{strict-certification-paths}} for further discussion.
+* If the ClientHello or CertificateRequest contains a `trust_anchors` extension, the authenticating party SHOULD send a certification path that matches the requested trust anchor IDs, as described in {{authenticating-party-configuration}}. See {{strict-certification-paths}} for additional requirements in this case.
 
 * If the ClientHello or CertificateRequest contains both `trust_anchors` and `certificate_authorities`, certification paths that satisfy either extension's criteria MAY be used. This additionally applies to future extensions which play a similar role.
 
-* If no certification paths satisfy either extension, the authenticating party MAY return a `handshake_failure` alert, or send some fallback certificates, without considering `trust_anchors` or `certificate_authorities`.
+* If no certification paths satisfy either extension, the authenticating party MAY return a `handshake_failure` alert, or send some fallback certificate, without considering `trust_anchors` or `certificate_authorities`.
 
 Sending a fallback allows the authenticating party to retain support for relying parties that do not implement any form of trust anchor negotiation. In this case, the authenticating party must find a sufficiently ubiquitous trust anchor, if one exists. However, only those relying parties need to be considered in this ubiquity determination. Updated relying parties may continue to evolve without restricting fallback certificate selection. {{trust-anchor-negotiation-property}} describes a RECOMMENDED mechanism for determining fallbacks.
 
