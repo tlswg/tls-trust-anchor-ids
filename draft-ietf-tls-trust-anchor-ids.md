@@ -808,4 +808,4 @@ New values are allocated according to the following process:
 # Acknowledgements
 {:numbered="false"}
 
-The authors thank Nick Harper, and Emily Stark for many valuable discussions and insights which led to this document. Thanks also to Aaron Gable for providing feedback on ACME extensions.
+The authors thank Nick Harper, Ilari Liusvaara, and Emily Stark for many valuable discussions and insights which led to this document. Thanks also to Aaron Gable for providing feedback on ACME extensions.
