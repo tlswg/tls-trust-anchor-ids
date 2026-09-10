@@ -274,43 +274,50 @@ Authenticating parties MAY have candidate certification paths that do not partic
 
 ### Trust Anchor ID Patterns
 
-A *trust anchor ID pattern* specifies a collection of related IDs. In this document, the IDs matched by a pattern are always the IDs of trust anchor groups. It is a sequence of pairs of non-negative 64-bit integers, `min` and `max`. A pattern is said to *contain* some trust anchor ID if both of the following are true:
+A *trust anchor ID pattern* specifies a collection of related IDs. In this document, the IDs matched by a pattern are always the IDs of trust anchor groups. It is a sequence of pairs `min` and `max`. `min` is a non-negative integer and `max` is either a non-negative integer or infinity. A pattern is said to *contain* some trust anchor ID if both of the following are true:
 
 1. The number of components of the trust anchor ID, as a relative OID, is equal to the number of pairs in the pattern.
 2. Each component of the trust anchor ID, as a relative OID, is between `min` and `max`, inclusive, of the corresponding pair in the pattern.
+
+A trust anchor ID pattern is represented as a byte string by concatenating the `min` and `max` values of each pair, in order. Each `min` or `max` value is encoded as follows:
+
+* Infinity is encoded as a single byte, 0x80.
+
+* A non-negative integer is encoded as described in paragraph 8.19.2 of {{X690}}. That is, each value is encoded in variable-length, big-endian, base-128 encoding. Each base-128 digit is in the seven least significant bits of each byte. The most significant bit of each byte is unset for the final byte and set for all other bytes. Values are encoded in the fewest number of non-zero bytes needed.
 
 A trust anchor ID pattern can be represented in text as follows:
 
 1. Represent each `min` and `max` pair as:
    * if `min` equals `max`, `min` as a single decimal integer
-   * if `max` is not 2<sup>64</sup>-1, the concatenation of "{", `min` as a decimal integer, "-", `max` as a decimal integer, and "}"
-   * if `max` is 2<sup>64</sup>-1, the concatenation of "{", `min` as a decimal integer, and "-}"
+   * if `max` is not infinity, the concatenation of "{", `min` as a decimal integer, "-", `max` as a decimal integer, and "}"
+   * if `max` is infinity, the concatenation of "{", `min` as a decimal integer, and "-}"
 2. Concatenate the representations of each pair, separating each by ".".
 
-A trust anchor ID pattern is represented as a byte string by concatenating the `min` and `max` values of each pair, in order. Each value is encoded as described in paragraph 8.19.2 of {{X690}}. That is, each value is encoded in variable-length, big-endian, base-128 encoding. Each base-128 digit is in the seven least significant bits of each byte. The most significant bit of each byte is unset for the final byte and set for all other bytes. Values are encoded in the fewest number of non-zero bytes needed.
+The byte string representation of an OID component is order-preserving by length and then lexicographic comparison, so the following procedures can be used to check if an ID is contained in the pattern:
 
-Given this byte representation, the following two procedures can be used to check if an ID is contained in the pattern:
+To remove an encoded base-128 integer from a byte string, `in`:
 
-To remove a base-128 integer from a byte string, `in`:
+1. If `in` is empty, fail the procedure. There are no more values in `in`.
+2. If the first byte of `in` is 0x80, fail the procedure. The value was not minimally encoded.
+3. Find the earliest byte of `in` whose most-significant bit is unuset.
+4. If not found, fail the procedure. The value was truncated.
+5. Remove and return the prefix of `in` which ends at the found byte.
 
-1. Set `v` to zero.
-2. If the first byte of `in` is 0x80, fail the procedure. The value was not minimally-encoded.
-3. While `in` is not empty:
-   1. Remove the first byte `in`. Let `b` be the value removed.
-   2. If `v` is greater than or equal to 2<sup>57</sup>, fail the procedure. The value exceeds 2<sup>64</sup>-1.
-   3. Set `v` to `(v << 7) | (b & 127)`. That is, multiply `v` by 128 and add the seven least significant bits of `v`.
-   4. If the most significant bit of `b` is zero, exit the procedure and return `v`.
-4. Fail the procedure. The value was truncated.
+To compare two encoded base-128 integers, `a` and `b`:
+
+1. Compare `a`'s length to `b`'s length. If they are not equal, return the result of the comparison.
+2. Return the result of lexicographically comparing `a` and `b`. Bytes in `a` and `b` are intepreted as integers from 0 to 255.
 
 To check if a trust anchor ID pattern, `pattern`, contains a trust anchor ID `id`, both in their byte representations:
 
-1. While `pattern` is not empty:
-   1. Remove a base-128 integer from `pattern`. Let `min` be the value removed.
-   2. Remove a base-128 integer from `pattern`. Let `max` be the value removed.
-   3. Remove a base-128 integer from `id`. Let `v` be the value removed.
-   4. If any of the above subroutines fail, or if `v` is not between `min` and `max`, inclusive, fail the procedure.
-2. If `id` is not empty, fail the procedure. Otherwise, the procedure succeeds.
-
+1. While `id` is not empty:
+   1. Remove an encoded base-128 integer from `id`. Let `v` be the value removed.
+   2. Remove an encoded base-128 integer from `pattern`. Let `min` be the value removed.
+   3. Compare `v` and `min` as described above. If `v` is less than `min`, fail the procedure.
+   4. If `pattern` is not empty and the next byte of `pattern` is 0x80, remove this byte and continue to the next loop iteration.
+   5. Otherwise, remove an encoded base-128 integer from `pattern`. Let `max` be the value removed.
+   6. Compare `max` and `v` as described above. If `max` is less than `v`, fail the procedure.
+2. If `pattern` is not empty, fail the procedure. Otherwise, the procedure succeeds.
 
 For example, `32473.{123-456}.{789-}` is a pattern that matches three-component IDs, where the first component must be 32473, the second must be between 123 and 456, and the final component must be at least 789. The byte string representation is:
 
@@ -325,8 +332,8 @@ For example, `32473.{123-456}.{789-}` is a pattern that matches three-component 
   0x83, 0x48,
   // component[2].min = 789
   0x86, 0x15,
-  // component[2].max = 2^64-1
-  0x81, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x7f,
+  // component[2].max = infinity
+  0x80,
 ~~~
 
 It contains the following IDs:
@@ -524,8 +531,7 @@ The following is an example file with a certification path containing an end-ent
 
 ~~~
 -----BEGIN CERTIFICATE PROPERTIES-----
-ADMAAAAEgf1ZAQABACMAIQmRC5ELAgJkgUgWgf1Zgf1ZAwMqgf//////////f2SB
-SAACAAA=
+ACoAAAAEgf1ZAQABABoAGAmRC5ELAgJkgUgNgf1Zgf1ZAwMqgGSBSAACAAA=
 -----END CERTIFICATE PROPERTIES-----
 -----BEGIN CERTIFICATE-----
 MIIBVzCB/6ADAgECAgkAh7Uv5X8pplkwCgYIKoZIzj0EAwIwGjEYMBYGA1UEAwwP

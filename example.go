@@ -5,7 +5,6 @@ package main
 import (
 	"encoding/pem"
 	"fmt"
-	"math"
 	"os"
 	"strings"
 
@@ -57,7 +56,8 @@ func addTrustAnchorID(out *cryptobyte.Builder, id TrustAnchorID) {
 }
 
 type ComponentRange struct {
-	Min, Max uint64
+	Min, Max      uint64
+	MaxIsInfinity bool
 }
 
 type TrustAnchorIDPattern []ComponentRange
@@ -68,10 +68,10 @@ func (p TrustAnchorIDPattern) String() string {
 		if i != 0 {
 			b.WriteByte('.')
 		}
-		if c.Min == c.Max {
-			fmt.Fprintf(&b, "%d", c.Min)
-		} else if c.Max == math.MaxUint64 {
+		if c.MaxIsInfinity {
 			fmt.Fprintf(&b, "{%d-}", c.Min)
+		} else if c.Min == c.Max {
+			fmt.Fprintf(&b, "%d", c.Min)
 		} else {
 			fmt.Fprintf(&b, "{%d-%d}", c.Min, c.Max)
 		}
@@ -82,7 +82,11 @@ func (p TrustAnchorIDPattern) String() string {
 func addTrustAnchorIDPattern(out *cryptobyte.Builder, pattern TrustAnchorIDPattern) {
 	for _, r := range pattern {
 		addBase128(out, r.Min)
-		addBase128(out, r.Max)
+		if r.MaxIsInfinity {
+			out.AddUint8(0x80)
+		} else {
+			addBase128(out, r.Max)
+		}
 	}
 }
 
@@ -133,7 +137,7 @@ func main() {
 		TrustAnchorID: []uint64{32473, 1},
 		TrustAnchorGroups: []TrustAnchorIDPattern{
 			{{Min: 2187, Max: 2187}, {Min: 2, Max: 2}, {Min: 100, Max: 200}},
-			{{Min: 32473, Max: 32473}, {Min: 3, Max: 3}, {Min: 42, Max: math.MaxUint64}, {Min: 100, Max: 200}},
+			{{Min: 32473, Max: 32473}, {Min: 3, Max: 3}, {Min: 42, MaxIsInfinity: true}, {Min: 100, Max: 200}},
 		},
 		TrustAnchorNegotiation: true,
 	}
