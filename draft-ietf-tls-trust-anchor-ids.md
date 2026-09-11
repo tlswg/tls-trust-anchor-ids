@@ -502,20 +502,18 @@ A path without the `trust_anchor_negotiation` property MAY still participate in 
 
 {{acme-extension}} discusses how an ACME server might set this property, as well as examples where the authenticating party might override this recommendation.
 
-## Media Type
+## PEM Representation
 
-A certification path with its associated CertificatePropertyList may be represented in a PEM {{!RFC7468}} structure in a file of type "application/pem-certificate-chain-with-properties". Files of this type MUST use the strict encoding and MUST NOT include explanatory text.  The ABNF {{!RFC5234}} for this format is
-as follows, where "stricttextualmsg" and "eol" are as defined in
-{{Section 3 of !RFC7468}}:
+A certification path with its associated CertificatePropertyList may be represented in a PEM {{!RFC7468}} structure in a file of type "application/pem-certificate-chain-with-properties". Files of this type MUST use the strict encoding and MUST NOT include explanatory text. The ABNF {{!RFC5234}} for this format is as follows, where "stricttextualmsg" is as defined in {{Section 3 of !RFC7468}}:
 
 ~~~ abnf
-certchainwithproperties = stricttextualmsg eol stricttextualmsg
-                          *(eol stricttextualmsg)
+certchainwithproperties = stricttextualmsg stricttextualmsg
+                          *(stricttextualmsg)
 ~~~
 
 The first element MUST be the encoded CertificatePropertyList.
-The second element MUST be an end-entity certificate. Each following
-certificate MUST directly certify the one preceding it. The certificate representing the trust anchor MUST be omitted from the path.
+The second element MUST be an end-entity certificate. Each following element
+MUST contain a certificate that directly certifies the one preceding it. The certificate representing the trust anchor MUST be omitted from the path.
 
 CertificatePropertyLists are encoded using the "CERTIFICATE PROPERTIES" label. The encoded data is a serialized CertificatePropertyList, defined in {{certificate-properties}}.
 
@@ -558,7 +556,7 @@ The IANA registration for this media type is described in {{media-type-updates}}
 
 ## ACME Extension
 
-The format defined in {{media-type}} can be used with ACME's alternate format mechanism (see {{Section 7.4.2 of !RFC8555}}) as follows. When downloading certificates, a supporting client SHOULD include "application/pem-certificate-chain-with-properties" in its HTTP Accept header ({{Section 12.5.1 of !RFC9110}}). When a supporting server sees such a header, it MAY then respond with that format to include a CertificatePropertyList with the certification path. This CertificatePropertyList MAY include `trust_anchor_id` and `trust_anchor_groups` properties for use with this protocol, or other properties defined in another document.
+The format defined in {{pem-representation}} can be used with ACME's alternate format mechanism (see {{Section 7.4.2 of !RFC8555}}) as follows. When downloading certificates, a supporting client SHOULD include "application/pem-certificate-chain-with-properties" in its HTTP Accept header ({{Section 12.5.1 of !RFC9110}}). When a supporting server sees such a header, it MAY then respond with that format to include a CertificatePropertyList with the certification path. This CertificatePropertyList MAY include `trust_anchor_id` and `trust_anchor_groups` properties for use with this protocol, or other properties defined in another document.
 
 When the ACME server provides multiple paths, e.g. with ACME's alternate certificate chain mechanism (see {{Section 7.4.2 of !RFC8555}}), the ACME server SHOULD include the `trust_anchor_negotiation` property on any paths it expects to gate on trust anchor negotiation. It SHOULD omit the property on any paths which are possible fallbacks when no trust anchors match.
 
@@ -760,7 +758,7 @@ Interoperability considerations:
 : None
 
 Published specification:
-: [this-RFC, {{media-type}}]
+: [this-RFC, {{pem-representation}}]
 
 Applications that use this media type:
 : ACME clients and servers, HTTP servers, other applications that need to be configured with a certificate chain
