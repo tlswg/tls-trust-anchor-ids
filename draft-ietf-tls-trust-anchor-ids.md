@@ -584,6 +584,84 @@ All paths include `trust_anchor_id` properties describing their corresponding is
 
 For other connections, the TLS software needs to determine fallback paths. Although both 1B and 2B lack the `trust_anchor_negotiation` property, the authenticating party knows that CA2 is more ubiquitously trusted among its supported relying parties than CA1. It configures its TLS software to use CA2 as the source of the fallback path, and so only path 2B will be used as fallback.
 
+## Representing Multiple Paths
+
+While ACME represents each certification path separately, applications might combine multiple certification paths in one file as part of local configuration. For example:
+
+* An ACME client might serialize all paths returned from a single order in a file. The TLS server might then be configured to load certificates from the files from each order.
+
+* An deployment might combine the paths from all ACME orders in a single file. The TLS server might then be configured to load its full certificate configuration from the file.
+
+This section extends the PEM representation defined in {{media-type}} for such cases.
+
+A list of certification paths is represented in PEM for by concatenating their corresponding PEM representations. Paths are encoded in order of preference, with the most preferred encoded first. Each path MUST begin with a CertificatePropertyList, which signals a new path to the decoder. If the path has no properties configured, the corresponding PEM-encoded CertificatePropertyList is as follows:
+
+~~~
+-----BEGIN CERTIFICATE PROPERTIES-----
+AAA=
+-----END CERTIFICATE PROPERTIES-----
+~~~
+
+This format does not directly represent private keys. However, applications MAY combine this format with private keys in one of several ways:
+
+* If the application represent paths with the same private key, it can associate all decoded paths with the corresponding private key.
+
+* If the application represent paths with different private keys, it can first load all available private keys, then match each decoded path with the private key that matches the end-entity certificate's subjectPublicKeyInfo.
+
+* If the application wishes to store paths and private keys in the same file, it can prepend available private keys using the formats defined in {{Section 10 and Section 11 of !RFC7468}}. The decoder then first decodes private keys, then decodes paths as described above.
+
+The following example file contains two certification paths:
+
+~~~
+-----BEGIN CERTIFICATE PROPERTIES-----
+ACoAAAAEgf1ZAQABABoAGAmRC5ELAgJkgUgNgf1Zgf1ZAwMqgGSBSAACAAA=
+-----END CERTIFICATE PROPERTIES-----
+-----BEGIN CERTIFICATE-----
+MIIBVzCB/6ADAgECAgkAh7Uv5X8pplkwCgYIKoZIzj0EAwIwGjEYMBYGA1UEAwwP
+SW50ZXJtZWRpYXRlIENBMB4XDTI2MDUwNTIxMzg1NVoXDTI3MDUwNTIxMzg1NVow
+FjEUMBIGA1UEAwwLZXhhbXBsZS5jb20wWTATBgcqhkjOPQIBBggqhkjOPQMBBwNC
+AAT5mg5z0464cE7rtEpTeSPFNlRUBjxqycdb4rvNkG3Fbd1R2IRo7zYOi5SP3S7L
+C4r5Hw+IiDq5X2nQT1w5ympeozIwMDAJBgNVHRMEAjAAMAsGA1UdDwQEAwIHgDAW
+BgNVHREEDzANggtleGFtcGxlLmNvbTAKBggqhkjOPQQDAgNHADBEAiBRdPrVpQtJ
+s+J9DFhT1Db6QmIZFfjFFKQ88B0gFezyfAIgSwIxntwrPFYagfK6vPcRpDxG2oLV
+LkfnP5v1SPjOsMY=
+-----END CERTIFICATE-----
+-----BEGIN CERTIFICATE-----
+MIIBRTCB7KADAgECAgkAkaBeQj6ZErAwCgYIKoZIzj0EAwIwEjEQMA4GA1UEAwwH
+Um9vdCBDQTAeFw0yNjA1MDUyMTM4MzJaFw0zMTA1MDQyMTM4MzJaMBoxGDAWBgNV
+BAMMD0ludGVybWVkaWF0ZSBDQTBZMBMGByqGSM49AgEGCCqGSM49AwEHA0IABJEH
+0D77iyFv01I/4sEqUaoUel50BBwsWSYrH/LtO6cdGI28NyzMyFuYrE6UCRusgAKo
+XBmWjHEGJmoDPoAy2t+jIzAhMA8GA1UdEwEB/wQFMAMBAf8wDgYDVR0PAQH/BAQD
+AgEGMAoGCCqGSM49BAMCA0gAMEUCIBWtPiDwXXEvbgy2+nu/w4MRBNsQ3hbVWyJT
+ITN+1R6WAiEA2AfGBy3Hz8oYY5wPldIndrXjntCzzSEduB6pEvYQZWo=
+-----END CERTIFICATE-----
+-----BEGIN CERTIFICATE PROPERTIES-----
+AAA=
+-----END CERTIFICATE PROPERTIES-----
+-----BEGIN CERTIFICATE-----
+MIIBojCCAUigAwIBAgIBAjAKBggqhkjOPQQDAjAcMRowGAYDVQQDDBFJbnRlcm1l
+ZGlhdGUgQ0EgMjAeFw0yNjA5MTEyMjA3MzJaFw0yNzA5MTEyMjA3MzJaMBYxFDAS
+BgNVBAMMC2V4YW1wbGUuY29tMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAErvaU
+F7iXvurpBgeG5eCx8cMmcOKb11Nvlk/dCdcAelIcvAAHABGc8cVSkjGlNGQhgeCm
+MBKQipIiDskIhIZoRaOBgDB+MB0GA1UdDgQWBBTw8ysZe1gMI/OX0Jx9Y/0yq4Q6
+zjAfBgNVHSMEGDAWgBT9JPmvVv2aTEDF/R+XTZzy9iMRWjAPBgNVHRMBAf8EBTAD
+AQH/MBYGA1UdEQQPMA2CC2V4YW1wbGUuY29tMBMGA1UdJQQMMAoGCCsGAQUFBwMB
+MAoGCCqGSM49BAMCA0gAMEUCIQCAbiJcNrPnAr0N9oBJ70ikytGQxTQLEfdMF3Id
+dRHp/QIgNFQIR4pV/CxvnbJnqUYySx7NgynEBj4v9fndOj8+Mvw=
+-----END CERTIFICATE-----
+-----BEGIN CERTIFICATE-----
+MIIBhDCCASugAwIBAgIBATAKBggqhkjOPQQDAjAUMRIwEAYDVQQDDAlSb290IENB
+IDIwHhcNMjYwOTExMjIwNzMyWhcNMzEwOTEwMjIwNzMyWjAcMRowGAYDVQQDDBFJ
+bnRlcm1lZGlhdGUgQ0EgMjBZMBMGByqGSM49AgEGCCqGSM49AwEHA0IABAqUU6fc
+WctyRGFMz3CGQwUCb5pPhi7imSamipwIrQopqOOUqTr27RLa0CSQwL/87OH/Yxc8
+1jp3cC3qdEp4sAmjZjBkMB0GA1UdDgQWBBT9JPmvVv2aTEDF/R+XTZzy9iMRWjAf
+BgNVHSMEGDAWgBSQ1f8odAe5s7NU91kxX2mPDd8xezASBgNVHRMBAf8ECDAGAQH/
+AgEAMA4GA1UdDwEB/wQEAwIBBjAKBggqhkjOPQQDAgNHADBEAiA1VrVfvq1QtS5v
+gZYh1yEIL8wV863GEE2C6/zSB7TzaAIgTUBrpMo56XIb+Wez1CPWtqYFd2a6NvJx
+IKzgi/++xTs=
+-----END CERTIFICATE-----
+~~~
+
 # Use Cases
 
 `trust_anchors`, like `certificate_authorities`, implements trust anchor negotiation. That is, it allows an authenticating party to incorporate relying party trust anchors into certificate selection. `trust_anchors` allows a wider range of TLS applications to use trust anchor negotiation, notably those that would be unable to use `certificate_authorities` due to size or privacy limitations.
