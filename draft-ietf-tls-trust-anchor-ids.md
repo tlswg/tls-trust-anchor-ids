@@ -608,8 +608,6 @@ This format does not directly represent private keys. However, applications MAY 
 
 * If the application represent paths with different private keys, it can first load all available private keys, then match each decoded path with the private key that matches the end-entity certificate's subjectPublicKeyInfo.
 
-* If the application wishes to store paths and private keys in the same file, it can prepend available private keys using the formats defined in {{Section 10 and Section 11 of !RFC7468}}. The decoder then first decodes private keys, then decodes paths as described above.
-
 The following example file contains two certification paths:
 
 ~~~
