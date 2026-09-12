@@ -507,8 +507,7 @@ A path without the `trust_anchor_negotiation` property MAY still participate in 
 A certification path with its associated CertificatePropertyList may be represented in a PEM {{!RFC7468}} structure in a file of type "application/pem-certificate-chain-with-properties". Files of this type MUST use the strict encoding and MUST NOT include explanatory text. The ABNF {{!RFC5234}} for this format is as follows, where "stricttextualmsg" is as defined in {{Section 3 of !RFC7468}}:
 
 ~~~ abnf
-certchainwithproperties = stricttextualmsg stricttextualmsg
-                          *stricttextualmsg
+certchainwithproperties = 2*stricttextualmsg
 ~~~
 
 The first element MUST be the encoded CertificatePropertyList.
