@@ -508,7 +508,7 @@ A certification path with its associated CertificatePropertyList may be represen
 
 ~~~ abnf
 certchainwithproperties = stricttextualmsg stricttextualmsg
-                          *(stricttextualmsg)
+                          *stricttextualmsg
 ~~~
 
 The first element MUST be the encoded CertificatePropertyList.
