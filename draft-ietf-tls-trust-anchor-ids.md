@@ -498,7 +498,7 @@ The `trust_anchor_negotiation` property's `data` field MUST be empty.
 
 When a candidate certification path has this property, the authenticating party SHOULD NOT select it as a fallback when the path's issuer cannot be matched against the relying party. When a candidate path lacks this property, the authenticating party MAY use it as a fallback. See also {{certificate-selection}}.
 
-A path without the `trust_anchor_negotiation` property MAY still participate in this protocol and include the `trust_anchor_id` and `trust_anchor_groups` properties. In particular, the authenticating party MAY still choose to condition the path on trust anchor negotiation.
+A path without the `trust_anchor_negotiation` property MAY still participate in this protocol and include the `trust_anchor_id` and `trust_anchor_groups` properties. In particular, the authenticating party MAY still choose to condition the path on trust anchor negotiation if it is combining multiple sets of candidate paths, each with their separate determinations about suitable fallbacks. {{acme-example}} gives an example scenario. This could be implemented either with separate local configuration or by modifying the CertificatePropertyList structures when combining the sets.
 
 {{acme-extension}} discusses how an ACME server might set this property, as well as examples where the authenticating party might override this recommendation.
 
@@ -563,7 +563,7 @@ The authenticating party MAY override this recommendation. In particular, if the
 
 When a path is gated on trust anchor negotiation, this protocol removes the need for heuristics in determining which path to serve to which relying party.
 
-### Example
+### Example {#acme-example}
 
 There are two CA operators, CA1 and CA2. The authenticating party is configured to request certificates from ACME servers operated by each of CA1 and CA2.
 
