@@ -590,11 +590,11 @@ While ACME represents each certification path separately, applications might com
 
 * An ACME client might serialize all paths returned from a single order in a file. The TLS server might then be configured to load certificates from the files from each order.
 
-* An deployment might combine the paths from all ACME orders in a single file. The TLS server might then be configured to load its full certificate configuration from the file.
+* A deployment might combine the paths from all ACME orders in a single file. The TLS server might then be configured to load its full certificate configuration from the file.
 
-This section extends the PEM representation defined in {{media-type}} for such cases.
+This section extends the PEM representation defined in {{pem-representation}} for such cases.
 
-A list of certification paths is represented in PEM for by concatenating their corresponding PEM representations. Each path MUST begin with a CertificatePropertyList, which signals a new path to the decoder. If the path has no properties configured, the corresponding PEM-encoded CertificatePropertyList is as follows:
+A list of certification paths is represented in PEM by concatenating their corresponding PEM representations. Each path MUST begin with a CertificatePropertyList, which signals a new path to the decoder. If the path has no properties configured, the corresponding PEM-encoded CertificatePropertyList is as follows:
 
 ~~~
 -----BEGIN CERTIFICATE PROPERTIES-----
@@ -606,9 +606,9 @@ Paths are ordered by the encoder's preference, with the most preferred encoded f
 
 This format does not directly represent private keys. However, applications MAY combine this format with private keys in one of several ways:
 
-* If the application represent paths with the same private key, it can associate all decoded paths with the corresponding private key.
+* If the application represents paths with the same private key, it can associate all decoded paths with the corresponding private key.
 
-* If the application represent paths with different private keys, it can first load all available private keys, then match each decoded path with the private key that matches the end-entity certificate's subjectPublicKeyInfo.
+* If the application represents paths with different private keys, it can first load all available private keys, then match each decoded path with the private key that matches the end-entity certificate's subjectPublicKeyInfo.
 
 The following example file contains two certification paths:
 
