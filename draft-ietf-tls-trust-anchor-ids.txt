@@ -123,6 +123,7 @@ Table of Contents
    12. References
      12.1.  Normative References
      12.2.  Informative References
+   Appendix A.  Trust Anchor ID Pattern Test Vectors
    Acknowledgements
    Authors' Addresses
 
@@ -606,6 +607,8 @@ Table of Contents
    *  32473.500.789 (second component out of range)
 
    *  32473.123.700 (third component out of range)
+
+   Appendix A provides more extensive test vectors.
 
 5.4.  Certificate Selection
 
@@ -1747,6 +1750,74 @@ Table of Contents
               Adrian, D., "How to distrust a CA without any certificate
               errors", March 2025,
               <https://dadrian.io/blog/posts/sct-not-after/>.
+
+Appendix A.  Trust Anchor ID Pattern Test Vectors
+
+   This section contains test vectors for trust anchor ID patterns
+   (Section 5.3.1).  Patterns and IDs are provided in their byte
+   representations in hexadecimal.
+
+   The following IDs are contained in the pattern
+   81fd5981fd597b8348861580 (32473.{123-456}.{789-}):
+
+   *  81fd597b8615 (32473.123.789)
+
+   *  81fd59822c8704 (32473.300.900)
+
+   *  81fd598348868d1f (32473.456.99999)
+
+   *  81fd59834881ffffffffffffffff7f (32473.456.(2^64-1))
+
+   *  81fd59834882808080808080808000 (32473.456.(2^64))
+
+   The following IDs are not contained the pattern
+   81fd5981fd597b8348861580 (32473.{123-456}.{789-}):
+
+   *  81fd597b (32473.123, too few components)
+
+   *  81fd597b861500 (32473.123.789.0, too many components)
+
+   *  81fd5a7b8615 (32474.123.789, first component out of range)
+
+   *  81fd5983748615 (32473.500.789, second component out of range)
+
+   *  81fd597b853c (32473.123.700, third component out of range)
+
+   *  8081fd597b8615 (invalid ID, not minimally encoded)
+
+   *  81fd597b8695 (invalid ID, component was truncated)
+
+   The following IDs are contained in the pattern
+   81fd5981fd598280808080808080800182808080808080808003 (32473.{2^64+1 -
+   2^64+3}):
+
+   *  81fd5982808080808080808001 (32473.(2^64+1))
+
+   *  81fd5982808080808080808002 (32473.(2^64+2))
+
+   *  81fd5982808080808080808003 (32473.(2^64+3))
+
+   The following IDs are not contained the pattern
+   81fd5981fd598280808080808080800182808080808080808003 (32473.{2^64+1 -
+   2^64+3}):
+
+   *  81fd5902 (32473.2)
+
+   *  81fd5982808080808080808000 (32473.2^64)
+
+   *  81fd5982808080808080808004 (32473.(2^64+4))
+
+   The ID 81fd59 (32473) is not contained in the pattern 81fd59.  The
+   pattern is invalid with an odd number of components.
+
+   The ID 81fd59 (32473) is not contained in the pattern 81fd.  The
+   pattern is invalid with a truncated min value.
+
+   The ID 81fd59 (32473) is not contained in the pattern 81fd5981ffff.
+   The pattern is invalid with a truncated max value.
+
+   The ID 00 (0) is not contained in the pattern 8042.  The pattern is
+   invalid because min cannot be infinity.
 
 Acknowledgements
 

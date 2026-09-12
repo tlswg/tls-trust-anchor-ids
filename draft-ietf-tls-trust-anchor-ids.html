@@ -1327,10 +1327,13 @@ svg {
             </ul>
 </li>
           <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.13">
-            <p id="section-toc.1-1.13.1"><a href="#appendix-A" class="auto internal xref"></a><a href="#name-acknowledgements" class="internal xref">Acknowledgements</a></p>
+            <p id="section-toc.1-1.13.1"><a href="#appendix-A" class="auto internal xref">Appendix A</a>.  <a href="#name-trust-anchor-id-pattern-tes" class="internal xref">Trust Anchor ID Pattern Test Vectors</a></p>
 </li>
           <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.14">
-            <p id="section-toc.1-1.14.1"><a href="#appendix-B" class="auto internal xref"></a><a href="#name-authors-addresses" class="internal xref">Authors' Addresses</a></p>
+            <p id="section-toc.1-1.14.1"><a href="#appendix-B" class="auto internal xref"></a><a href="#name-acknowledgements" class="internal xref">Acknowledgements</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.15">
+            <p id="section-toc.1-1.15.1"><a href="#appendix-C" class="auto internal xref"></a><a href="#name-authors-addresses" class="internal xref">Authors' Addresses</a></p>
 </li>
         </ul>
 </nav>
@@ -1727,6 +1730,7 @@ TrustAnchorID AvailableTrustAnchorList&lt;1..2^16-1&gt;;
               <p id="section-5.3.1-19.5.1"><code>32473.123.700</code> (third component out of range)<a href="#section-5.3.1-19.5.1" class="pilcrow">¶</a></p>
 </li>
           </ul>
+<p id="section-5.3.1-20"><a href="#trust-anchor-id-pattern-test-vectors" class="auto internal xref">Appendix A</a> provides more extensive test vectors.<a href="#section-5.3.1-20" class="pilcrow">¶</a></p>
 </section>
 </div>
 </section>
@@ -2617,16 +2621,94 @@ IKzgi/++xTs=
 </div>
 </section>
 </div>
-<div id="acknowledgements">
+<div id="trust-anchor-id-pattern-test-vectors">
 <section id="appendix-A">
+      <h2 id="name-trust-anchor-id-pattern-tes">
+<a href="#appendix-A" class="section-number selfRef">Appendix A. </a><a href="#name-trust-anchor-id-pattern-tes" class="section-name selfRef">Trust Anchor ID Pattern Test Vectors</a>
+      </h2>
+<p id="appendix-A-1">This section contains test vectors for trust anchor ID patterns (<a href="#trust-anchor-id-patterns" class="auto internal xref">Section 5.3.1</a>). Patterns and IDs are provided in their byte representations in hexadecimal.<a href="#appendix-A-1" class="pilcrow">¶</a></p>
+<p id="appendix-A-2">The following IDs are contained in the pattern <code>81fd5981fd597b8348861580</code> (32473.{123-456}.{789-}):<a href="#appendix-A-2" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="appendix-A-3.1">
+          <p id="appendix-A-3.1.1"><code>81fd597b8615</code> (32473.123.789)<a href="#appendix-A-3.1.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="appendix-A-3.2">
+          <p id="appendix-A-3.2.1"><code>81fd59822c8704</code> (32473.300.900)<a href="#appendix-A-3.2.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="appendix-A-3.3">
+          <p id="appendix-A-3.3.1"><code>81fd598348868d1f</code> (32473.456.99999)<a href="#appendix-A-3.3.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="appendix-A-3.4">
+          <p id="appendix-A-3.4.1"><code>81fd59834881ffffffffffffffff7f</code> (32473.456.(2<sup>64</sup>-1))<a href="#appendix-A-3.4.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="appendix-A-3.5">
+          <p id="appendix-A-3.5.1"><code>81fd59834882808080808080808000</code> (32473.456.(2<sup>64</sup>))<a href="#appendix-A-3.5.1" class="pilcrow">¶</a></p>
+</li>
+      </ul>
+<p id="appendix-A-4">The following IDs are not contained the pattern <code>81fd5981fd597b8348861580</code> (32473.{123-456}.{789-}):<a href="#appendix-A-4" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="appendix-A-5.1">
+          <p id="appendix-A-5.1.1"><code>81fd597b</code> (32473.123, too few components)<a href="#appendix-A-5.1.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="appendix-A-5.2">
+          <p id="appendix-A-5.2.1"><code>81fd597b861500</code> (32473.123.789.0, too many components)<a href="#appendix-A-5.2.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="appendix-A-5.3">
+          <p id="appendix-A-5.3.1"><code>81fd5a7b8615</code> (32474.123.789, first component out of range)<a href="#appendix-A-5.3.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="appendix-A-5.4">
+          <p id="appendix-A-5.4.1"><code>81fd5983748615</code> (32473.500.789, second component out of range)<a href="#appendix-A-5.4.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="appendix-A-5.5">
+          <p id="appendix-A-5.5.1"><code>81fd597b853c</code> (32473.123.700, third component out of range)<a href="#appendix-A-5.5.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="appendix-A-5.6">
+          <p id="appendix-A-5.6.1"><code>8081fd597b8615</code> (invalid ID, not minimally encoded)<a href="#appendix-A-5.6.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="appendix-A-5.7">
+          <p id="appendix-A-5.7.1"><code>81fd597b8695</code> (invalid ID, component was truncated)<a href="#appendix-A-5.7.1" class="pilcrow">¶</a></p>
+</li>
+      </ul>
+<p id="appendix-A-6">The following IDs are contained in the pattern <code>81fd5981fd598280808080808080800182808080808080808003</code> (32473.{2<sup>64</sup>+1 - 2<sup>64</sup>+3}):<a href="#appendix-A-6" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="appendix-A-7.1">
+          <p id="appendix-A-7.1.1"><code>81fd5982808080808080808001</code> (32473.(2<sup>64</sup>+1))<a href="#appendix-A-7.1.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="appendix-A-7.2">
+          <p id="appendix-A-7.2.1"><code>81fd5982808080808080808002</code> (32473.(2<sup>64</sup>+2))<a href="#appendix-A-7.2.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="appendix-A-7.3">
+          <p id="appendix-A-7.3.1"><code>81fd5982808080808080808003</code> (32473.(2<sup>64</sup>+3))<a href="#appendix-A-7.3.1" class="pilcrow">¶</a></p>
+</li>
+      </ul>
+<p id="appendix-A-8">The following IDs are not contained the pattern <code>81fd5981fd598280808080808080800182808080808080808003</code> (32473.{2<sup>64</sup>+1 - 2<sup>64</sup>+3}):<a href="#appendix-A-8" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="appendix-A-9.1">
+          <p id="appendix-A-9.1.1"><code>81fd5902</code> (32473.2)<a href="#appendix-A-9.1.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="appendix-A-9.2">
+          <p id="appendix-A-9.2.1"><code>81fd5982808080808080808000</code> (32473.2<sup>64</sup>)<a href="#appendix-A-9.2.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="appendix-A-9.3">
+          <p id="appendix-A-9.3.1"><code>81fd5982808080808080808004</code> (32473.(2<sup>64</sup>+4))<a href="#appendix-A-9.3.1" class="pilcrow">¶</a></p>
+</li>
+      </ul>
+<p id="appendix-A-10">The ID <code>81fd59</code> (32473) is not contained in the pattern <code>81fd59</code>. The pattern is invalid with an odd number of components.<a href="#appendix-A-10" class="pilcrow">¶</a></p>
+<p id="appendix-A-11">The ID <code>81fd59</code> (32473) is not contained in the pattern <code>81fd</code>. The pattern is invalid with a truncated <code>min</code> value.<a href="#appendix-A-11" class="pilcrow">¶</a></p>
+<p id="appendix-A-12">The ID <code>81fd59</code> (32473) is not contained in the pattern <code>81fd5981ffff</code>. The pattern is invalid with a truncated <code>max</code> value.<a href="#appendix-A-12" class="pilcrow">¶</a></p>
+<p id="appendix-A-13">The ID <code>00</code> (0) is not contained in the pattern <code>8042</code>. The pattern is invalid because <code>min</code> cannot be infinity.<a href="#appendix-A-13" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="acknowledgements">
+<section id="appendix-B">
       <h2 id="name-acknowledgements">
 <a href="#name-acknowledgements" class="section-name selfRef">Acknowledgements</a>
       </h2>
-<p id="appendix-A-1">The authors thank Nick Harper, Ilari Liusvaara, and Emily Stark for many valuable discussions and insights which led to this document. Thanks also to Aaron Gable for providing feedback on ACME extensions.<a href="#appendix-A-1" class="pilcrow">¶</a></p>
+<p id="appendix-B-1">The authors thank Nick Harper, Ilari Liusvaara, and Emily Stark for many valuable discussions and insights which led to this document. Thanks also to Aaron Gable for providing feedback on ACME extensions.<a href="#appendix-B-1" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="authors-addresses">
-<section id="appendix-B">
+<section id="appendix-C">
       <h2 id="name-authors-addresses">
 <a href="#name-authors-addresses" class="section-name selfRef">Authors' Addresses</a>
       </h2>
