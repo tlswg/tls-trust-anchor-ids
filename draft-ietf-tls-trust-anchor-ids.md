@@ -594,13 +594,15 @@ While ACME represents each certification path separately, applications might com
 
 This section extends the PEM representation defined in {{media-type}} for such cases.
 
-A list of certification paths is represented in PEM for by concatenating their corresponding PEM representations. Paths are encoded in order of preference, with the most preferred encoded first. Each path MUST begin with a CertificatePropertyList, which signals a new path to the decoder. If the path has no properties configured, the corresponding PEM-encoded CertificatePropertyList is as follows:
+A list of certification paths is represented in PEM for by concatenating their corresponding PEM representations. Each path MUST begin with a CertificatePropertyList, which signals a new path to the decoder. If the path has no properties configured, the corresponding PEM-encoded CertificatePropertyList is as follows:
 
 ~~~
 -----BEGIN CERTIFICATE PROPERTIES-----
 AAA=
 -----END CERTIFICATE PROPERTIES-----
 ~~~
+
+Paths are ordered by the encoder's preference, with the most preferred encoded first. Depending on the application, the decoder might use this preference order, or it might override it with another ordering.
 
 This format does not directly represent private keys. However, applications MAY combine this format with private keys in one of several ways:
 
