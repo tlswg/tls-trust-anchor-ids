@@ -5,12 +5,12 @@
 Transport Layer Security                                         B. Beck
 Internet-Draft                                                   OpenSSL
 Intended status: Standards Track                             D. Benjamin
-Expires: 15 March 2027                                        Google LLC
+Expires: 16 March 2027                                        Google LLC
                                                               D. O'Brien
                                                                         
                                                               K. Nekritz
                                                                     Meta
-                                                       11 September 2026
+                                                       12 September 2026
 
 
                       TLS Trust Anchor Identifiers
@@ -56,7 +56,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 15 March 2027.
+   This Internet-Draft will expire on 16 March 2027.
 
 Copyright Notice
 
@@ -93,7 +93,7 @@ Table of Contents
      7.1.  Trust Anchor ID Property
      7.2.  Trust Anchor Groups Property
      7.3.  Trust Anchor Negotiation Property
-     7.4.  Media Type
+     7.4.  PEM Representation
      7.5.  ACME Extension
        7.5.1.  Example
    8.  Use Cases
@@ -924,24 +924,22 @@ Table of Contents
    well as examples where the authenticating party might override this
    recommendation.
 
-7.4.  Media Type
+7.4.  PEM Representation
 
    A certification path with its associated CertificatePropertyList may
    be represented in a PEM [RFC7468] structure in a file of type
    "application/pem-certificate-chain-with-properties".  Files of this
    type MUST use the strict encoding and MUST NOT include explanatory
    text.  The ABNF [RFC5234] for this format is as follows, where
-   "stricttextualmsg" and "eol" are as defined in Section 3 of
-   [RFC7468]:
+   "stricttextualmsg" is as defined in Section 3 of [RFC7468]:
 
-   certchainwithproperties = stricttextualmsg eol stricttextualmsg
-                             *(eol stricttextualmsg)
+   certchainwithproperties = 2*stricttextualmsg
 
    The first element MUST be the encoded CertificatePropertyList.  The
    second element MUST be an end-entity certificate.  Each following
-   certificate MUST directly certify the one preceding it.  The
-   certificate representing the trust anchor MUST be omitted from the
-   path.
+   element MUST contain a certificate that directly certifies the one
+   preceding it.  The certificate representing the trust anchor MUST be
+   omitted from the path.
 
    CertificatePropertyLists are encoded using the "CERTIFICATE
    PROPERTIES" label.  The encoded data is a serialized
