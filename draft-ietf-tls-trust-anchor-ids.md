@@ -350,6 +350,8 @@ It does not contain any of the following IDs:
 * `32473.500.789` (second component out of range)
 * `32473.123.700` (third component out of range)
 
+{{trust-anchor-id-pattern-test-vectors}} provides more extensive test vectors.
+
 ## Certificate Selection
 
 This document extends TLS certificate selection ({{Section 4.5.1.2 of !RFC9846}}) as follows:
@@ -879,6 +881,48 @@ New values are allocated according to the following process:
 * Values in the range 65280-65535 are reserved for Private Use {{!RFC8126}}.
 
 --- back
+
+# Trust Anchor ID Pattern Test Vectors
+
+This section contains test vectors for trust anchor ID patterns ({{trust-anchor-id-patterns}}). Patterns and IDs are provided in their byte representations in hexadecimal.
+
+The following IDs are contained in the pattern `81fd5981fd597b8348861580` (32473.{123-456}.{789-}):
+
+* `81fd597b8615` (32473.123.789)
+* `81fd59822c8704` (32473.300.900)
+* `81fd598348868d1f` (32473.456.99999)
+* `81fd59834881ffffffffffffffff7f` (32473.456.(2<sup>64</sup>-1))
+* `81fd59834882808080808080808000` (32473.456.(2<sup>64</sup>))
+
+The following IDs are not contained the pattern `81fd5981fd597b8348861580` (32473.{123-456}.{789-}):
+
+* `81fd597b` (32473.123, too few components)
+* `81fd597b861500` (32473.123.789.0, too many components)
+* `81fd5a7b8615` (32474.123.789, first component out of range)
+* `81fd5983748615` (32473.500.789, second component out of range)
+* `81fd597b853c` (32473.123.700, third component out of range)
+* `8081fd597b8615` (invalid ID, not minimally encoded)
+* `81fd597b8695` (invalid ID, component was truncated)
+
+The following IDs are contained in the pattern `81fd5981fd598280808080808080800182808080808080808003` (32473.{2<sup>64</sup>+1 - 2<sup>64</sup>+3}):
+
+* `81fd5982808080808080808001` (32473.(2<sup>64</sup>+1))
+* `81fd5982808080808080808002` (32473.(2<sup>64</sup>+2))
+* `81fd5982808080808080808003` (32473.(2<sup>64</sup>+3))
+
+The following IDs are not contained the pattern `81fd5981fd598280808080808080800182808080808080808003` (32473.{2<sup>64</sup>+1 - 2<sup>64</sup>+3}):
+
+* `81fd5902` (32473.2)
+* `81fd5982808080808080808000` (32473.2<sup>64</sup>)
+* `81fd5982808080808080808004` (32473.(2<sup>64</sup>+4))
+
+The ID `81fd59` (32473) is not contained in the pattern `81fd59`. The pattern is invalid with an odd number of components.
+
+The ID `81fd59` (32473) is not contained in the pattern `81fd`. The pattern is invalid with a truncated `min` value.
+
+The ID `81fd59` (32473) is not contained in the pattern `81fd5981ffff`. The pattern is invalid with a truncated `max` value.
+
+The ID `00` (0) is not contained in the pattern `8042`. The pattern is invalid because `min` cannot be infinity.
 
 # Acknowledgements
 {:numbered="false"}
