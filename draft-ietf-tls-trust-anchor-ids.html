@@ -1927,7 +1927,7 @@ TrustAnchorIDPattern TrustAnchorIDPatternList&lt;1..2^16-1&gt;;
         </h3>
 <p id="section-7.3-1">The <code>trust_anchor_negotiation</code> property's <code>data</code> field MUST be empty.<a href="#section-7.3-1" class="pilcrow">¶</a></p>
 <p id="section-7.3-2">When a candidate certification path has this property, the authenticating party SHOULD NOT select it as a fallback when the path's issuer cannot be matched against the relying party. When a candidate path lacks this property, the authenticating party MAY use it as a fallback. See also <a href="#certificate-selection" class="auto internal xref">Section 5.4</a>.<a href="#section-7.3-2" class="pilcrow">¶</a></p>
-<p id="section-7.3-3">A path without the <code>trust_anchor_negotiation</code> property MAY still participate in this protocol and include the <code>trust_anchor_id</code> and <code>trust_anchor_groups</code> properties. In particular, the authenticating party MAY still choose to condition the path on trust anchor negotiation.<a href="#section-7.3-3" class="pilcrow">¶</a></p>
+<p id="section-7.3-3">A path without the <code>trust_anchor_negotiation</code> property MAY still participate in this protocol and include the <code>trust_anchor_id</code> and <code>trust_anchor_groups</code> properties. In particular, the authenticating party MAY still choose to condition the path on trust anchor negotiation if it is combining multiple sets of candidate paths, each with their separate determinations about suitable fallbacks. <a href="#acme-example" class="auto internal xref">Section 7.5.1</a> gives an example scenario. This could be implemented either with separate local configuration or by modifying the CertificatePropertyList structures when combining the sets.<a href="#section-7.3-3" class="pilcrow">¶</a></p>
 <p id="section-7.3-4"><a href="#acme-extension" class="auto internal xref">Section 7.5</a> discusses how an ACME server might set this property, as well as examples where the authenticating party might override this recommendation.<a href="#section-7.3-4" class="pilcrow">¶</a></p>
 </section>
 </div>
@@ -2005,7 +2005,7 @@ ITN+1R6WAiEA2AfGBy3Hz8oYY5wPldIndrXjntCzzSEduB6pEvYQZWo=
 <p id="section-7.5-2">When the ACME server provides multiple paths, e.g. with ACME's alternate certificate chain mechanism (see <span><a href="https://rfc-editor.org/rfc/rfc8555#section-7.4.2" class="relref">Section 7.4.2</a> of [<a href="#RFC8555" class="cite xref">RFC8555</a>]</span>), the ACME server SHOULD include the <code>trust_anchor_negotiation</code> property on any paths it expects to gate on trust anchor negotiation. It SHOULD omit the property on any paths which are possible fallbacks when no trust anchors match.<a href="#section-7.5-2" class="pilcrow">¶</a></p>
 <p id="section-7.5-3">The authenticating party MAY override this recommendation. In particular, if the authenticating party combines certification paths from two ACME orders, it might only consider some orders as a source for fallback paths.<a href="#section-7.5-3" class="pilcrow">¶</a></p>
 <p id="section-7.5-4">When a path is gated on trust anchor negotiation, this protocol removes the need for heuristics in determining which path to serve to which relying party.<a href="#section-7.5-4" class="pilcrow">¶</a></p>
-<div id="example">
+<div id="acme-example">
 <section id="section-7.5.1">
           <h4 id="name-example">
 <a href="#section-7.5.1" class="section-number selfRef">7.5.1. </a><a href="#name-example" class="section-name selfRef">Example</a>

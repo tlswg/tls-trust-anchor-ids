@@ -919,7 +919,11 @@ Table of Contents
    participate in this protocol and include the trust_anchor_id and
    trust_anchor_groups properties.  In particular, the authenticating
    party MAY still choose to condition the path on trust anchor
-   negotiation.
+   negotiation if it is combining multiple sets of candidate paths, each
+   with their separate determinations about suitable fallbacks.
+   Section 7.5.1 gives an example scenario.  This could be implemented
+   either with separate local configuration or by modifying the
+   CertificatePropertyList structures when combining the sets.
 
    Section 7.5 discusses how an ACME server might set this property, as
    well as examples where the authenticating party might override this
