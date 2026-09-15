@@ -4,7 +4,9 @@ package main
 
 import (
 	"encoding/pem"
+	"errors"
 	"fmt"
+	"math"
 	"os"
 	"strings"
 
@@ -49,10 +51,42 @@ func addBase128(out *cryptobyte.Builder, v uint64) {
 	}
 }
 
+func readBase128(s *cryptobyte.String, out *uint64) bool {
+	var b uint8
+	if !s.ReadUint8(&b) || b == 0x80 {
+		return false
+	}
+	val := uint64(b & 0x7f)
+	for b&0x80 != 0 {
+		if !s.ReadUint8(&b) || val > (math.MaxUint64>>7) {
+			return false
+		}
+		val = (val << 7) | uint64(b&0x7f)
+	}
+	*out = val
+	return true
+}
+
 func addTrustAnchorID(out *cryptobyte.Builder, id TrustAnchorID) {
 	for _, v := range id {
 		addBase128(out, v)
 	}
+}
+
+func readTrustAnchorID(s *cryptobyte.String, out *TrustAnchorID) bool {
+	var id TrustAnchorID
+	for !s.Empty() {
+		var v uint64
+		if !readBase128(s, &v) {
+			return false
+		}
+		id = append(id, v)
+	}
+	if len(id) == 0 {
+		return false
+	}
+	*out = id
+	return true
 }
 
 type ComponentRange struct {
@@ -90,10 +124,41 @@ func addTrustAnchorIDPattern(out *cryptobyte.Builder, pattern TrustAnchorIDPatte
 	}
 }
 
+func readTrustAnchorIDPattern(s *cryptobyte.String, out *TrustAnchorIDPattern) bool {
+	var pattern TrustAnchorIDPattern
+	for !s.Empty() {
+		var min uint64
+		if !readBase128(s, &min) || s.Empty() {
+			return false
+		}
+		if (*s)[0] == 0x80 {
+			s.Skip(1)
+			pattern = append(pattern, ComponentRange{Min: min, MaxIsInfinity: true})
+		} else {
+			var max uint64
+			if !readBase128(s, &max) {
+				return false
+			}
+			pattern = append(pattern, ComponentRange{Min: min, Max: max})
+		}
+	}
+	if len(pattern) == 0 {
+		return false
+	}
+	*out = pattern
+	return true
+}
+
+type UnknownProperty struct {
+	Type uint16
+	Data []byte
+}
+
 type CertificatePropertyList struct {
 	TrustAnchorID          TrustAnchorID
 	TrustAnchorGroups      []TrustAnchorIDPattern
 	TrustAnchorNegotiation bool
+	UnknownProperties      []UnknownProperty
 }
 
 func (l *CertificatePropertyList) Marshal() ([]byte, error) {
@@ -132,7 +197,91 @@ func (l *CertificatePropertyList) Marshal() ([]byte, error) {
 	return b.Bytes()
 }
 
-func main() {
+func parseCertificatePropertyList(in []byte) (*CertificatePropertyList, error) {
+	s := cryptobyte.String(in)
+	var props cryptobyte.String
+	if !s.ReadUint16LengthPrefixed(&props) || !s.Empty() {
+		return nil, errors.New("invalid CertificatePropertyList")
+	}
+	var out CertificatePropertyList
+	var lastType uint16
+	hasLastType := false
+	for !props.Empty() {
+		var propType uint16
+		var data cryptobyte.String
+		if !props.ReadUint16(&propType) || !props.ReadUint16LengthPrefixed(&data) {
+			return nil, errors.New("invalid property")
+		}
+		if hasLastType && propType <= lastType {
+			return nil, errors.New("properties must be strictly sorted by type")
+		}
+		lastType = propType
+		hasLastType = true
+
+		switch propType {
+		case propertyTrustAnchorID:
+			if len(data) > 255 || !readTrustAnchorID(&data, &out.TrustAnchorID) {
+				return nil, errors.New("invalid trust_anchor_id")
+			}
+		case propertyTrustAnchorGroups:
+			var list cryptobyte.String
+			if !data.ReadUint16LengthPrefixed(&list) || !data.Empty() || list.Empty() {
+				return nil, errors.New("invalid trust_anchor_groups")
+			}
+			for !list.Empty() {
+				var p cryptobyte.String
+				var pattern TrustAnchorIDPattern
+				if !list.ReadUint8LengthPrefixed(&p) || !readTrustAnchorIDPattern(&p, &pattern) {
+					return nil, errors.New("invalid trust_anchor_groups pattern")
+				}
+				out.TrustAnchorGroups = append(out.TrustAnchorGroups, pattern)
+			}
+		case propertyTrustAnchorNegotiation:
+			if !data.Empty() {
+				return nil, errors.New("invalid trust_anchor_negotiation")
+			}
+			out.TrustAnchorNegotiation = true
+		default:
+			out.UnknownProperties = append(out.UnknownProperties, UnknownProperty{
+				Type: propType,
+				Data: append([]byte(nil), data...),
+			})
+		}
+	}
+	return &out, nil
+}
+
+func printProperties(props *CertificatePropertyList) {
+	var numProps int
+	if len(props.TrustAnchorID) != 0 {
+		numProps++
+		fmt.Printf("- trust_anchor_id: %s\n", props.TrustAnchorID)
+	}
+	if len(props.TrustAnchorGroups) != 0 {
+		numProps++
+		fmt.Printf("- trust_anchor_groups:\n")
+		for _, g := range props.TrustAnchorGroups {
+			fmt.Printf("    %s\n", g)
+		}
+	}
+	if props.TrustAnchorNegotiation {
+		numProps++
+		fmt.Printf("- trust_anchor_negotiation\n")
+	}
+	for _, p := range props.UnknownProperties {
+		numProps++
+		if len(p.Data) == 0 {
+			fmt.Printf("- unknown property %d\n", p.Type)
+		} else {
+			fmt.Printf("- unknown property %d: %x\n", p.Type, p.Data)
+		}
+	}
+	if numProps == 0 {
+		fmt.Printf("(empty)\n")
+	}
+}
+
+func printExample() {
 	props := CertificatePropertyList{
 		TrustAnchorID: []uint64{32473, 1},
 		TrustAnchorGroups: []TrustAnchorIDPattern{
@@ -145,23 +294,51 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	fmt.Printf("Properties:\n")
-	if len(props.TrustAnchorID) != 0 {
-		fmt.Printf("- Issued by CA with ID %s\n", props.TrustAnchorID)
-	}
-	if len(props.TrustAnchorGroups) != 0 {
-		fmt.Printf("- CA is in trust anchor groups:\n")
-		for _, g := range props.TrustAnchorGroups {
-			fmt.Printf("    %s\n", g)
-		}
-	}
-	if props.TrustAnchorNegotiation {
-		fmt.Printf("- Should only be used if trust anchors match\n")
-	} else {
-		fmt.Printf("- May be used as a fallback if trust anchors do not match\n")
-	}
+	printProperties(&props)
 
 	fmt.Printf("\nhex: %x\n", b)
 	fmt.Printf("\nPEM:\n")
 	pem.Encode(os.Stdout, &pem.Block{Type: "CERTIFICATE PROPERTIES", Bytes: b})
+}
+
+func parsePEM(path string) {
+	bytes, err := os.ReadFile(path)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error reading %s: %s\n", path, err)
+		os.Exit(1)
+	}
+	var count int
+	for len(bytes) > 0 {
+		var block *pem.Block
+		block, bytes = pem.Decode(bytes)
+		if block == nil {
+			break
+		}
+		if block.Type == "CERTIFICATE PROPERTIES" {
+			props, err := parseCertificatePropertyList(block.Bytes)
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "Error parsing CertificatePropertyList: %s\n", err)
+				os.Exit(1)
+			}
+			fmt.Printf("Properties found in %s:\n", path)
+			printProperties(props)
+			fmt.Printf("\n")
+			count++
+		}
+	}
+	if count == 0 {
+		fmt.Fprintf(os.Stderr, "No CERTIFICATE PROPERTIES blocks found in %s\n", path)
+		os.Exit(1)
+	}
+}
+
+func main() {
+	args := os.Args[1:]
+	if len(args) == 0 {
+		printExample()
+	}
+
+	for _, arg := range args {
+		parsePEM(arg)
+	}
 }
