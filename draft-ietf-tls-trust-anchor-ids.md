@@ -193,7 +193,7 @@ Depending on the protocol, trust anchor IDs may be represented in one of three w
 
 * For use in ASCII-compatible text protocols, a trust anchor ID's ASCII representation is the relative object identifier in dotted decimal notation. The example ID's ASCII representation is `32473.1`.
 
-The length of a trust anchor ID's binary representation MUST NOT exceed 255 bytes. It SHOULD be significantly shorter, for bandwidth efficiency.
+The length of a trust anchor ID's binary representation MUST NOT exceed 32 bytes. Additionally, each OID component MUST be at most 2<sup>64</sup>-1. This ensures that the ID's binary and dotted-decimal representations, as either a relative or full OID, all fit comfortably under 255 bytes.
 
 A trust anchor ID representing a single trust anchor SHOULD be allocated by the CA operator and be common among relying parties that trust the CA. They MAY be allocated by another party, e.g. when bootstrapping an existing ecosystem, if all parties agree on the ID. In particular, the protocol requires authenticating and relying parties to agree, and the authenticating party's configuration typically comes from the CA.
 
@@ -202,7 +202,7 @@ A trust anchor ID representing a trust anchor group MAY be allocated by any part
 When embedded in a TLS structure, a trust anchor ID uses the TrustAnchorID structure defined below. The contents of the TrustAnchorID, after the one-byte length prefix, are the binary representation of the trust anchor ID.
 
 ~~~ tls-presentation
-opaque TrustAnchorID<1..2^8-1>;
+opaque TrustAnchorID<1..32>;
 ~~~
 
 # TLS Extension
