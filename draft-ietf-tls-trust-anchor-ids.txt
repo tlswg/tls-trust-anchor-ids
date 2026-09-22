@@ -5,12 +5,12 @@
 Transport Layer Security                                         B. Beck
 Internet-Draft                                                   OpenSSL
 Intended status: Standards Track                             D. Benjamin
-Expires: 16 March 2027                                        Google LLC
+Expires: 26 March 2027                                        Google LLC
                                                               D. O'Brien
                                                                         
                                                               K. Nekritz
                                                                     Meta
-                                                       12 September 2026
+                                                       22 September 2026
 
 
                       TLS Trust Anchor Identifiers
@@ -56,7 +56,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 16 March 2027.
+   This Internet-Draft will expire on 26 March 2027.
 
 Copyright Notice
 
@@ -1725,9 +1725,9 @@ Table of Contents
               Benjamin, D., O'Brien, D., Westerbaan, B., Valenta, L.,
               and F. Valsorda, "Merkle Tree Certificates", Work in
               Progress, Internet-Draft, draft-ietf-plants-merkle-tree-
-              certs-05, 6 July 2026,
+              certs-06, 21 September 2026,
               <https://datatracker.ietf.org/doc/html/draft-ietf-plants-
-              merkle-tree-certs-05>.
+              merkle-tree-certs-06>.
 
    [MOZILLA-ROOTS]
               Mozilla, "Mozilla Included CA Certificate List", 30 August
