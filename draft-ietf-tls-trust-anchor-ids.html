@@ -1328,6 +1328,14 @@ svg {
 </li>
           <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.13">
             <p id="section-toc.1-1.13.1"><a href="#appendix-A" class="auto internal xref">Appendix A</a>.  <a href="#name-trust-anchor-id-pattern-tes" class="internal xref">Trust Anchor ID Pattern Test Vectors</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.13.2.1">
+                <p id="section-toc.1-1.13.2.1.1"><a href="#appendix-A.1" class="auto internal xref">A.1</a>.  <a href="#name-large-oid-components" class="internal xref">Large OID Components</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.13.2.2">
+                <p id="section-toc.1-1.13.2.2.1"><a href="#appendix-A.2" class="auto internal xref">A.2</a>.  <a href="#name-invalid-ids-or-patterns" class="internal xref">Invalid IDs or Patterns</a></p>
+</li>
+            </ul>
 </li>
           <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.14">
             <p id="section-toc.1-1.14.1"><a href="#appendix-B" class="auto internal xref"></a><a href="#name-acknowledgements" class="internal xref">Acknowledgements</a></p>
@@ -1483,13 +1491,13 @@ when, and only when, they appear in all capitals, as shown here.<a href="#sectio
           <p id="section-4-4.3.1">For use in ASCII-compatible text protocols, a trust anchor ID's ASCII representation is the relative object identifier in dotted decimal notation. The example ID's ASCII representation is <code>32473.1</code>.<a href="#section-4-4.3.1" class="pilcrow">¶</a></p>
 </li>
       </ul>
-<p id="section-4-5">The length of a trust anchor ID's binary representation MUST NOT exceed 255 bytes. It SHOULD be significantly shorter, for bandwidth efficiency.<a href="#section-4-5" class="pilcrow">¶</a></p>
+<p id="section-4-5">The length of a trust anchor ID's binary representation MUST NOT exceed 32 bytes. This ensures that the ID's binary and dotted-decimal representations, as either a relative or full OID, all fit comfortably under 255 bytes. Additionally, trust anchor IDs MUST be allocated such that OID components are at most 2<sup>63</sup>-1. This ensures OID components can be represented in a 64-bit signed or unsigned integer.<a href="#section-4-5" class="pilcrow">¶</a></p>
 <p id="section-4-6">A trust anchor ID representing a single trust anchor SHOULD be allocated by the CA operator and be common among relying parties that trust the CA. They MAY be allocated by another party, e.g. when bootstrapping an existing ecosystem, if all parties agree on the ID. In particular, the protocol requires authenticating and relying parties to agree, and the authenticating party's configuration typically comes from the CA.<a href="#section-4-6" class="pilcrow">¶</a></p>
 <p id="section-4-7">A trust anchor ID representing a trust anchor group MAY be allocated by any party. However, to be useful, the group requires agreement between relying parties and authenticating parties. <a href="#trust-anchor-groups" class="auto internal xref">Section 6</a> discusses defining trust anchor groups in more detail.<a href="#section-4-7" class="pilcrow">¶</a></p>
 <p id="section-4-8">When embedded in a TLS structure, a trust anchor ID uses the TrustAnchorID structure defined below. The contents of the TrustAnchorID, after the one-byte length prefix, are the binary representation of the trust anchor ID.<a href="#section-4-8" class="pilcrow">¶</a></p>
 <div class="lang-tls-presentation sourcecode" id="section-4-9">
 <pre>
-opaque TrustAnchorID&lt;1..2^8-1&gt;;
+opaque TrustAnchorID&lt;1..32&gt;;
 </pre><a href="#section-4-9" class="pilcrow">¶</a>
 </div>
 </section>
@@ -2639,10 +2647,7 @@ IKzgi/++xTs=
           <p id="appendix-A-3.3.1"><code>81fd598348868d1f</code> (32473.456.99999)<a href="#appendix-A-3.3.1" class="pilcrow">¶</a></p>
 </li>
         <li class="normal" id="appendix-A-3.4">
-          <p id="appendix-A-3.4.1"><code>81fd59834881ffffffffffffffff7f</code> (32473.456.(2<sup>64</sup>-1))<a href="#appendix-A-3.4.1" class="pilcrow">¶</a></p>
-</li>
-        <li class="normal" id="appendix-A-3.5">
-          <p id="appendix-A-3.5.1"><code>81fd59834882808080808080808000</code> (32473.456.(2<sup>64</sup>))<a href="#appendix-A-3.5.1" class="pilcrow">¶</a></p>
+          <p id="appendix-A-3.4.1"><code>81fd598348ffffffffffffffff7f</code> (32473.456.(2<sup>63</sup>-1))<a href="#appendix-A-3.4.1" class="pilcrow">¶</a></p>
 </li>
       </ul>
 <p id="appendix-A-4">The following IDs are not contained the pattern <code>81fd5981fd597b8348861580</code> (32473.{123-456}.{789-}):<a href="#appendix-A-4" class="pilcrow">¶</a></p>
@@ -2669,34 +2674,83 @@ IKzgi/++xTs=
           <p id="appendix-A-5.7.1"><code>81fd597b8695</code> (invalid ID, component was truncated)<a href="#appendix-A-5.7.1" class="pilcrow">¶</a></p>
 </li>
       </ul>
-<p id="appendix-A-6">The following IDs are contained in the pattern <code>81fd5981fd598280808080808080800182808080808080808003</code> (32473.{2<sup>64</sup>+1 - 2<sup>64</sup>+3}):<a href="#appendix-A-6" class="pilcrow">¶</a></p>
+<p id="appendix-A-6">The following IDs are contained in the pattern <code>81fd5981fd59c08080808080808001c08080808080808003</code> (32473.{2<sup>62</sup>+1 - 2<sup>62</sup>+3}):<a href="#appendix-A-6" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="appendix-A-7.1">
-          <p id="appendix-A-7.1.1"><code>81fd5982808080808080808001</code> (32473.(2<sup>64</sup>+1))<a href="#appendix-A-7.1.1" class="pilcrow">¶</a></p>
+          <p id="appendix-A-7.1.1"><code>81fd59c08080808080808001</code> (32473.(2<sup>62</sup>+1))<a href="#appendix-A-7.1.1" class="pilcrow">¶</a></p>
 </li>
         <li class="normal" id="appendix-A-7.2">
-          <p id="appendix-A-7.2.1"><code>81fd5982808080808080808002</code> (32473.(2<sup>64</sup>+2))<a href="#appendix-A-7.2.1" class="pilcrow">¶</a></p>
+          <p id="appendix-A-7.2.1"><code>81fd59c08080808080808002</code> (32473.(2<sup>62</sup>+2))<a href="#appendix-A-7.2.1" class="pilcrow">¶</a></p>
 </li>
         <li class="normal" id="appendix-A-7.3">
-          <p id="appendix-A-7.3.1"><code>81fd5982808080808080808003</code> (32473.(2<sup>64</sup>+3))<a href="#appendix-A-7.3.1" class="pilcrow">¶</a></p>
+          <p id="appendix-A-7.3.1"><code>81fd59c08080808080808003</code> (32473.(2<sup>62</sup>+3))<a href="#appendix-A-7.3.1" class="pilcrow">¶</a></p>
 </li>
       </ul>
-<p id="appendix-A-8">The following IDs are not contained the pattern <code>81fd5981fd598280808080808080800182808080808080808003</code> (32473.{2<sup>64</sup>+1 - 2<sup>64</sup>+3}):<a href="#appendix-A-8" class="pilcrow">¶</a></p>
+<p id="appendix-A-8">The following IDs are not contained the pattern <code>81fd5981fd59c08080808080808001c08080808080808003</code> (32473.{2<sup>62</sup>+1 - 2<sup>62</sup>+3}):<a href="#appendix-A-8" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="appendix-A-9.1">
           <p id="appendix-A-9.1.1"><code>81fd5902</code> (32473.2)<a href="#appendix-A-9.1.1" class="pilcrow">¶</a></p>
 </li>
         <li class="normal" id="appendix-A-9.2">
-          <p id="appendix-A-9.2.1"><code>81fd5982808080808080808000</code> (32473.2<sup>64</sup>)<a href="#appendix-A-9.2.1" class="pilcrow">¶</a></p>
+          <p id="appendix-A-9.2.1"><code>81fd59c08080808080808000</code> (32473.2<sup>62</sup>)<a href="#appendix-A-9.2.1" class="pilcrow">¶</a></p>
 </li>
         <li class="normal" id="appendix-A-9.3">
-          <p id="appendix-A-9.3.1"><code>81fd5982808080808080808004</code> (32473.(2<sup>64</sup>+4))<a href="#appendix-A-9.3.1" class="pilcrow">¶</a></p>
+          <p id="appendix-A-9.3.1"><code>81fd59c08080808080808004</code> (32473.(2<sup>62</sup>+4))<a href="#appendix-A-9.3.1" class="pilcrow">¶</a></p>
 </li>
       </ul>
-<p id="appendix-A-10">The ID <code>81fd59</code> (32473) is not contained in the pattern <code>81fd59</code>. The pattern is invalid with an odd number of components.<a href="#appendix-A-10" class="pilcrow">¶</a></p>
-<p id="appendix-A-11">The ID <code>81fd59</code> (32473) is not contained in the pattern <code>81fd</code>. The pattern is invalid with a truncated <code>min</code> value.<a href="#appendix-A-11" class="pilcrow">¶</a></p>
-<p id="appendix-A-12">The ID <code>81fd59</code> (32473) is not contained in the pattern <code>81fd5981ffff</code>. The pattern is invalid with a truncated <code>max</code> value.<a href="#appendix-A-12" class="pilcrow">¶</a></p>
-<p id="appendix-A-13">The ID <code>00</code> (0) is not contained in the pattern <code>8042</code>. The pattern is invalid because <code>min</code> cannot be infinity.<a href="#appendix-A-13" class="pilcrow">¶</a></p>
+<div id="large-oid-components">
+<section id="appendix-A.1">
+        <h3 id="name-large-oid-components">
+<a href="#appendix-A.1" class="section-number selfRef">A.1. </a><a href="#name-large-oid-components" class="section-name selfRef">Large OID Components</a>
+        </h3>
+<p id="appendix-A.1-1">This section contains test vectors with large OID components. <a href="#trust-anchor-ids" class="auto internal xref">Section 4</a> limits OID components to 63-bit values, but the procedure in <a href="#trust-anchor-id-patterns" class="auto internal xref">Section 5.3.1</a> is defined for arbitrary byte strings. Implementations MAY skip these test vectors if they limit OID components before calling the procedure.<a href="#appendix-A.1-1" class="pilcrow">¶</a></p>
+<p id="appendix-A.1-2">The following IDs are contained in the pattern <code>81fd5981fd597b8348861580</code> (32473.{123-456}.{789-}):<a href="#appendix-A.1-2" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="appendix-A.1-3.1">
+            <p id="appendix-A.1-3.1.1"><code>81fd59834881ffffffffffffffff7f</code> (32473.456.(2<sup>64</sup>-1))<a href="#appendix-A.1-3.1.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="appendix-A.1-3.2">
+            <p id="appendix-A.1-3.2.1"><code>81fd59834882808080808080808000</code> (32473.456.(2<sup>64</sup>))<a href="#appendix-A.1-3.2.1" class="pilcrow">¶</a></p>
+</li>
+        </ul>
+<p id="appendix-A.1-4">The following IDs are contained in the pattern <code>81fd5981fd598280808080808080800182808080808080808003</code> (32473.{2<sup>64</sup>+1 - 2<sup>64</sup>+3}):<a href="#appendix-A.1-4" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="appendix-A.1-5.1">
+            <p id="appendix-A.1-5.1.1"><code>81fd5982808080808080808001</code> (32473.(2<sup>64</sup>+1))<a href="#appendix-A.1-5.1.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="appendix-A.1-5.2">
+            <p id="appendix-A.1-5.2.1"><code>81fd5982808080808080808002</code> (32473.(2<sup>64</sup>+2))<a href="#appendix-A.1-5.2.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="appendix-A.1-5.3">
+            <p id="appendix-A.1-5.3.1"><code>81fd5982808080808080808003</code> (32473.(2<sup>64</sup>+3))<a href="#appendix-A.1-5.3.1" class="pilcrow">¶</a></p>
+</li>
+        </ul>
+<p id="appendix-A.1-6">The following IDs are not contained the pattern <code>81fd5981fd598280808080808080800182808080808080808003</code> (32473.{2<sup>64</sup>+1 - 2<sup>64</sup>+3}):<a href="#appendix-A.1-6" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="appendix-A.1-7.1">
+            <p id="appendix-A.1-7.1.1"><code>81fd5902</code> (32473.2)<a href="#appendix-A.1-7.1.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="appendix-A.1-7.2">
+            <p id="appendix-A.1-7.2.1"><code>81fd5982808080808080808000</code> (32473.2<sup>64</sup>)<a href="#appendix-A.1-7.2.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="appendix-A.1-7.3">
+            <p id="appendix-A.1-7.3.1"><code>81fd5982808080808080808004</code> (32473.(2<sup>64</sup>+4))<a href="#appendix-A.1-7.3.1" class="pilcrow">¶</a></p>
+</li>
+        </ul>
+</section>
+</div>
+<div id="invalid-ids-or-patterns">
+<section id="appendix-A.2">
+        <h3 id="name-invalid-ids-or-patterns">
+<a href="#appendix-A.2" class="section-number selfRef">A.2. </a><a href="#name-invalid-ids-or-patterns" class="section-name selfRef">Invalid IDs or Patterns</a>
+        </h3>
+<p id="appendix-A.2-1">This section contains test vectors where either the ID or pattern is not a valid byte representation. The procedure in <a href="#trust-anchor-id-patterns" class="auto internal xref">Section 5.3.1</a> is defined for arbitrary byte strings and is expected to fail if either input is invalid. Implementations MAY skip these test vectors if they validate the ID and pattern before calling this procedure.<a href="#appendix-A.2-1" class="pilcrow">¶</a></p>
+<p id="appendix-A.2-2">The ID <code>81fd59</code> (32473) is not contained in the pattern <code>81fd59</code>. The pattern is invalid with an odd number of components.<a href="#appendix-A.2-2" class="pilcrow">¶</a></p>
+<p id="appendix-A.2-3">The ID <code>81fd59</code> (32473) is not contained in the pattern <code>81fd</code>. The pattern is invalid with a truncated <code>min</code> value.<a href="#appendix-A.2-3" class="pilcrow">¶</a></p>
+<p id="appendix-A.2-4">The ID <code>81fd59</code> (32473) is not contained in the pattern <code>81fd5981ffff</code>. The pattern is invalid with a truncated <code>max</code> value.<a href="#appendix-A.2-4" class="pilcrow">¶</a></p>
+<p id="appendix-A.2-5">The ID <code>00</code> (0) is not contained in the pattern <code>8042</code>. The pattern is invalid because <code>min</code> cannot be infinity.<a href="#appendix-A.2-5" class="pilcrow">¶</a></p>
+</section>
+</div>
 </section>
 </div>
 <div id="acknowledgements">

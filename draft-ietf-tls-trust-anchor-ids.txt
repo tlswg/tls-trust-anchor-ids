@@ -124,6 +124,8 @@ Table of Contents
      12.1.  Normative References
      12.2.  Informative References
    Appendix A.  Trust Anchor ID Pattern Test Vectors
+     A.1.  Large OID Components
+     A.2.  Invalid IDs or Patterns
    Acknowledgements
    Authors' Addresses
 
@@ -312,8 +314,12 @@ Table of Contents
       32473.1.
 
    The length of a trust anchor ID's binary representation MUST NOT
-   exceed 255 bytes.  It SHOULD be significantly shorter, for bandwidth
-   efficiency.
+   exceed 32 bytes.  This ensures that the ID's binary and dotted-
+   decimal representations, as either a relative or full OID, all fit
+   comfortably under 255 bytes.  Additionally, trust anchor IDs MUST be
+   allocated such that OID components are at most 2^63-1.  This ensures
+   OID components can be represented in a 64-bit signed or unsigned
+   integer.
 
    A trust anchor ID representing a single trust anchor SHOULD be
    allocated by the CA operator and be common among relying parties that
@@ -333,7 +339,7 @@ Table of Contents
    TrustAnchorID, after the one-byte length prefix, are the binary
    representation of the trust anchor ID.
 
-   opaque TrustAnchorID<1..2^8-1>;
+   opaque TrustAnchorID<1..32>;
 
 5.  TLS Extension
 
@@ -1766,9 +1772,7 @@ Appendix A.  Trust Anchor ID Pattern Test Vectors
 
    *  81fd598348868d1f (32473.456.99999)
 
-   *  81fd59834881ffffffffffffffff7f (32473.456.(2^64-1))
-
-   *  81fd59834882808080808080808000 (32473.456.(2^64))
+   *  81fd598348ffffffffffffffff7f (32473.456.(2^63-1))
 
    The following IDs are not contained the pattern
    81fd5981fd597b8348861580 (32473.{123-456}.{789-}):
@@ -1786,6 +1790,41 @@ Appendix A.  Trust Anchor ID Pattern Test Vectors
    *  8081fd597b8615 (invalid ID, not minimally encoded)
 
    *  81fd597b8695 (invalid ID, component was truncated)
+
+   The following IDs are contained in the pattern
+   81fd5981fd59c08080808080808001c08080808080808003 (32473.{2^62+1 -
+   2^62+3}):
+
+   *  81fd59c08080808080808001 (32473.(2^62+1))
+
+   *  81fd59c08080808080808002 (32473.(2^62+2))
+
+   *  81fd59c08080808080808003 (32473.(2^62+3))
+
+   The following IDs are not contained the pattern
+   81fd5981fd59c08080808080808001c08080808080808003 (32473.{2^62+1 -
+   2^62+3}):
+
+   *  81fd5902 (32473.2)
+
+   *  81fd59c08080808080808000 (32473.2^62)
+
+   *  81fd59c08080808080808004 (32473.(2^62+4))
+
+A.1.  Large OID Components
+
+   This section contains test vectors with large OID components.
+   Section 4 limits OID components to 63-bit values, but the procedure
+   in Section 5.3.1 is defined for arbitrary byte strings.
+   Implementations MAY skip these test vectors if they limit OID
+   components before calling the procedure.
+
+   The following IDs are contained in the pattern
+   81fd5981fd597b8348861580 (32473.{123-456}.{789-}):
+
+   *  81fd59834881ffffffffffffffff7f (32473.456.(2^64-1))
+
+   *  81fd59834882808080808080808000 (32473.456.(2^64))
 
    The following IDs are contained in the pattern
    81fd5981fd598280808080808080800182808080808080808003 (32473.{2^64+1 -
@@ -1806,6 +1845,14 @@ Appendix A.  Trust Anchor ID Pattern Test Vectors
    *  81fd5982808080808080808000 (32473.2^64)
 
    *  81fd5982808080808080808004 (32473.(2^64+4))
+
+A.2.  Invalid IDs or Patterns
+
+   This section contains test vectors where either the ID or pattern is
+   not a valid byte representation.  The procedure in Section 5.3.1 is
+   defined for arbitrary byte strings and is expected to fail if either
+   input is invalid.  Implementations MAY skip these test vectors if
+   they validate the ID and pattern before calling this procedure.
 
    The ID 81fd59 (32473) is not contained in the pattern 81fd59.  The
    pattern is invalid with an odd number of components.
