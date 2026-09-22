@@ -285,7 +285,7 @@ A trust anchor ID pattern is represented as a byte string by concatenating the `
 
 * A non-negative integer is encoded as described in paragraph 8.19.2 of {{X690}}. That is, each value is encoded in variable-length, big-endian, base-128 encoding. Each base-128 digit is in the seven least significant bits of each byte. The most significant bit of each byte is unset for the final byte and set for all other bytes. Values are encoded in the fewest number of non-zero bytes needed.
 
-A trust anchor ID pattern can be represented in text as follows:
+A trust anchor ID pattern can also be represented in text as follows:
 
 1. Represent each `min` and `max` pair as:
    * if `min` equals `max`, `min` as a single decimal integer
@@ -432,7 +432,7 @@ Each candidate path is then configured with the versioned groups that contain it
 
 1. Let `base` be the OID arc that identifies the sequence. Let `min` be the first version that includes the trust anchor.
 2. At issuance, if the trust anchor is no longer in the latest group version, let `max` be the last version that includes the trust anchor. The pattern is `base.{min-max}`.
-3. At issuance, if the trust anchor is in the latest group version, the pattern is `base.{min-}`. That is, the last component has a `max` of 2<sup>64</sup>-1.
+3. At issuance, if the trust anchor is in the latest group version, the pattern is `base.{min-}`. That is, the last component has a `max` of infinity.
 
 In the second case, the range contains not-yet-defined group versions, so there is a potential signaling error. Suppose, after issuance, a new group version is defined without the trust anchor. The unlimited upper bound is now incorrect. A relying party might not trust this trust anchor, while sending this new group version. However, the authenticating party will misinterpret the certificate as compatible based on its stale information. Such signaling errors may result in the wrong certificate being selected.
 
