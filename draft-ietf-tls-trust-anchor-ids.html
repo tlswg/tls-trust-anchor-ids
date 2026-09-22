@@ -1614,7 +1614,7 @@ TrustAnchorID AvailableTrustAnchorList&lt;1..2^16-1&gt;;
               <p id="section-5.3.1-4.2.1">A non-negative integer is encoded as described in paragraph 8.19.2 of <span>[<a href="#X690" class="cite xref">X690</a>]</span>. That is, each value is encoded in variable-length, big-endian, base-128 encoding. Each base-128 digit is in the seven least significant bits of each byte. The most significant bit of each byte is unset for the final byte and set for all other bytes. Values are encoded in the fewest number of non-zero bytes needed.<a href="#section-5.3.1-4.2.1" class="pilcrow">¶</a></p>
 </li>
           </ul>
-<p id="section-5.3.1-5">A trust anchor ID pattern can be represented in text as follows:<a href="#section-5.3.1-5" class="pilcrow">¶</a></p>
+<p id="section-5.3.1-5">A trust anchor ID pattern can also be represented in text as follows:<a href="#section-5.3.1-5" class="pilcrow">¶</a></p>
 <ol start="1" type="1" class="normal type-1" id="section-5.3.1-6">
 <li id="section-5.3.1-6.1">
               <p id="section-5.3.1-6.1.1">Represent each <code>min</code> and <code>max</code> pair as:<a href="#section-5.3.1-6.1.1" class="pilcrow">¶</a></p>
@@ -1847,7 +1847,7 @@ TrustAnchorID AvailableTrustAnchorList&lt;1..2^16-1&gt;;
             <p id="section-6.1-4.2.1">At issuance, if the trust anchor is no longer in the latest group version, let <code>max</code> be the last version that includes the trust anchor. The pattern is <code>base.{min-max}</code>.<a href="#section-6.1-4.2.1" class="pilcrow">¶</a></p>
 </li>
           <li id="section-6.1-4.3">
-            <p id="section-6.1-4.3.1">At issuance, if the trust anchor is in the latest group version, the pattern is <code>base.{min-}</code>. That is, the last component has a <code>max</code> of 2<sup>64</sup>-1.<a href="#section-6.1-4.3.1" class="pilcrow">¶</a></p>
+            <p id="section-6.1-4.3.1">At issuance, if the trust anchor is in the latest group version, the pattern is <code>base.{min-}</code>. That is, the last component has a <code>max</code> of infinity.<a href="#section-6.1-4.3.1" class="pilcrow">¶</a></p>
 </li>
         </ol>
 <p id="section-6.1-5">In the second case, the range contains not-yet-defined group versions, so there is a potential signaling error. Suppose, after issuance, a new group version is defined without the trust anchor. The unlimited upper bound is now incorrect. A relying party might not trust this trust anchor, while sending this new group version. However, the authenticating party will misinterpret the certificate as compatible based on its stale information. Such signaling errors may result in the wrong certificate being selected.<a href="#section-6.1-5" class="pilcrow">¶</a></p>

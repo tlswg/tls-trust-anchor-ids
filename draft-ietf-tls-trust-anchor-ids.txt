@@ -507,7 +507,7 @@ Table of Contents
       bytes.  Values are encoded in the fewest number of non-zero bytes
       needed.
 
-   A trust anchor ID pattern can be represented in text as follows:
+   A trust anchor ID pattern can also be represented in text as follows:
 
    1.  Represent each min and max pair as:
 
@@ -811,7 +811,7 @@ Table of Contents
 
    3.  At issuance, if the trust anchor is in the latest group version,
        the pattern is base.{min-}. That is, the last component has a max
-       of 2^64-1.
+       of infinity.
 
    In the second case, the range contains not-yet-defined group
    versions, so there is a potential signaling error.  Suppose, after
