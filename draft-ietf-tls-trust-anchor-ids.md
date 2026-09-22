@@ -193,7 +193,9 @@ Depending on the protocol, trust anchor IDs may be represented in one of three w
 
 * For use in ASCII-compatible text protocols, a trust anchor ID's ASCII representation is the relative object identifier in dotted decimal notation. The example ID's ASCII representation is `32473.1`.
 
-The length of a trust anchor ID's binary representation MUST NOT exceed 32 bytes. This ensures that the ID's binary and dotted-decimal representations, as either a relative or full OID, all fit comfortably under 255 bytes. Additionally, trust anchor IDs MUST be allocated such that OID components are at most 2<sup>63</sup>-1. This ensures OID components can be represented in a 64-bit signed or unsigned integer.
+The length of a trust anchor ID's binary representation MUST NOT exceed 32 bytes. This ensures that the ID's binary and dotted-decimal representations, as either a relative or full OID, all fit comfortably under 255 bytes.
+
+Trust anchor IDs MUST be allocated such that OID components are at most 2<sup>31</sup>-1. This ensures OID components can be represented in a 32-bit signed or unsigned integer. Implementations MUST accept OID components up to 2<sup>31</sup>-1. They MAY accept larger OID components, provided they correctly avoid overflows.
 
 A trust anchor ID representing a single trust anchor SHOULD be allocated by the CA operator and be common among relying parties that trust the CA. They MAY be allocated by another party, e.g. when bootstrapping an existing ecosystem, if all parties agree on the ID. In particular, the protocol requires authenticating and relying parties to agree, and the authenticating party's configuration typically comes from the CA.
 
@@ -891,7 +893,7 @@ The following IDs are contained in the pattern `81fd5981fd597b8348861580` (32473
 * `81fd597b8615` (32473.123.789)
 * `81fd59822c8704` (32473.300.900)
 * `81fd598348868d1f` (32473.456.99999)
-* `81fd598348ffffffffffffffff7f` (32473.456.(2<sup>63</sup>-1))
+* `81fd59834887ffffff7f` (32473.456.(2<sup>31</sup>-1))
 
 The following IDs are not contained the pattern `81fd5981fd597b8348861580` (32473.{123-456}.{789-}):
 
@@ -903,21 +905,21 @@ The following IDs are not contained the pattern `81fd5981fd597b8348861580` (3247
 * `8081fd597b8615` (invalid ID, not minimally encoded)
 * `81fd597b8695` (invalid ID, component was truncated)
 
-The following IDs are contained in the pattern `81fd5981fd59c08080808080808001c08080808080808003` (32473.{2<sup>62</sup>+1 - 2<sup>62</sup>+3}):
+The following IDs are contained in the pattern `81fd5981fd5984808080018480808003` (32473.{2<sup>30</sup>+1 - 2<sup>30</sup>+3}):
 
-* `81fd59c08080808080808001` (32473.(2<sup>62</sup>+1))
-* `81fd59c08080808080808002` (32473.(2<sup>62</sup>+2))
-* `81fd59c08080808080808003` (32473.(2<sup>62</sup>+3))
+* `81fd598480808001` (32473.(2<sup>30</sup>+1))
+* `81fd598480808002` (32473.(2<sup>30</sup>+2))
+* `81fd598480808003` (32473.(2<sup>30</sup>+3))
 
-The following IDs are not contained the pattern `81fd5981fd59c08080808080808001c08080808080808003` (32473.{2<sup>62</sup>+1 - 2<sup>62</sup>+3}):
+The following IDs are not contained the pattern `81fd5981fd5984808080018480808003` (32473.{2<sup>30</sup>+1 - 2<sup>30</sup>+3}):
 
 * `81fd5902` (32473.2)
-* `81fd59c08080808080808000` (32473.2<sup>62</sup>)
-* `81fd59c08080808080808004` (32473.(2<sup>62</sup>+4))
+* `81fd598480808000` (32473.2<sup>30</sup>)
+* `81fd598480808004` (32473.(2<sup>30</sup>+4))
 
 ## Large OID Components
 
-This section contains test vectors with large OID components. {{trust-anchor-ids}} limits OID components to 63-bit values, but the procedure in {{trust-anchor-id-patterns}} is defined for arbitrary byte strings. Implementations MAY skip these test vectors if they limit OID components before calling the procedure.
+This section contains test vectors with large OID components. {{trust-anchor-ids}} limits OID components to 31-bit values, but the procedure in {{trust-anchor-id-patterns}} is defined for arbitrary byte strings. Implementations MAY skip these test vectors if they limit OID components before calling the procedure.
 
 The following IDs are contained in the pattern `81fd5981fd597b8348861580` (32473.{123-456}.{789-}):
 
