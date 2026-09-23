@@ -193,7 +193,7 @@ Depending on the protocol, trust anchor IDs may be represented in one of three w
 
 * For use in ASCII-compatible text protocols, a trust anchor ID's ASCII representation is the relative object identifier in dotted decimal notation. The example ID's ASCII representation is `32473.1`.
 
-The length of a trust anchor ID's binary representation MUST NOT exceed 32 bytes. This ensures that the ID's binary and dotted-decimal representations, as either a relative or full OID, all fit comfortably under 255 bytes. Additionally, trust anchor IDs MUST be allocated such that OID components are at most 2<sup>63</sup>-1. This ensures OID components can be represented in a 64-bit signed or unsigned integer.
+The length of a trust anchor ID's binary representation MUST NOT exceed 32 bytes. This ensures that the ID's binary and dotted-decimal representations, as either a relative or full OID, all fit comfortably under 255 bytes. OID components in a trust anchor ID MAY be arbitrarily large, but see {{implementation-considerations}} for additional guidance.
 
 A trust anchor ID representing a single trust anchor SHOULD be allocated by the CA operator and be common among relying parties that trust the CA. They MAY be allocated by another party, e.g. when bootstrapping an existing ecosystem, if all parties agree on the ID. In particular, the protocol requires authenticating and relying parties to agree, and the authenticating party's configuration typically comes from the CA.
 
@@ -274,7 +274,9 @@ Authenticating parties MAY have candidate certification paths that do not partic
 
 ### Trust Anchor ID Patterns
 
-A *trust anchor ID pattern* specifies a collection of related IDs. In this document, the IDs matched by a pattern are always the IDs of trust anchor groups. It is a sequence of pairs `min` and `max`. `min` is a non-negative integer and `max` is either a non-negative integer or infinity. A pattern is said to *contain* some trust anchor ID if both of the following are true:
+A *trust anchor ID pattern* specifies a collection of related IDs. In this document, the IDs matched by a pattern are always the IDs of trust anchor groups. It is a sequence of pairs `min` and `max`. `min` is a non-negative integer and `max` is either a non-negative integer or infinity. Integers in a trust anchor ID pattern MAY be arbitrarily large, but see {{implementation-considerations}} for additional guidance.
+
+A pattern is said to *contain* some trust anchor ID if both of the following are true:
 
 1. The number of components of the trust anchor ID, as a relative OID, is equal to the number of pairs in the pattern.
 2. Each component of the trust anchor ID, as a relative OID, is between `min` and `max`, inclusive, of the corresponding pair in the pattern.
@@ -661,6 +663,24 @@ IKzgi/++xTs=
 -----END CERTIFICATE-----
 ~~~
 
+# Implementation Considerations
+
+As in {{X680}}, an OID component in a trust anchor ID or trust anchor ID pattern can be arbitrarily large. Implementations MUST NOT misinterpret large components or otherwise exhibit undefined behavior on overflow. However, implementations MAY set an implementation-defined upper bound on supported trust anchor IDs. This can be particularly useful when using the ASCII, dotted-decimal representation of a trust anchor ID, either to avoid big integer implementations or a quadratic base-10 conversion.
+
+Implementations MUST correctly and interoperably handle unsupported but valid trust anchor IDs. In particular:
+
+* Implementations that print a trust anchor ID for diagnostic purposes MAY skip printing an ID, or printing some fallback representation, if they are unable to convert a large OID component to dotted decimal.
+
+* TLS implementations MUST accept IDs with arbitrarily large OID components in ClientHello, EncryptedExtensions, CertificateRequest messages. They MAY discard unsupported IDs before, e.g., passing them to the application.
+
+* Relying parties MAY limit their local configuration ({{relying-party-configuration}}) to trust anchor IDs with bounded OID components.
+
+* Authenticating parties MAY limit their local configuration ({{authenticating-party-configuration}}) to trust anchor IDs with bounded OID components.
+
+* Authenticating parties MUST accept arbitrarily large OID components in CertificatePropertyList structures. They MAY discard unsupported IDs or patterns before, e.g., applying them in local configuration. Note the algorithm in {{trust-anchor-id-patterns}} works for arbitrarily large OID components and does not require big integer support.
+
+Implementations SHOULD, at minimum, support OID components up to 2<sup>32</sup>-1 to support the full range of PEN values defined in {{Section 3 of !RFC9371}}. Trust anchor IDs SHOULD be allocated to fit in this limit.
+
 # Use Cases
 
 `trust_anchors`, like `certificate_authorities`, implements trust anchor negotiation. That is, it allows an authenticating party to incorporate relying party trust anchors into certificate selection. `trust_anchors` allows a wider range of TLS applications to use trust anchor negotiation, notably those that would be unable to use `certificate_authorities` due to size or privacy limitations.
@@ -891,7 +911,8 @@ The following IDs are contained in the pattern `81fd5981fd597b8348861580` (32473
 * `81fd597b8615` (32473.123.789)
 * `81fd59822c8704` (32473.300.900)
 * `81fd598348868d1f` (32473.456.99999)
-* `81fd598348ffffffffffffffff7f` (32473.456.(2<sup>63</sup>-1))
+* `81fd59834881ffffffffffffffff7f` (32473.456.(2<sup>64</sup>-1))
+* `81fd59834882808080808080808000` (32473.456.(2<sup>64</sup>))
 
 The following IDs are not contained the pattern `81fd5981fd597b8348861580` (32473.{123-456}.{789-}):
 
@@ -902,27 +923,6 @@ The following IDs are not contained the pattern `81fd5981fd597b8348861580` (3247
 * `81fd597b853c` (32473.123.700, third component out of range)
 * `8081fd597b8615` (invalid ID, not minimally encoded)
 * `81fd597b8695` (invalid ID, component was truncated)
-
-The following IDs are contained in the pattern `81fd5981fd59c08080808080808001c08080808080808003` (32473.{2<sup>62</sup>+1 - 2<sup>62</sup>+3}):
-
-* `81fd59c08080808080808001` (32473.(2<sup>62</sup>+1))
-* `81fd59c08080808080808002` (32473.(2<sup>62</sup>+2))
-* `81fd59c08080808080808003` (32473.(2<sup>62</sup>+3))
-
-The following IDs are not contained the pattern `81fd5981fd59c08080808080808001c08080808080808003` (32473.{2<sup>62</sup>+1 - 2<sup>62</sup>+3}):
-
-* `81fd5902` (32473.2)
-* `81fd59c08080808080808000` (32473.2<sup>62</sup>)
-* `81fd59c08080808080808004` (32473.(2<sup>62</sup>+4))
-
-## Large OID Components
-
-This section contains test vectors with large OID components. {{trust-anchor-ids}} limits OID components to 63-bit values, but the procedure in {{trust-anchor-id-patterns}} is defined for arbitrary byte strings. Implementations MAY skip these test vectors if they limit OID components before calling the procedure.
-
-The following IDs are contained in the pattern `81fd5981fd597b8348861580` (32473.{123-456}.{789-}):
-
-* `81fd59834881ffffffffffffffff7f` (32473.456.(2<sup>64</sup>-1))
-* `81fd59834882808080808080808000` (32473.456.(2<sup>64</sup>))
 
 The following IDs are contained in the pattern `81fd5981fd598280808080808080800182808080808080808003` (32473.{2<sup>64</sup>+1 - 2<sup>64</sup>+3}):
 
@@ -935,10 +935,6 @@ The following IDs are not contained the pattern `81fd5981fd598280808080808080800
 * `81fd5902` (32473.2)
 * `81fd5982808080808080808000` (32473.2<sup>64</sup>)
 * `81fd5982808080808080808004` (32473.(2<sup>64</sup>+4))
-
-## Invalid IDs or Patterns
-
-This section contains test vectors where either the ID or pattern is not a valid byte representation. The procedure in {{trust-anchor-id-patterns}} is defined for arbitrary byte strings and is expected to fail if either input is invalid. Implementations MAY skip these test vectors if they validate the ID and pattern before calling this procedure.
 
 The ID `81fd59` (32473) is not contained in the pattern `81fd59`. The pattern is invalid with an odd number of components.
 
