@@ -936,6 +936,10 @@ The following IDs are not contained the pattern `81fd5981fd598280808080808080800
 * `81fd5982808080808080808000` (32473.2<sup>64</sup>)
 * `81fd5982808080808080808004` (32473.(2<sup>64</sup>+4))
 
+## Invalid IDs or Patterns
+
+This section contains test vectors where either the ID or pattern is not a valid byte representation. The procedure in {{trust-anchor-id-patterns}} is defined for arbitrary byte strings and is expected to fail if either input is invalid. Implementations MAY skip these test vectors if they validate the ID and pattern before calling this procedure.
+
 The ID `81fd59` (32473) is not contained in the pattern `81fd59`. The pattern is invalid with an odd number of components.
 
 The ID `81fd59` (32473) is not contained in the pattern `81fd`. The pattern is invalid with a truncated `min` value.
