@@ -665,21 +665,25 @@ IKzgi/++xTs=
 
 # Implementation Considerations
 
-As in {{X680}}, an OID component in a trust anchor ID or trust anchor ID pattern can be arbitrarily large. Implementations MUST NOT misinterpret large components or otherwise exhibit undefined behavior on overflow. However, implementations MAY set an implementation-defined upper bound on supported trust anchor IDs. This can be particularly useful when using the ASCII, dotted-decimal representation of a trust anchor ID, either to avoid big integer implementations or a quadratic base-10 conversion.
+As in {{X680}}, an OID component in a trust anchor ID or trust anchor ID pattern can be arbitrarily large. Implementations MUST NOT misinterpret large components or otherwise exhibit undefined behavior on overflow.
 
-Implementations MUST correctly and interoperably handle unsupported but valid trust anchor IDs. In particular:
+The operations defined in this document act on the byte representation of a trust anchor ID, and do not require decoding individual OID components. Implementations are RECOMMENDED to retain IDs in the byte representation, which naturally supports arbitrary OID components. In particular, trust anchor ID equality and the procedures in {{trust-anchor-id-patterns}} can work directly on the byte representations.
+
+However, in some contexts, the ASCII, dotted-decimal representations are more suitable. For example, an application might print IDs for diagnostics, use a text-based configuration file, or work with IDs in some other text-based system. In these contexts, implementations MAY set an implementation-defined upper bound on supported trust anchor IDs. This can help avoid big integers or a quadratic base-10 conversion.
+
+When limiting OID components, implementations MUST still correctly and interoperably handle unsupported but valid trust anchor IDs. In particular:
 
 * Implementations that print a trust anchor ID for diagnostic purposes MAY skip printing an ID, or printing some fallback representation, if they are unable to convert a large OID component to dotted decimal.
 
-* TLS implementations MUST accept IDs with arbitrarily large OID components in ClientHello, EncryptedExtensions, CertificateRequest messages. They MAY discard unsupported IDs before, e.g., passing them to the application.
+* TLS implementations MUST accept IDs with arbitrarily large OID components in ClientHello, EncryptedExtensions, and CertificateRequest. They MAY discard unsupported IDs before passing them to another component. If all IDs in EncryptedExtensions are discarded, this is equivalent to the extension being omitted.
 
 * Relying parties MAY limit their local configuration ({{relying-party-configuration}}) to trust anchor IDs with bounded OID components.
 
-* Authenticating parties MAY limit their local configuration ({{authenticating-party-configuration}}) to trust anchor IDs with bounded OID components.
+* Authenticating parties MAY limit their local configuration ({{authenticating-party-configuration}}) to trust anchor IDs and patterns with bounded OID components.
 
-* Authenticating parties MUST accept arbitrarily large OID components in CertificatePropertyList structures. They MAY discard unsupported IDs or patterns before, e.g., applying them in local configuration. Note the algorithm in {{trust-anchor-id-patterns}} works for arbitrarily large OID components and does not require big integer support.
+* Authenticating parties MAY discard unsupported IDs or patterns in CertificatePropertyList structures before applying them in local configuration, but doing so might result in an incomplete configuration.
 
-Implementations SHOULD, at minimum, support OID components up to 2<sup>32</sup>-1 to support the full range of PEN values defined in {{Section 3 of !RFC9371}}. Trust anchor IDs SHOULD be allocated to fit in this limit.
+Implementations with an OID component limit SHOULD, at minimum, support OID components up to 2<sup>32</sup>-1 to support the full range of PEN values defined in {{Section 3 of !RFC9371}}. Trust anchor IDs SHOULD be allocated to fit in this limit.
 
 # Use Cases
 
