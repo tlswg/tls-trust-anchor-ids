@@ -5,12 +5,12 @@
 Transport Layer Security                                         B. Beck
 Internet-Draft                                                   OpenSSL
 Intended status: Standards Track                             D. Benjamin
-Expires: 26 March 2027                                        Google LLC
+Expires: 31 March 2027                                        Google LLC
                                                               D. O'Brien
                                                                         
                                                               K. Nekritz
                                                                     Meta
-                                                       22 September 2026
+                                                       27 September 2026
 
 
                       TLS Trust Anchor Identifiers
@@ -56,7 +56,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 26 March 2027.
+   This Internet-Draft will expire on 31 March 2027.
 
 Copyright Notice
 
@@ -97,35 +97,35 @@ Table of Contents
      7.5.  ACME Extension
        7.5.1.  Example
      7.6.  Representing Multiple Paths
-   8.  Use Cases
-     8.1.  Making Use of Newly-Trusted CAs
-     8.2.  Removing Untrustworthy CAs
-     8.3.  Key Rotation
-     8.4.  Other Root Transitions
-     8.5.  Intermediate Elision
-     8.6.  Conflicting Relying Party Requirements
-     8.7.  Backup Certificates
-     8.8.  Public Key Pinning
-   9.  Privacy Considerations
-     9.1.  Relying Parties
-     9.2.  Authenticating Parties
-   10. Security Considerations
-     10.1.  Incorrect Selection Metadata
-     10.2.  Trust Anchor Negotiation
-       10.2.1.  Relying Party Policies
-       10.2.2.  Agility
-       10.2.3.  Serving Multiple Certificates
-       10.2.4.  Targeting TLS Interception
-   11. IANA Considerations
-     11.1.  TLS ExtensionType Updates
-     11.2.  Media Type Updates
-     11.3.  CertificatePropertyType Registry
-   12. References
-     12.1.  Normative References
-     12.2.  Informative References
+   8.  Implementation Considerations
+   9.  Use Cases
+     9.1.  Making Use of Newly-Trusted CAs
+     9.2.  Removing Untrustworthy CAs
+     9.3.  Key Rotation
+     9.4.  Other Root Transitions
+     9.5.  Intermediate Elision
+     9.6.  Conflicting Relying Party Requirements
+     9.7.  Backup Certificates
+     9.8.  Public Key Pinning
+   10. Privacy Considerations
+     10.1.  Relying Parties
+     10.2.  Authenticating Parties
+   11. Security Considerations
+     11.1.  Incorrect Selection Metadata
+     11.2.  Trust Anchor Negotiation
+       11.2.1.  Relying Party Policies
+       11.2.2.  Agility
+       11.2.3.  Serving Multiple Certificates
+       11.2.4.  Targeting TLS Interception
+   12. IANA Considerations
+     12.1.  TLS ExtensionType Updates
+     12.2.  Media Type Updates
+     12.3.  CertificatePropertyType Registry
+   13. References
+     13.1.  Normative References
+     13.2.  Informative References
    Appendix A.  Trust Anchor ID Pattern Test Vectors
-     A.1.  Large OID Components
-     A.2.  Invalid IDs or Patterns
+     A.1.  Invalid IDs or Patterns
    Acknowledgements
    Authors' Addresses
 
@@ -316,10 +316,8 @@ Table of Contents
    The length of a trust anchor ID's binary representation MUST NOT
    exceed 32 bytes.  This ensures that the ID's binary and dotted-
    decimal representations, as either a relative or full OID, all fit
-   comfortably under 255 bytes.  Additionally, trust anchor IDs MUST be
-   allocated such that OID components are at most 2^63-1.  This ensures
-   OID components can be represented in a 64-bit signed or unsigned
-   integer.
+   comfortably under 255 bytes.  OID components in a trust anchor ID MAY
+   be arbitrarily large, but see Section 8 for additional guidance.
 
    A trust anchor ID representing a single trust anchor SHOULD be
    allocated by the CA operator and be common among relying parties that
@@ -427,7 +425,7 @@ Table of Contents
       Sending the group would signal the full contents of the group.
 
    *  The client MAY send a (possibly empty) subset of its trust anchors
-      due to fingerprinting risks (see Section 9) or size concerns.
+      due to fingerprinting risks (see Section 10) or size concerns.
 
    *  The client MAY send trust anchors it does not trust.  This can
       reduce fingerprinting if, e.g., default instances of the client
@@ -483,8 +481,11 @@ Table of Contents
    In this document, the IDs matched by a pattern are always the IDs of
    trust anchor groups.  It is a sequence of pairs min and max. min is a
    non-negative integer and max is either a non-negative integer or
-   infinity.  A pattern is said to _contain_ some trust anchor ID if
-   both of the following are true:
+   infinity.  Integers in a trust anchor ID pattern MAY be arbitrarily
+   large, but see Section 8 for additional guidance.
+
+   A pattern is said to _contain_ some trust anchor ID if both of the
+   following are true:
 
    1.  The number of components of the trust anchor ID, as a relative
        OID, is equal to the number of pairs in the pattern.
@@ -744,7 +745,7 @@ Table of Contents
    A trust anchor group specifies a collection of trust anchors, which a
    relying party can send to represent the contents.  For example:
 
-   *  A set of root CAs (or intermediate CAs, as in Section 8.5)
+   *  A set of root CAs (or intermediate CAs, as in Section 9.5)
       operated by a CA operator.
 
    *  A set of trust anchors common to large set of relying parties.
@@ -1000,7 +1001,7 @@ Table of Contents
    -----END CERTIFICATE-----
 
    The IANA registration for this media type is described in
-   Section 11.2.
+   Section 12.2.
 
 7.5.  ACME Extension
 
@@ -1166,7 +1167,63 @@ Table of Contents
    IKzgi/++xTs=
    -----END CERTIFICATE-----
 
-8.  Use Cases
+8.  Implementation Considerations
+
+   As in [X680], an OID component in a trust anchor ID or trust anchor
+   ID pattern can be arbitrarily large.  Implementations MUST NOT
+   misinterpret large components or otherwise exhibit undefined behavior
+   on overflow.
+
+   The operations defined in this document act on the byte
+   representation of a trust anchor ID, and do not require decoding
+   individual OID components.  Implementations are RECOMMENDED to retain
+   IDs in the byte representation, which naturally supports arbitrary
+   OID components.  In particular, trust anchor ID equality and the
+   procedures in Section 5.3.1 can work directly on the byte
+   representations.
+
+   However, in some contexts, the ASCII, dotted-decimal representations
+   are more suitable.  For example, an application might print IDs for
+   diagnostics, use a text-based configuration file, or work with IDs in
+   some other text-based system.  In these contexts, implementations MAY
+   set an implementation-defined upper bound on supported trust anchor
+   IDs.  This can help avoid big integers or a quadratic base-10
+   conversion.
+
+   When limiting OID components, implementations MUST still correctly
+   and interoperably handle unsupported but valid trust anchor IDs.  In
+   particular:
+
+   *  Implementations that print a trust anchor ID for diagnostic
+      purposes MAY skip printing an ID, or printing some fallback
+      representation, if they are unable to convert a large OID
+      component to dotted decimal.
+
+   *  TLS implementations MUST accept IDs with arbitrarily large OID
+      components in ClientHello, EncryptedExtensions, and
+      CertificateRequest.  They MAY discard unsupported IDs before
+      passing them to another component.  If all IDs in
+      EncryptedExtensions are discarded, this is equivalent to the
+      extension being omitted.
+
+   *  Relying parties MAY limit their local configuration (Section 5.2)
+      to trust anchor IDs with bounded OID components.
+
+   *  Authenticating parties MAY limit their local configuration
+      (Section 5.3) to trust anchor IDs and patterns with bounded OID
+      components.
+
+   *  Authenticating parties MAY discard unsupported IDs or patterns in
+      CertificatePropertyList structures before applying them in local
+      configuration, but doing so might result in an incomplete
+      configuration.
+
+   Implementations with an OID component limit SHOULD, at minimum,
+   support OID components up to 2^32-1 to support the full range of PEN
+   values defined in Section 3 of [RFC9371].  Trust anchor IDs SHOULD be
+   allocated to fit in this limit.
+
+9.  Use Cases
 
    trust_anchors, like certificate_authorities, implements trust anchor
    negotiation.  That is, it allows an authenticating party to
@@ -1193,7 +1250,7 @@ Table of Contents
    The rest of this section discusses uses cases for trust anchor
    negotiation.
 
-8.1.  Making Use of Newly-Trusted CAs
+9.1.  Making Use of Newly-Trusted CAs
 
    When one relying party trusts a new CA, other relying parties, such
    as older ones, may not yet trust it.  Trust anchor negotiation allows
@@ -1220,7 +1277,7 @@ Table of Contents
    addresses this problem and allows for both gradual and possibly
    heterogeneous deployment of post-quantum CAs across relying parties.
 
-8.2.  Removing Untrustworthy CAs
+9.2.  Removing Untrustworthy CAs
 
    When CAs are determined to be untrustworthy, relying parties must
    remove them to mitigate the risk to user security.  Over time, this
@@ -1247,7 +1304,7 @@ Table of Contents
    of CA, so this can occur asynchronously, based on serving needs and
    costs, rather than delay the response to a security incident.
 
-8.3.  Key Rotation
+9.3.  Key Rotation
 
    Despite the severity of root CA private key compromise and the
    benefits of routinely rotating cryptographic key material, such
@@ -1255,7 +1312,7 @@ Table of Contents
    [CHROME-ROOTS] and [MOZILLA-ROOTS] was 25 years old, dating to 1998.
 
    Key rotation in PKIs used in TLS is challenging, as it combines the
-   challenges described in both Section 8.1 and Section 8.2.  Without
+   challenges described in both Section 9.1 and Section 9.2.  Without
    trust anchor negotiation, authenticating parties cannot switch to the
    new root as long as any supported older relying party requires the
    old root.  That, in turn, means relying parties cannot distrust the
@@ -1267,20 +1324,20 @@ Table of Contents
    impacting older relying parties.  New relying parties can then
    distrust the old root.
 
-8.4.  Other Root Transitions
+9.4.  Other Root Transitions
 
    The mechanisms in this document can aid PKI transitions beyond key
    rotation.  For example, a CA operator may generate a postquantum root
    CA and issue from the classical and postquantum roots concurrently.
    The authenticating party will then, transparently and with no
-   configuration change, serve both.  As in Section 8.3, newer relying
+   configuration change, serve both.  As in Section 9.3, newer relying
    parties can then remove the classical roots, while older relying
    parties continue to function.
 
    This same procedure may also be used to transition between newer,
    more size-efficient signature algorithms, as they are developed.
 
-8.5.  Intermediate Elision
+9.5.  Intermediate Elision
 
    In many PKIs, root CAs issue shorter-lived intermediate certificates
    which, in turn, issue end-entity certificates.  This comes at a
@@ -1303,7 +1360,7 @@ Table of Contents
    possible, falling back to the longer path when the relying party’s
    short-lived root is stale.
 
-8.6.  Conflicting Relying Party Requirements
+9.6.  Conflicting Relying Party Requirements
 
    An authenticating party may need to support relying parties with
    different, potentially conflicting requirements.  For example, in
@@ -1317,7 +1374,7 @@ Table of Contents
    different trust anchors where necessary.  This avoids the need to
    compromise on user security or service availability.
 
-8.7.  Backup Certificates
+9.7.  Backup Certificates
 
    An authenticating party may obtain certification paths from multiple
    CAs for redundancy.  If one CA is compromised and removed from newer
@@ -1325,7 +1382,7 @@ Table of Contents
    serve a backup certification path, avoiding the immediate breakage
    that would otherwise be caused by this removal.
 
-8.8.  Public Key Pinning
+9.8.  Public Key Pinning
 
    To reduce security risk from misissued certificates, relying parties
    sometimes employ public key pinning [RFC7469].  Pinning effectively
@@ -1345,9 +1402,9 @@ Table of Contents
    with the pinning relying party, and another CA with other relying
    parties.
 
-9.  Privacy Considerations
+10.  Privacy Considerations
 
-9.1.  Relying Parties
+10.1.  Relying Parties
 
    The trust_anchors extension is analogous to the
    certificate_authorities extension (Section 4.3.4 of [RFC9846]), but
@@ -1408,7 +1465,7 @@ Table of Contents
    across connections.  Relying parties SHOULD NOT maintain such state
    across connections that are intended to be uncorrelated.
 
-9.2.  Authenticating Parties
+10.2.  Authenticating Parties
 
    If the authenticating party is a server, the trust_anchors extension
    in EncryptedExtensions enumerates the trust anchors for the server's
@@ -1427,9 +1484,9 @@ Table of Contents
    This protocol does not enumerate the available certification paths
    for a client.
 
-10.  Security Considerations
+11.  Security Considerations
 
-10.1.  Incorrect Selection Metadata
+11.1.  Incorrect Selection Metadata
 
    If the authenticating party has provisioned certification paths with
    incorrect trust anchor IDs, it may negotiate inaccurately and send an
@@ -1437,7 +1494,7 @@ Table of Contents
    been trusted.  This will not result in the untrusted path becoming
    trusted, but the connection will fail.
 
-10.2.  Trust Anchor Negotiation
+11.2.  Trust Anchor Negotiation
 
    Both the trust_anchors and certificate_authorities (Section 4.3.4 of
    [RFC9846]) extensions implement trust anchor negotiation, so security
@@ -1445,7 +1502,7 @@ Table of Contents
    This section discusses security considerations for trust anchor
    negotiation in general.
 
-10.2.1.  Relying Party Policies
+11.2.1.  Relying Party Policies
 
    PKI-based TLS authentication depends on the relying party's
    certificate policies.  If the relying party trusts an untrustworthy
@@ -1460,7 +1517,7 @@ Table of Contents
    Relying parties remain responsible for trusting only trustworthy CAs,
    and untrustworthy CAs remain a security risk when trusted.
 
-10.2.2.  Agility
+11.2.2.  Agility
 
    As with other TLS parameters, negotiation reduces a conflict between
    availability and security, which allows PKIs to better mitigate
@@ -1469,7 +1526,7 @@ Table of Contents
    negotiation helps authenticating parties navigate differences between
    those relying parties and existing relying parties.  Each set of
    requirements may be satisfied without compatibility risk to the
-   other.  Section 8 discusses such scenarios in more detail.
+   other.  Section 9 discusses such scenarios in more detail.
 
    Negotiation also reduces pressures on relying parties to sacrifice
    user security for compatibility.  If a relying party does not trust
@@ -1485,13 +1542,13 @@ Table of Contents
    the relying party.  This allows the ecosystem to improve
    interoperability without sacrificing user security.
 
-10.2.3.  Serving Multiple Certificates
+11.2.3.  Serving Multiple Certificates
 
    Trust anchor negotiation reduces compatibility pressures against
    authenticating parties serving certificates from a less common CA, as
    they can be served with other certificates.  In some cases, the CA
    may have been distrusted, but still used to support older relying
-   parties.  As discussed in Section 8 and Section 10.2.2, this
+   parties.  As discussed in Section 9 and Section 11.2.2, this
    capability aids PKI transitions that mitigate security risks to
    users.
 
@@ -1524,7 +1581,7 @@ Table of Contents
    incorrect certificates, possibly in the future, that can attack the
    relying party.
 
-10.2.4.  Targeting TLS Interception
+11.2.4.  Targeting TLS Interception
 
    A network attacker in possession of a misissued certificate could use
    trust anchor negotiation to differentiate clients and only enable TLS
@@ -1547,9 +1604,9 @@ Table of Contents
    differentiation, with or without trust anchor negotiation, has no
    significant impact.
 
-11.  IANA Considerations
+12.  IANA Considerations
 
-11.1.  TLS ExtensionType Updates
+12.1.  TLS ExtensionType Updates
 
    IANA is requested to create the following entry in the TLS
    ExtensionType Values registry, originally created in [RFC4366]:
@@ -1566,7 +1623,7 @@ Table of Contents
 
                                  Table 1
 
-11.2.  Media Type Updates
+12.2.  Media Type Updates
 
    IANA is requested to create the following entry in the "Media Types"
    registry, defined in [RFC6838]:
@@ -1609,7 +1666,7 @@ Table of Contents
 
    Change controller:  IETF
 
-11.3.  CertificatePropertyType Registry
+12.3.  CertificatePropertyType Registry
 
    IANA is requested to create the "CertificatePropertyType" registry
    within the "Transport Layer Security (TLS) Extensions" group.  The
@@ -1635,9 +1692,9 @@ Table of Contents
    *  Values in the range 65280-65535 are reserved for Private Use
       [RFC8126].
 
-12.  References
+13.  References
 
-12.1.  Normative References
+13.1.  Normative References
 
    [RFC2119]  Bradner, S., "Key words for use in RFCs to Indicate
               Requirement Levels", BCP 14, RFC 2119,
@@ -1715,7 +1772,7 @@ Table of Contents
               (DER)", ISO/IEC 8825-1:2021, 2021,
               <https://www.itu.int/rec/T-REC-X.690>.
 
-12.2.  Informative References
+13.2.  Informative References
 
    [CHROME-ROOTS]
               Chromium, "Chrome Root Store", 30 August 2023,
@@ -1772,7 +1829,9 @@ Appendix A.  Trust Anchor ID Pattern Test Vectors
 
    *  81fd598348868d1f (32473.456.99999)
 
-   *  81fd598348ffffffffffffffff7f (32473.456.(2^63-1))
+   *  81fd59834881ffffffffffffffff7f (32473.456.(2^64-1))
+
+   *  81fd59834882808080808080808000 (32473.456.(2^64))
 
    The following IDs are not contained the pattern
    81fd5981fd597b8348861580 (32473.{123-456}.{789-}):
@@ -1790,41 +1849,6 @@ Appendix A.  Trust Anchor ID Pattern Test Vectors
    *  8081fd597b8615 (invalid ID, not minimally encoded)
 
    *  81fd597b8695 (invalid ID, component was truncated)
-
-   The following IDs are contained in the pattern
-   81fd5981fd59c08080808080808001c08080808080808003 (32473.{2^62+1 -
-   2^62+3}):
-
-   *  81fd59c08080808080808001 (32473.(2^62+1))
-
-   *  81fd59c08080808080808002 (32473.(2^62+2))
-
-   *  81fd59c08080808080808003 (32473.(2^62+3))
-
-   The following IDs are not contained the pattern
-   81fd5981fd59c08080808080808001c08080808080808003 (32473.{2^62+1 -
-   2^62+3}):
-
-   *  81fd5902 (32473.2)
-
-   *  81fd59c08080808080808000 (32473.2^62)
-
-   *  81fd59c08080808080808004 (32473.(2^62+4))
-
-A.1.  Large OID Components
-
-   This section contains test vectors with large OID components.
-   Section 4 limits OID components to 63-bit values, but the procedure
-   in Section 5.3.1 is defined for arbitrary byte strings.
-   Implementations MAY skip these test vectors if they limit OID
-   components before calling the procedure.
-
-   The following IDs are contained in the pattern
-   81fd5981fd597b8348861580 (32473.{123-456}.{789-}):
-
-   *  81fd59834881ffffffffffffffff7f (32473.456.(2^64-1))
-
-   *  81fd59834882808080808080808000 (32473.456.(2^64))
 
    The following IDs are contained in the pattern
    81fd5981fd598280808080808080800182808080808080808003 (32473.{2^64+1 -
@@ -1846,7 +1870,7 @@ A.1.  Large OID Components
 
    *  81fd5982808080808080808004 (32473.(2^64+4))
 
-A.2.  Invalid IDs or Patterns
+A.1.  Invalid IDs or Patterns
 
    This section contains test vectors where either the ID or pattern is
    not a valid byte representation.  The procedure in Section 5.3.1 is
