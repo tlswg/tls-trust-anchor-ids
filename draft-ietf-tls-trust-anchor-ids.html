@@ -1645,7 +1645,7 @@ TrustAnchorID AvailableTrustAnchorList&lt;1..2^16-1&gt;;
               <p id="section-5.3.1-10.2.1">If the first byte of <code>in</code> is 0x80, fail the procedure. The value was not minimally encoded.<a href="#section-5.3.1-10.2.1" class="pilcrow">¶</a></p>
 </li>
             <li id="section-5.3.1-10.3">
-              <p id="section-5.3.1-10.3.1">Find the earliest byte of <code>in</code> whose most-significant bit is unuset.<a href="#section-5.3.1-10.3.1" class="pilcrow">¶</a></p>
+              <p id="section-5.3.1-10.3.1">Find the earliest byte of <code>in</code> whose most-significant bit is unset.<a href="#section-5.3.1-10.3.1" class="pilcrow">¶</a></p>
 </li>
             <li id="section-5.3.1-10.4">
               <p id="section-5.3.1-10.4.1">If not found, fail the procedure. The value was truncated.<a href="#section-5.3.1-10.4.1" class="pilcrow">¶</a></p>
@@ -1660,7 +1660,7 @@ TrustAnchorID AvailableTrustAnchorList&lt;1..2^16-1&gt;;
               <p id="section-5.3.1-12.1.1">Compare <code>a</code>'s length to <code>b</code>'s length. If they are not equal, return the result of the comparison.<a href="#section-5.3.1-12.1.1" class="pilcrow">¶</a></p>
 </li>
             <li id="section-5.3.1-12.2">
-              <p id="section-5.3.1-12.2.1">Return the result of lexicographically comparing <code>a</code> and <code>b</code>. Bytes in <code>a</code> and <code>b</code> are intepreted as integers from 0 to 255.<a href="#section-5.3.1-12.2.1" class="pilcrow">¶</a></p>
+              <p id="section-5.3.1-12.2.1">Return the result of lexicographically comparing <code>a</code> and <code>b</code>. Bytes in <code>a</code> and <code>b</code> are interpreted as integers from 0 to 255.<a href="#section-5.3.1-12.2.1" class="pilcrow">¶</a></p>
 </li>
           </ol>
 <p id="section-5.3.1-13">To check if a trust anchor ID pattern, <code>pattern</code>, contains a trust anchor ID <code>id</code>, both in their byte representations:<a href="#section-5.3.1-13" class="pilcrow">¶</a></p>
@@ -2683,7 +2683,7 @@ IKzgi/++xTs=
           <p id="appendix-A-3.5.1"><code>81fd59834882808080808080808000</code> (32473.456.(2<sup>64</sup>))<a href="#appendix-A-3.5.1" class="pilcrow">¶</a></p>
 </li>
       </ul>
-<p id="appendix-A-4">The following IDs are not contained the pattern <code>81fd5981fd597b8348861580</code> (32473.{123-456}.{789-}):<a href="#appendix-A-4" class="pilcrow">¶</a></p>
+<p id="appendix-A-4">The following IDs are not contained in the pattern <code>81fd5981fd597b8348861580</code> (32473.{123-456}.{789-}):<a href="#appendix-A-4" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="appendix-A-5.1">
           <p id="appendix-A-5.1.1"><code>81fd597b</code> (32473.123, too few components)<a href="#appendix-A-5.1.1" class="pilcrow">¶</a></p>
@@ -2719,7 +2719,7 @@ IKzgi/++xTs=
           <p id="appendix-A-7.3.1"><code>81fd5982808080808080808003</code> (32473.(2<sup>64</sup>+3))<a href="#appendix-A-7.3.1" class="pilcrow">¶</a></p>
 </li>
       </ul>
-<p id="appendix-A-8">The following IDs are not contained the pattern <code>81fd5981fd598280808080808080800182808080808080808003</code> (32473.{2<sup>64</sup>+1 - 2<sup>64</sup>+3}):<a href="#appendix-A-8" class="pilcrow">¶</a></p>
+<p id="appendix-A-8">The following IDs are not contained in the pattern <code>81fd5981fd598280808080808080800182808080808080808003</code> (32473.{2<sup>64</sup>+1 - 2<sup>64</sup>+3}):<a href="#appendix-A-8" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="appendix-A-9.1">
           <p id="appendix-A-9.1.1"><code>81fd5902</code> (32473.2)<a href="#appendix-A-9.1.1" class="pilcrow">¶</a></p>

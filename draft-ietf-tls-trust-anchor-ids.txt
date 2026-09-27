@@ -536,8 +536,7 @@ Table of Contents
    2.  If the first byte of in is 0x80, fail the procedure.  The value
        was not minimally encoded.
 
-   3.  Find the earliest byte of in whose most-significant bit is
-       unuset.
+   3.  Find the earliest byte of in whose most-significant bit is unset.
 
    4.  If not found, fail the procedure.  The value was truncated.
 
@@ -549,7 +548,7 @@ Table of Contents
        the result of the comparison.
 
    2.  Return the result of lexicographically comparing a and b.  Bytes
-       in a and b are intepreted as integers from 0 to 255.
+       in a and b are interpreted as integers from 0 to 255.
 
    To check if a trust anchor ID pattern, pattern, contains a trust
    anchor ID id, both in their byte representations:
@@ -1833,7 +1832,7 @@ Appendix A.  Trust Anchor ID Pattern Test Vectors
 
    *  81fd59834882808080808080808000 (32473.456.(2^64))
 
-   The following IDs are not contained the pattern
+   The following IDs are not contained in the pattern
    81fd5981fd597b8348861580 (32473.{123-456}.{789-}):
 
    *  81fd597b (32473.123, too few components)
@@ -1860,7 +1859,7 @@ Appendix A.  Trust Anchor ID Pattern Test Vectors
 
    *  81fd5982808080808080808003 (32473.(2^64+3))
 
-   The following IDs are not contained the pattern
+   The following IDs are not contained in the pattern
    81fd5981fd598280808080808080800182808080808080808003 (32473.{2^64+1 -
    2^64+3}):
 
