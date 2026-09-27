@@ -301,14 +301,14 @@ To remove an encoded base-128 integer from a byte string, `in`:
 
 1. If `in` is empty, fail the procedure. There are no more values in `in`.
 2. If the first byte of `in` is 0x80, fail the procedure. The value was not minimally encoded.
-3. Find the earliest byte of `in` whose most-significant bit is unuset.
+3. Find the earliest byte of `in` whose most-significant bit is unset.
 4. If not found, fail the procedure. The value was truncated.
 5. Remove and return the prefix of `in` which ends at the found byte.
 
 To compare two encoded base-128 integers, `a` and `b`:
 
 1. Compare `a`'s length to `b`'s length. If they are not equal, return the result of the comparison.
-2. Return the result of lexicographically comparing `a` and `b`. Bytes in `a` and `b` are intepreted as integers from 0 to 255.
+2. Return the result of lexicographically comparing `a` and `b`. Bytes in `a` and `b` are interpreted as integers from 0 to 255.
 
 To check if a trust anchor ID pattern, `pattern`, contains a trust anchor ID `id`, both in their byte representations:
 
@@ -918,7 +918,7 @@ The following IDs are contained in the pattern `81fd5981fd597b8348861580` (32473
 * `81fd59834881ffffffffffffffff7f` (32473.456.(2<sup>64</sup>-1))
 * `81fd59834882808080808080808000` (32473.456.(2<sup>64</sup>))
 
-The following IDs are not contained the pattern `81fd5981fd597b8348861580` (32473.{123-456}.{789-}):
+The following IDs are not contained in the pattern `81fd5981fd597b8348861580` (32473.{123-456}.{789-}):
 
 * `81fd597b` (32473.123, too few components)
 * `81fd597b861500` (32473.123.789.0, too many components)
@@ -934,7 +934,7 @@ The following IDs are contained in the pattern `81fd5981fd5982808080808080808001
 * `81fd5982808080808080808002` (32473.(2<sup>64</sup>+2))
 * `81fd5982808080808080808003` (32473.(2<sup>64</sup>+3))
 
-The following IDs are not contained the pattern `81fd5981fd598280808080808080800182808080808080808003` (32473.{2<sup>64</sup>+1 - 2<sup>64</sup>+3}):
+The following IDs are not contained in the pattern `81fd5981fd598280808080808080800182808080808080808003` (32473.{2<sup>64</sup>+1 - 2<sup>64</sup>+3}):
 
 * `81fd5902` (32473.2)
 * `81fd5982808080808080808000` (32473.2<sup>64</sup>)
