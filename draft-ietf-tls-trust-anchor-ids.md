@@ -502,6 +502,8 @@ A CertificatePropertyList is defined using the TLS presentation language ({{Sect
 enum {
     trust_anchor_id(0),
     trust_anchor_groups(1),
+    trust_anchor_spki(3),
+    ignore_last_algorithm(5),
     (2^16-1)
 } CertificatePropertyType;
 
@@ -535,6 +537,22 @@ opaque TrustAnchorIDPattern<0..2^8-1>;
 
 TrustAnchorIDPattern TrustAnchorIDPatternList<1..2^16-1>;
 ~~~
+
+## Trust anchor SPKI Property
+
+The `trust_anchor_spki` property's `data` field contains DER encoding of an X.509 `SubjectPublicKeyInfo` structure {{!RFC5280}}. This structure represents the trust anchor's public key.
+
+One use of this is OCSP (Online Certificate Status Protocol) stapling: Fetching OCSP response requires the issuer public key, which is not otherwise available for the last certificate in the chain. While OCSP for CAs might not be useful, in case all intermediates are suppressed, the last certificate in chain will be the end-entity one.
+
+Other uses include authenticating parties that verify signatures on any sent certificates.
+
+## Ignore Last Algorithm Property
+
+The `ignore_last_algorithm` property's `data` field MUST be empty.
+
+This property marks that the algorithm of the last certificate in chain is to be ignored for purposes of TLS `signature_algorithms_cert` matching.
+
+This SHOULD be set on trust anchors that are only ever intended to use a single signature algorithm, so any RP supporting the trust anchor can be assumed to support the algorithm used, even if it was not explicitly signaled.
 
 ## PEM Representation
 
@@ -950,6 +968,8 @@ IANA is requested to create the "TLS CertificatePropertyType" registry within th
 |---------|--------------------------|------------|
 | 0       | trust_anchor_id          | [this-RFC] |
 | 1       | trust_anchor_groups      | [this-RFC] |
+| 3       | trust_anchor_spki        | [this-RFC] |
+| 5       | ignore_last_algorithm    | [this-RFC] |
 
 New values are allocated according to the following process:
 
