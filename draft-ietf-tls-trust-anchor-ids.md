@@ -461,6 +461,9 @@ enum {
     trust_anchor_id(0),
     trust_anchor_groups(1),
     trust_anchor_negotiation(2),
+    trust_anchor_spki(3),
+    not_stand_alone(4),
+    ignore_last_algorithm(5),
     (2^16-1)
 } CertificatePropertyType;
 
@@ -505,6 +508,37 @@ When a candidate certification path has this property, the authenticating party 
 A path without the `trust_anchor_negotiation` property MAY still participate in this protocol and include the `trust_anchor_id` and `trust_anchor_groups` properties. In particular, the authenticating party MAY still choose to condition the path on trust anchor negotiation if it is combining multiple sets of candidate paths, each with their separate determinations about suitable fallbacks. {{acme-example}} gives an example scenario. This could be implemented either with separate local configuration or by modifying the CertificatePropertyList structures when combining the sets.
 
 {{acme-extension}} discusses how an ACME server might set this property, as well as examples where the authenticating party might override this recommendation.
+
+## Trust anchor SPKI Property
+
+The `trust_anchor_spki` property's `data` field contains DER encoding of X.509 `SubjectPublicKeyInfo` structure {{!RFC5280}}. This structure represents the trust anchor's public key.
+
+One use of this is OCSP (Online Certificate Status Protocol) stapling: Fetching OCSP response requires the issuer public key, which is not otherwise available for the last certificate in the chain. While OCSP for CAs might not be useful, in case all intermediates are suppressed, the last certificate in chain will be the end-entity one.
+
+Other uses include authenticating parties that verify signatures on any sent certificates.
+
+## Not Stand-alone Property
+
+The `not_stand_alone` property's `data` field MUST be empty.
+
+This property marks that the certification path is non-stand-alone. That is, even if the relying party trusts its apperent issuer, it still might not trust the certificate chain (e.g., Merkle Tree Certificate landmark-relative certificates).
+
+Such chains really SHOULD NOT be used without proper negotiation, as cosequence:
+
+* ACME servers SHOULD NOT offer such chains as the main chain.
+* ACME clients SHOULD filter out such chains when selecting default path from an order.
+* If such chain is forced as default by configuration, authenticating parties SHOULD log a warning.
+* Authenticating parties SHOULD ignore such chains when selecting the default chain.
+* Authenticating parties SHOULD ignore such chains in TLS `certificate_authorities` and `trusted_ca_keys` extensions.
+
+## Ignore Last Algorithm Property
+
+The `ignore_last_algorithm` property's `data` field MUST be empty.
+
+This property marks that the algorithm of the last certificate in chain is to be ignored for purposes of TLS `signature_algorithms_cert` matching.
+
+This SHOULD be set on trust anchors that are only ever intended to use a single signature algorithm, so any RP supporting the trust anchor can be assumed to support the algorithm used, even if it was not explicitly signaled.
+
 
 ## PEM Representation
 
@@ -898,6 +932,9 @@ IANA is requested to create the "CertificatePropertyType" registry within the "T
 | 0       | trust_anchor_id          | [this-RFC] |
 | 1       | trust_anchor_groups      | [this-RFC] |
 | 2       | trust_anchor_negotiation | [this-RFC] |
+| 3       | trust_anchor_spki        | [this-RFC] |
+| 4       | not_stand_alone          | [this-RFC] |
+| 5       | ignore_last_algorithm    | [this-RFC] |
 
 New values are allocated according to the following process:
 
