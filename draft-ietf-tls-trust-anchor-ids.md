@@ -216,6 +216,7 @@ id-rdna-trustAnchorID OBJECT IDENTIFIER ::= {
     iso(1) identified-organization(3) dod(6) internet(1) security(5)
     mechanisms(5) pkix(7) rdna(25) 3 }
 
+-- The attribute value MUST be a valid trust anchor ID.
 at-trustAnchorID ATTRIBUTE ::= {
     TYPE RELATIVE-OID
     IDENTIFIED BY id-rdna-trustAnchorID
@@ -969,6 +970,7 @@ id-rdna-trustAnchorID OBJECT IDENTIFIER ::= {
     iso(1) identified-organization(3) dod(6) internet(1) security(5)
     mechanisms(5) pkix(7) rdna(25) 3 }
 
+-- The attribute value MUST be a valid trust anchor ID.
 at-trustAnchorID ATTRIBUTE ::= {
     TYPE RELATIVE-OID
     IDENTIFIED BY id-rdna-trustAnchorID
