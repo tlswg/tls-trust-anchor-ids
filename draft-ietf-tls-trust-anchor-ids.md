@@ -391,7 +391,7 @@ If a client requests extra trust anchors or omits trusted ones, it SHOULD implem
 
 If the client receives either a connection error or an untrusted certificate, the client looks in the server's EncryptedExtensions for a trust anchor ID that it trusts. If there are multiple, it selects an option based on the server's preference order and its local preferences. It then makes a new connection to the same endpoint, requesting only the selected trust anchor ID in the ClientHello `trust_anchors` extension. If the EncryptedExtensions had no `trust_anchors` extension, or no match was found, the client returns the error to the application.
 
-If the server's certification path chains to a trust anchor the client trusts, but the client rejected the path for a reason that is not related to TA trust (e.g., expiry, revocation, a name mismatch, or a relying party constraint on that trust anchor), the client SHOULD NOT select that trust anchor's associated trust anchor ID when retrying.
+If the server's certification path chains to a trust anchor the client trusts, but the client rejected the path for some other reason (e.g., expiry, revocation, a name mismatch, or a relying party constraint on that trust anchor), the client SHOULD NOT select that trust anchor's associated trust anchor ID when retrying.
 
 Clients SHOULD retry at most once per connection attempt.
 
