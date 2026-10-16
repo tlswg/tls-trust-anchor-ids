@@ -209,15 +209,22 @@ opaque TrustAnchorID<1..32>;
 
 Trust anchor IDs can be encoded as a PKIX distinguished name ({{Section 4.1.2.4 of !RFC5280}}). CAs deployed for ecosystems that name entities with trust anchor IDs can use this representation as the subject or issuer of an X.509 certificate.
 
-This distinguished name has a single relative distinguished name, which has a single attribute. The attribute has type `id-rdna-trustAnchorID`, defined below:
+This distinguished name has a single relative distinguished name, which has a single attribute, defined below.
 
 ~~~asn.1
 id-rdna-trustAnchorID OBJECT IDENTIFIER ::= {
     iso(1) identified-organization(3) dod(6) internet(1) security(5)
     mechanisms(5) pkix(7) rdna(25) 3 }
+
+at-trustAnchorID ATTRIBUTE ::= {
+    TYPE RELATIVE-OID
+    IDENTIFIED BY id-rdna-trustAnchorID
+}
 ~~~
 
-The attribute's value is a RELATIVE-OID containing the trust anchor ID's ASN.1 representation. For example, the distinguished name for trust anchor ID `32473.1` would be represented in syntax of {{?RFC4514}} as:
+The attribute has type `id-rdna-trustAnchorID`. The attribute's value is a RELATIVE-OID containing the trust anchor ID's ASN.1 representation. Note that, while a general RELATIVE-OID can be arbitrarily long, {{trust-anchor-ids}} limits trust anchor IDs to relative OIDs whose contents octets are at most 32 bytes.
+
+For example, the distinguished name for trust anchor ID `32473.1` would be represented in syntax of {{?RFC4514}} as:
 
 ~~~
 1.3.6.1.5.5.7.25.3=#0d0481fd5901
