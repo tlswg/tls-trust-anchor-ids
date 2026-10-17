@@ -5,12 +5,12 @@
 Transport Layer Security                                         B. Beck
 Internet-Draft                                                   OpenSSL
 Intended status: Standards Track                             D. Benjamin
-Expires: 31 March 2027                                        Google LLC
+Expires: 20 April 2027                                        Google LLC
                                                               D. O'Brien
                                                                         
                                                               K. Nekritz
                                                                     Meta
-                                                       27 September 2026
+                                                         17 October 2026
 
 
                       TLS Trust Anchor Identifiers
@@ -56,7 +56,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 31 March 2027.
+   This Internet-Draft will expire on 20 April 2027.
 
 Copyright Notice
 
@@ -703,6 +703,12 @@ Table of Contents
    trust_anchors extension.  If the EncryptedExtensions had no
    trust_anchors extension, or no match was found, the client returns
    the error to the application.
+
+   If the server's certification path chains to a trust anchor the
+   client trusts, but the client rejected the path for some other reason
+   (e.g., expiry, revocation, a name mismatch, or a relying party
+   constraint on that trust anchor), the client SHOULD NOT select that
+   trust anchor's associated trust anchor ID when retrying.
 
    Clients SHOULD retry at most once per connection attempt.
 
@@ -1787,9 +1793,9 @@ Table of Contents
               Benjamin, D., O'Brien, D., Westerbaan, B., Valenta, L.,
               and F. Valsorda, "Merkle Tree Certificates", Work in
               Progress, Internet-Draft, draft-ietf-plants-merkle-tree-
-              certs-06, 21 September 2026,
+              certs-07, 7 October 2026,
               <https://datatracker.ietf.org/doc/html/draft-ietf-plants-
-              merkle-tree-certs-06>.
+              merkle-tree-certs-07>.
 
    [MOZILLA-ROOTS]
               Mozilla, "Mozilla Included CA Certificate List", 30 August
