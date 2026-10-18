@@ -585,7 +585,7 @@ When the authenticating party requests certificates from CA2, it receives:
 
 All paths include `trust_anchor_id` properties describing their corresponding issuer. The authenticating party's TLS software will consider all four in connections that use the `trust_anchors` extension.
 
-For other connections, the TLS software needs to determine fallback paths. Although both 1B and 2B lack the `trust_anchor_negotiation` property, the authenticating party knows that CA2 is more ubiquitously trusted among its supported relying parties than CA1. It configures its TLS software to use CA2 as the source of the fallback path, and so only path 2B will be used as fallback.
+For other connections, the TLS software needs to determine fallback paths. Although both 1A and 2A lack the `trust_anchor_negotiation` property, the authenticating party knows that CA2 is more ubiquitously trusted among its supported relying parties than CA1. It configures its TLS software to use CA2 as the source of the fallback path, and so only path 2A will be used as fallback.
 
 ## Representing Multiple Paths
 
