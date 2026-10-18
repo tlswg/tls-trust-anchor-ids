@@ -23,11 +23,11 @@
     Jinja2 3.1.6
     lxml 6.1.1
     natsort 8.4.0
-    platformdirs 4.12.2
+    platformdirs 4.13.4
     pycountry 24.6.1
     PyYAML 6.0.3
     requests 2.33.1
-    wcwidth 0.9.1
+    wcwidth 0.9.2
 -->
 <link href="draft-ietf-tls-trust-anchor-ids.xml" rel="alternate" type="application/rfc+xml">
 <link href="#copyright" rel="license">
@@ -1047,7 +1047,7 @@ svg {
 </tr></thead>
 <tfoot><tr>
 <td class="left">Beck, et al.</td>
-<td class="center">Expires 20 April 2027</td>
+<td class="center">Expires 21 April 2027</td>
 <td class="right">[Page]</td>
 </tr></tfoot>
 </table>
@@ -1060,12 +1060,12 @@ svg {
 <dd class="internet-draft">draft-ietf-tls-trust-anchor-ids-latest</dd>
 <dt class="label-published">Published:</dt>
 <dd class="published">
-<time datetime="2026-10-17" class="published">17 October 2026</time>
+<time datetime="2026-10-18" class="published">18 October 2026</time>
     </dd>
 <dt class="label-intended-status">Intended Status:</dt>
 <dd class="intended-status">Standards Track</dd>
 <dt class="label-expires">Expires:</dt>
-<dd class="expires"><time datetime="2027-04-20">20 April 2027</time></dd>
+<dd class="expires"><time datetime="2027-04-21">21 April 2027</time></dd>
 <dt class="label-authors">Authors:</dt>
 <dd class="authors">
 <div class="author">
@@ -1126,7 +1126,7 @@ svg {
         time. It is inappropriate to use Internet-Drafts as reference
         material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
 <p id="section-boilerplate.1-4">
-        This Internet-Draft will expire on 20 April 2027.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+        This Internet-Draft will expire on 21 April 2027.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="copyright">
@@ -1577,7 +1577,7 @@ TrustAnchorID AvailableTrustAnchorList&lt;1..2^16-1&gt;;
             <p id="section-5.3-2.1.1">The trust anchor ID for the CA that issued this candidate path.<a href="#section-5.3-2.1.1" class="pilcrow">¶</a></p>
 </li>
           <li class="normal" id="section-5.3-2.2">
-            <p id="section-5.3-2.2.1">The trust anchor groups known to contain the issuing CA. The CA can be contained in a family of related trust anchor groups, such as in <a href="#versioned-groups" class="auto internal xref">Section 6.1</a>. To accomodate this, the IDs of the containing groups are described with a list of <em>trust anchor ID patterns</em>, defined below in <a href="#trust-anchor-id-patterns" class="auto internal xref">Section 5.3.1</a>. Note these patterns specify the IDs of the groups, not their contents.<a href="#section-5.3-2.2.1" class="pilcrow">¶</a></p>
+            <p id="section-5.3-2.2.1">The trust anchor groups known to contain the issuing CA. The CA can be contained in a family of related trust anchor groups, such as in <a href="#versioned-groups" class="auto internal xref">Section 6.1</a>. To accommodate this, the IDs of the containing groups are described with a list of <em>trust anchor ID patterns</em>, defined below in <a href="#trust-anchor-id-patterns" class="auto internal xref">Section 5.3.1</a>. Note these patterns specify the IDs of the groups, not their contents.<a href="#section-5.3-2.2.1" class="pilcrow">¶</a></p>
 </li>
         </ul>
 <p id="section-5.3-3"><a href="#certificate-properties" class="auto internal xref">Section 7</a> defines a format to represent these properties. <a href="#acme-extension" class="auto internal xref">Section 7.5</a> defines how to obtain them from ACME <span>[<a href="#RFC8555" class="cite xref">RFC8555</a>]</span>.<a href="#section-5.3-3" class="pilcrow">¶</a></p>
@@ -1823,7 +1823,7 @@ TrustAnchorID AvailableTrustAnchorList&lt;1..2^16-1&gt;;
           <p id="section-6-6.1.1">A set of root CAs (or intermediate CAs, as in <a href="#intermediate-elision" class="auto internal xref">Section 9.5</a>) operated by a CA operator.<a href="#section-6-6.1.1" class="pilcrow">¶</a></p>
 </li>
         <li class="normal" id="section-6-6.2">
-          <p id="section-6-6.2.1">A set of trust anchors common to large set of relying parties.<a href="#section-6-6.2.1" class="pilcrow">¶</a></p>
+          <p id="section-6-6.2.1">A set of trust anchors common to a large set of relying parties.<a href="#section-6-6.2.1" class="pilcrow">¶</a></p>
 </li>
         <li class="normal" id="section-6-6.3">
           <p id="section-6-6.3.1">A set of related application-specific trust anchors, such as a range of Merkle Tree Certificate landmarks <span>[<a href="#I-D.ietf-plants-merkle-tree-certs" class="cite xref">I-D.ietf-plants-merkle-tree-certs</a>]</span>.<a href="#section-6-6.3.1" class="pilcrow">¶</a></p>
@@ -1839,7 +1839,7 @@ TrustAnchorID AvailableTrustAnchorList&lt;1..2^16-1&gt;;
 <a href="#section-6.1" class="section-number selfRef">6.1. </a><a href="#name-versioned-groups" class="section-name selfRef">Versioned Groups</a>
         </h3>
 <p id="section-6.1-1">Over time, a group may become out-of-date, making it describe current relying parties less effectively. For example, a CA operator may deploy or turn down a CA instance, or a relying party may trust a new CA or distrust an existing CA. Existing trust anchor groups SHOULD NOT be redefined, but the following versioning scheme MAY be used to define updated groups:<a href="#section-6.1-1" class="pilcrow">¶</a></p>
-<p id="section-6.1-2">A versioned sequence of trust anchor groups is identified by a OID arc. Each group has an ID of this OID arc, with a non-negative integer version number component appended. For example, versioned groups using the OID arc <code>32473.2</code> would have IDs <code>32473.2.0</code>, <code>32473.2.1</code>, <code>32473.2.2</code>, and so on. When defining a new group version, the version component is incremented.<a href="#section-6.1-2" class="pilcrow">¶</a></p>
+<p id="section-6.1-2">A versioned sequence of trust anchor groups is identified by an OID arc. Each group has an ID of this OID arc, with a non-negative integer version number component appended. For example, versioned groups using the OID arc <code>32473.2</code> would have IDs <code>32473.2.0</code>, <code>32473.2.1</code>, <code>32473.2.2</code>, and so on. When defining a new group version, the version component is incremented.<a href="#section-6.1-2" class="pilcrow">¶</a></p>
 <p id="section-6.1-3">Each candidate path is then configured with the versioned groups that contain it. These groups are described by a trust anchor ID pattern (<a href="#trust-anchor-id-patterns" class="auto internal xref">Section 5.3.1</a>) as follows:<a href="#section-6.1-3" class="pilcrow">¶</a></p>
 <ol start="1" type="1" class="normal type-1" id="section-6.1-4">
 <li id="section-6.1-4.1">
@@ -1853,7 +1853,7 @@ TrustAnchorID AvailableTrustAnchorList&lt;1..2^16-1&gt;;
 </li>
         </ol>
 <p id="section-6.1-5">In the second case, the range contains not-yet-defined group versions, so there is a potential signaling error. Suppose, after issuance, a new group version is defined without the trust anchor. The unlimited upper bound is now incorrect. A relying party might not trust this trust anchor, while sending this new group version. However, the authenticating party will misinterpret the certificate as compatible based on its stale information. Such signaling errors may result in the wrong certificate being selected.<a href="#section-6.1-5" class="pilcrow">¶</a></p>
-<p id="section-6.1-6">This can be mitigated in one several ways:<a href="#section-6.1-6" class="pilcrow">¶</a></p>
+<p id="section-6.1-6">This can be mitigated in one of several ways:<a href="#section-6.1-6" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-6.1-7.1">
             <p id="section-6.1-7.1.1">Only pre-existing certificates are impacted. Newly-issued certificates postdate this version and will have the correct upper bound. When the certificate is renewed, group inclusions will be corrected.<a href="#section-6.1-7.1.1" class="pilcrow">¶</a></p>
@@ -1862,7 +1862,7 @@ TrustAnchorID AvailableTrustAnchorList&lt;1..2^16-1&gt;;
             <p id="section-6.1-7.2.1"><span>[<a href="#SCTNotAfter" class="cite xref">SCTNotAfter</a>]</span> describes a trust anchor removal strategy that only impacts newly-issued certificates. In this case, no renewal is needed. Pre-existing group inclusions remain accurate under this strategy.<a href="#section-6.1-7.2.1" class="pilcrow">¶</a></p>
 </li>
           <li class="normal" id="section-6.1-7.3">
-            <p id="section-6.1-7.3.1">If the authenticating party's preferences place the correct candidate path (issued by a newer trust anchor) ahead of misinterpreted one (issued by the removed trust anchor), the correct candidate will still be chosen.<a href="#section-6.1-7.3.1" class="pilcrow">¶</a></p>
+            <p id="section-6.1-7.3.1">If the authenticating party's preferences place the correct candidate path (issued by a newer trust anchor) ahead of the misinterpreted one (issued by the removed trust anchor), the correct candidate will still be chosen.<a href="#section-6.1-7.3.1" class="pilcrow">¶</a></p>
 </li>
           <li class="normal" id="section-6.1-7.4">
             <p id="section-6.1-7.4.1">When the relying party is a client, any remaining signaling errors can be corrected with the recovery mechanism described in <a href="#recovery" class="auto internal xref">Section 5.6</a>.<a href="#section-6.1-7.4.1" class="pilcrow">¶</a></p>
@@ -2175,7 +2175,7 @@ IKzgi/++xTs=
 <p id="section-9-1"><code>trust_anchors</code>, like <code>certificate_authorities</code>, implements trust anchor negotiation. That is, it allows an authenticating party to incorporate relying party trust anchors into certificate selection. <code>trust_anchors</code> allows a wider range of TLS applications to use trust anchor negotiation, notably those that would be unable to use <code>certificate_authorities</code> due to size or privacy limitations.<a href="#section-9-1" class="pilcrow">¶</a></p>
 <p id="section-9-2">Without trust anchor negotiation, authenticating parties are limited to CAs in the intersection of all supported relying parties. However, trust anchors can vary significantly between different relying party implementations and different versions of a single relying party implementation, particularly as PKIs evolve to meet user security needs.<a href="#section-9-2" class="pilcrow">¶</a></p>
 <p id="section-9-3">As security-positive PKI changes increase variance, this intersection shrinks. This leads to a conflict between user security and service availability. When the authenticating party cannot serve a certificate in the intersection, either the relying party must risk user security by not changing the PKI, or the authenticating party must degrade service availability by dropping support for some relying parties.<a href="#section-9-3" class="pilcrow">¶</a></p>
-<p id="section-9-4">The rest of this section discusses uses cases for trust anchor negotiation.<a href="#section-9-4" class="pilcrow">¶</a></p>
+<p id="section-9-4">The rest of this section discusses use cases for trust anchor negotiation.<a href="#section-9-4" class="pilcrow">¶</a></p>
 <div id="making-use-of-newly-trusted-cas">
 <section id="section-9.1">
         <h3 id="name-making-use-of-newly-trusted">
@@ -2211,7 +2211,7 @@ IKzgi/++xTs=
         <h3 id="name-other-root-transitions">
 <a href="#section-9.4" class="section-number selfRef">9.4. </a><a href="#name-other-root-transitions" class="section-name selfRef">Other Root Transitions</a>
         </h3>
-<p id="section-9.4-1">The mechanisms in this document can aid PKI transitions beyond key rotation. For example, a CA operator may generate a postquantum root CA and issue from the classical and postquantum roots concurrently. The authenticating party will then, transparently and with no configuration change, serve both. As in <a href="#key-rotation" class="auto internal xref">Section 9.3</a>, newer relying parties can then remove the classical roots, while older relying parties continue to function.<a href="#section-9.4-1" class="pilcrow">¶</a></p>
+<p id="section-9.4-1">The mechanisms in this document can aid PKI transitions beyond key rotation. For example, a CA operator may generate a post-quantum root CA and issue from the classical and post-quantum roots concurrently. The authenticating party will then, transparently and with no configuration change, serve both. As in <a href="#key-rotation" class="auto internal xref">Section 9.3</a>, newer relying parties can then remove the classical roots, while older relying parties continue to function.<a href="#section-9.4-1" class="pilcrow">¶</a></p>
 <p id="section-9.4-2">This same procedure may also be used to transition between newer, more size-efficient signature algorithms, as they are developed.<a href="#section-9.4-2" class="pilcrow">¶</a></p>
 </section>
 </div>
@@ -2222,7 +2222,7 @@ IKzgi/++xTs=
         </h3>
 <p id="section-9.5-1">In many PKIs, root CAs issue shorter-lived intermediate certificates which, in turn, issue end-entity certificates. This comes at a bandwidth cost: the TLS handshake includes an extra certificate, which includes a public key, signature, and X.509 metadata. Post-quantum signature algorithms will dramatically increase this cost. ML-DSA-65 <span>[<a href="#FIPS204" class="cite xref">FIPS204</a>]</span>, for example, has a total public key and signature size of 5,261 bytes.<a href="#section-9.5-1" class="pilcrow">¶</a></p>
 <p id="section-9.5-2">Trust anchor negotiation can avoid this size cost. Relying parties predistribute intermediate CAs and configure them as short-lived trust anchors. Authenticating parties can then send shorter paths to those relying parties.<a href="#section-9.5-2" class="pilcrow">¶</a></p>
-<p id="section-9.5-3">More generally, a CA operator provides authenticating parties with two certification paths: a longer path ending at a long-lived root and shorter path the other ending at a short-lived root. Relying parties trust both the long-lived root and the most recent short-lived root. The authenticating party sends the shorter path when possible, falling back to the longer path when the relying party’s short-lived root is stale.<a href="#section-9.5-3" class="pilcrow">¶</a></p>
+<p id="section-9.5-3">More generally, a CA operator provides authenticating parties with two certification paths: a longer path ending at a long-lived root and a shorter path ending at a short-lived root. Relying parties trust both the long-lived root and the most recent short-lived root. The authenticating party sends the shorter path when possible, falling back to the longer path when the relying party's short-lived root is stale.<a href="#section-9.5-3" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="conflicting-relying-party-requirements">

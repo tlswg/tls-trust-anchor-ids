@@ -5,12 +5,12 @@
 Transport Layer Security                                         B. Beck
 Internet-Draft                                                   OpenSSL
 Intended status: Standards Track                             D. Benjamin
-Expires: 20 April 2027                                        Google LLC
+Expires: 21 April 2027                                        Google LLC
                                                               D. O'Brien
                                                                         
                                                               K. Nekritz
                                                                     Meta
-                                                         17 October 2026
+                                                         18 October 2026
 
 
                       TLS Trust Anchor Identifiers
@@ -56,7 +56,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 20 April 2027.
+   This Internet-Draft will expire on 21 April 2027.
 
 Copyright Notice
 
@@ -450,7 +450,7 @@ Table of Contents
 
    *  The trust anchor groups known to contain the issuing CA.  The CA
       can be contained in a family of related trust anchor groups, such
-      as in Section 6.1.  To accomodate this, the IDs of the containing
+      as in Section 6.1.  To accommodate this, the IDs of the containing
       groups are described with a list of _trust anchor ID patterns_,
       defined below in Section 5.3.1.  Note these patterns specify the
       IDs of the groups, not their contents.
@@ -753,7 +753,7 @@ Table of Contents
    *  A set of root CAs (or intermediate CAs, as in Section 9.5)
       operated by a CA operator.
 
-   *  A set of trust anchors common to large set of relying parties.
+   *  A set of trust anchors common to a large set of relying parties.
 
    *  A set of related application-specific trust anchors, such as a
       range of Merkle Tree Certificate landmarks
@@ -797,7 +797,7 @@ Table of Contents
    NOT be redefined, but the following versioning scheme MAY be used to
    define updated groups:
 
-   A versioned sequence of trust anchor groups is identified by a OID
+   A versioned sequence of trust anchor groups is identified by an OID
    arc.  Each group has an ID of this OID arc, with a non-negative
    integer version number component appended.  For example, versioned
    groups using the OID arc 32473.2 would have IDs 32473.2.0, 32473.2.1,
@@ -828,7 +828,7 @@ Table of Contents
    as compatible based on its stale information.  Such signaling errors
    may result in the wrong certificate being selected.
 
-   This can be mitigated in one several ways:
+   This can be mitigated in one of several ways:
 
    *  Only pre-existing certificates are impacted.  Newly-issued
       certificates postdate this version and will have the correct upper
@@ -841,7 +841,7 @@ Table of Contents
       strategy.
 
    *  If the authenticating party's preferences place the correct
-      candidate path (issued by a newer trust anchor) ahead of
+      candidate path (issued by a newer trust anchor) ahead of the
       misinterpreted one (issued by the removed trust anchor), the
       correct candidate will still be chosen.
 
@@ -1252,7 +1252,7 @@ Table of Contents
    must degrade service availability by dropping support for some
    relying parties.
 
-   The rest of this section discusses uses cases for trust anchor
+   The rest of this section discusses use cases for trust anchor
    negotiation.
 
 9.1.  Making Use of Newly-Trusted CAs
@@ -1332,12 +1332,12 @@ Table of Contents
 9.4.  Other Root Transitions
 
    The mechanisms in this document can aid PKI transitions beyond key
-   rotation.  For example, a CA operator may generate a postquantum root
-   CA and issue from the classical and postquantum roots concurrently.
-   The authenticating party will then, transparently and with no
-   configuration change, serve both.  As in Section 9.3, newer relying
-   parties can then remove the classical roots, while older relying
-   parties continue to function.
+   rotation.  For example, a CA operator may generate a post-quantum
+   root CA and issue from the classical and post-quantum roots
+   concurrently.  The authenticating party will then, transparently and
+   with no configuration change, serve both.  As in Section 9.3, newer
+   relying parties can then remove the classical roots, while older
+   relying parties continue to function.
 
    This same procedure may also be used to transition between newer,
    more size-efficient signature algorithms, as they are developed.
@@ -1359,11 +1359,11 @@ Table of Contents
 
    More generally, a CA operator provides authenticating parties with
    two certification paths: a longer path ending at a long-lived root
-   and shorter path the other ending at a short-lived root.  Relying
-   parties trust both the long-lived root and the most recent short-
-   lived root.  The authenticating party sends the shorter path when
-   possible, falling back to the longer path when the relying party’s
-   short-lived root is stale.
+   and a shorter path ending at a short-lived root.  Relying parties
+   trust both the long-lived root and the most recent short-lived root.
+   The authenticating party sends the shorter path when possible,
+   falling back to the longer path when the relying party's short-lived
+   root is stale.
 
 9.6.  Conflicting Relying Party Requirements
 
