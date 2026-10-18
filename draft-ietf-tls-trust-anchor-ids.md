@@ -261,7 +261,7 @@ The authenticating party compares the requested trust anchor IDs with its candid
 
 * The trust anchor ID for the CA that issued this candidate path.
 
-* The trust anchor groups known to contain the issuing CA. The CA can be contained in a family of related trust anchor groups, such as in {{versioned-groups}}. To accomodate this, the IDs of the containing groups are described with a list of *trust anchor ID patterns*, defined below in {{trust-anchor-id-patterns}}. Note these patterns specify the IDs of the groups, not their contents.
+* The trust anchor groups known to contain the issuing CA. The CA can be contained in a family of related trust anchor groups, such as in {{versioned-groups}}. To accommodate this, the IDs of the containing groups are described with a list of *trust anchor ID patterns*, defined below in {{trust-anchor-id-patterns}}. Note these patterns specify the IDs of the groups, not their contents.
 
 {{certificate-properties}} defines a format to represent these properties. {{acme-extension}} defines how to obtain them from ACME {{!RFC8555}}.
 
@@ -412,7 +412,7 @@ A trust anchor group specifies a collection of trust anchors, which a relying pa
 
 * A set of root CAs (or intermediate CAs, as in {{intermediate-elision}}) operated by a CA operator.
 
-* A set of trust anchors common to large set of relying parties.
+* A set of trust anchors common to a large set of relying parties.
 
 * A set of related application-specific trust anchors, such as a range of Merkle Tree Certificate landmarks {{?I-D.ietf-plants-merkle-tree-certs}}.
 
@@ -428,7 +428,7 @@ The matching process described in {{authenticating-party-configuration}} can be 
 
 Over time, a group may become out-of-date, making it describe current relying parties less effectively. For example, a CA operator may deploy or turn down a CA instance, or a relying party may trust a new CA or distrust an existing CA. Existing trust anchor groups SHOULD NOT be redefined, but the following versioning scheme MAY be used to define updated groups:
 
-A versioned sequence of trust anchor groups is identified by a OID arc. Each group has an ID of this OID arc, with a non-negative integer version number component appended. For example, versioned groups using the OID arc `32473.2` would have IDs `32473.2.0`, `32473.2.1`, `32473.2.2`, and so on. When defining a new group version, the version component is incremented.
+A versioned sequence of trust anchor groups is identified by an OID arc. Each group has an ID of this OID arc, with a non-negative integer version number component appended. For example, versioned groups using the OID arc `32473.2` would have IDs `32473.2.0`, `32473.2.1`, `32473.2.2`, and so on. When defining a new group version, the version component is incremented.
 
 Each candidate path is then configured with the versioned groups that contain it. These groups are described by a trust anchor ID pattern ({{trust-anchor-id-patterns}}) as follows:
 
@@ -438,13 +438,13 @@ Each candidate path is then configured with the versioned groups that contain it
 
 In the second case, the range contains not-yet-defined group versions, so there is a potential signaling error. Suppose, after issuance, a new group version is defined without the trust anchor. The unlimited upper bound is now incorrect. A relying party might not trust this trust anchor, while sending this new group version. However, the authenticating party will misinterpret the certificate as compatible based on its stale information. Such signaling errors may result in the wrong certificate being selected.
 
-This can be mitigated in one several ways:
+This can be mitigated in one of several ways:
 
 * Only pre-existing certificates are impacted. Newly-issued certificates postdate this version and will have the correct upper bound. When the certificate is renewed, group inclusions will be corrected.
 
 * {{SCTNotAfter}} describes a trust anchor removal strategy that only impacts newly-issued certificates. In this case, no renewal is needed. Pre-existing group inclusions remain accurate under this strategy.
 
-* If the authenticating party's preferences place the correct candidate path (issued by a newer trust anchor) ahead of misinterpreted one (issued by the removed trust anchor), the correct candidate will still be chosen.
+* If the authenticating party's preferences place the correct candidate path (issued by a newer trust anchor) ahead of the misinterpreted one (issued by the removed trust anchor), the correct candidate will still be chosen.
 
 * When the relying party is a client, any remaining signaling errors can be corrected with the recovery mechanism described in {{recovery}}.
 
@@ -693,7 +693,7 @@ Without trust anchor negotiation, authenticating parties are limited to CAs in t
 
 As security-positive PKI changes increase variance, this intersection shrinks. This leads to a conflict between user security and service availability. When the authenticating party cannot serve a certificate in the intersection, either the relying party must risk user security by not changing the PKI, or the authenticating party must degrade service availability by dropping support for some relying parties.
 
-The rest of this section discusses uses cases for trust anchor negotiation.
+The rest of this section discusses use cases for trust anchor negotiation.
 
 ## Making Use of Newly-Trusted CAs
 
@@ -721,7 +721,7 @@ Trust anchor negotiation offers a smooth transition for CA key rotation. The CA 
 
 ## Other Root Transitions
 
-The mechanisms in this document can aid PKI transitions beyond key rotation. For example, a CA operator may generate a postquantum root CA and issue from the classical and postquantum roots concurrently. The authenticating party will then, transparently and with no configuration change, serve both. As in {{key-rotation}}, newer relying parties can then remove the classical roots, while older relying parties continue to function.
+The mechanisms in this document can aid PKI transitions beyond key rotation. For example, a CA operator may generate a post-quantum root CA and issue from the classical and post-quantum roots concurrently. The authenticating party will then, transparently and with no configuration change, serve both. As in {{key-rotation}}, newer relying parties can then remove the classical roots, while older relying parties continue to function.
 
 This same procedure may also be used to transition between newer, more size-efficient signature algorithms, as they are developed.
 
@@ -731,7 +731,7 @@ In many PKIs, root CAs issue shorter-lived intermediate certificates which, in t
 
 Trust anchor negotiation can avoid this size cost. Relying parties predistribute intermediate CAs and configure them as short-lived trust anchors. Authenticating parties can then send shorter paths to those relying parties.
 
-More generally, a CA operator provides authenticating parties with two certification paths: a longer path ending at a long-lived root and shorter path the other ending at a short-lived root. Relying parties trust both the long-lived root and the most recent short-lived root. The authenticating party sends the shorter path when possible, falling back to the longer path when the relying party’s short-lived root is stale.
+More generally, a CA operator provides authenticating parties with two certification paths: a longer path ending at a long-lived root and a shorter path ending at a short-lived root. Relying parties trust both the long-lived root and the most recent short-lived root. The authenticating party sends the shorter path when possible, falling back to the longer path when the relying party's short-lived root is stale.
 
 ## Conflicting Relying Party Requirements
 
