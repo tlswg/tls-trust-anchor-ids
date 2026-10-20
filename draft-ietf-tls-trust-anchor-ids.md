@@ -205,6 +205,32 @@ When embedded in a TLS structure, a trust anchor ID uses the TrustAnchorID struc
 opaque TrustAnchorID<1..32>;
 ~~~
 
+## PKIX Distinguished Name
+
+Trust anchor IDs can be encoded as a PKIX distinguished name ({{Section 4.1.2.4 of !RFC5280}}). CAs deployed for ecosystems that name entities with trust anchor IDs can use this representation as the subject or issuer of an X.509 certificate.
+
+This distinguished name has a single relative distinguished name, which has a single attribute, defined below.
+
+~~~asn.1
+id-rdna-trustAnchorID OBJECT IDENTIFIER ::= {
+    iso(1) identified-organization(3) dod(6) internet(1) security(5)
+    mechanisms(5) pkix(7) rdna(25) 3 }
+
+-- The attribute value MUST be a valid trust anchor ID.
+at-trustAnchorID ATTRIBUTE ::= {
+    TYPE RELATIVE-OID
+    IDENTIFIED BY id-rdna-trustAnchorID
+}
+~~~
+
+The attribute has type `id-rdna-trustAnchorID`. The attribute's value is a RELATIVE-OID containing the trust anchor ID's ASN.1 representation. Note that, while a general RELATIVE-OID can be arbitrarily long, {{trust-anchor-ids}} limits trust anchor IDs to relative OIDs whose contents octets are at most 32 bytes.
+
+For example, the distinguished name for trust anchor ID `32473.1` would be represented in syntax of {{?RFC4514}} as:
+
+~~~
+1.3.6.1.5.5.7.25.3=#0d0481fd5901
+~~~
+
 # TLS Extension
 
 ## Extension Syntax
@@ -239,7 +265,7 @@ Relying parties are configured with:
 1. An *associated trust anchor ID* for each supported trust anchor that participates in this protocol
 2. A list of *requested trust anchor IDs* which, together, describe supported trust anchors
 
-A trust anchor's associated ID MUST be the trust anchor ID which represents it. In this document, the ID is expected to be configured separately from the trust anchor for compatibility with existing PKIs. Future certificate profiles MAY define representations where the trust anchor ID is encoded directly in the trust anchor.
+A trust anchor's associated ID MUST be the trust anchor ID which represents it. The ID MAY be extracted from the trust anchor, if its PKIX distinguished name is of the form described in {{pkix-distinguished-name}}. It MAY also be configured separately from the trust anchor for compatibility with existing PKIs.
 
 Relying parties MAY support trust anchors without associated trust anchor IDs, but such trust anchors will not participate in this protocol. Those trust anchors MAY participate in other trust anchor negotiation protocols, such as the `certificate_authorities` extension.
 
@@ -891,6 +917,20 @@ Author:
 Change controller:
 : IETF
 
+## PKIX Registry Updates
+
+IANA is requested to create the following entry in the SMI Security for PKIX Module Identifier registry, defined by {{!RFC7299}}:
+
+| Decimal | Description                 | References |
+|---------|-----------------------------|------------|
+| TBD     | id-mod-trustAnchorIDs-2025  | [this-RFC] |
+
+IANA is requested to add the following entry to the "SMI Security for PKIX Relative Distinguished Name Attribute" registry {{!RFC9925}}:
+
+| Decimal | Description           | References |
+|---------|-----------------------|------------|
+| 3       | id-rdna-trustAnchorID | [this-RFC] |
+
 ## CertificatePropertyType Registry
 
 IANA is requested to create the "CertificatePropertyType" registry within the "Transport Layer Security (TLS) Extensions" group. The initial entries in the registry are as follows:
@@ -907,6 +947,39 @@ New values are allocated according to the following process:
 * Values in the range 65280-65535 are reserved for Private Use {{!RFC8126}}.
 
 --- back
+
+# ASN.1 Module
+
+This ASN.1 module uses the conventions established by {{!RFC5912}}.
+
+~~~asn.1
+TrustAnchorIDs-2025
+  { iso(1) identified-organization(3) dod(6) internet(1)
+    security(5) mechanisms(5) pkix(7) id-mod(0)
+    id-mod-trustAnchorIDs-2025(TBD) }
+
+DEFINITIONS IMPLICIT TAGS ::=
+BEGIN
+
+IMPORTS
+  ATTRIBUTE
+  FROM PKIX-CommonTypes-2009 -- in [RFC5912]
+    { iso(1) identified-organization(3) dod(6) internet(1)
+      security(5) mechanisms(5) pkix(7) id-mod(0)
+      id-mod-pkixCommon-02(57) } ;
+
+id-rdna-trustAnchorID OBJECT IDENTIFIER ::= {
+    iso(1) identified-organization(3) dod(6) internet(1) security(5)
+    mechanisms(5) pkix(7) rdna(25) 3 }
+
+-- The attribute value MUST be a valid trust anchor ID.
+at-trustAnchorID ATTRIBUTE ::= {
+    TYPE RELATIVE-OID
+    IDENTIFIED BY id-rdna-trustAnchorID
+}
+
+END
+~~~
 
 # Trust Anchor ID Pattern Test Vectors
 
