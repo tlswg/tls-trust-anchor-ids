@@ -5,12 +5,12 @@
 Transport Layer Security                                         B. Beck
 Internet-Draft                                                   OpenSSL
 Intended status: Standards Track                             D. Benjamin
-Expires: 31 March 2027                                        Google LLC
+Expires: 6 May 2027                                           Google LLC
                                                               D. O'Brien
                                                                         
                                                               K. Nekritz
                                                                     Meta
-                                                       27 September 2026
+                                                         2 November 2026
 
 
                       TLS Trust Anchor Identifiers
@@ -56,7 +56,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 31 March 2027.
+   This Internet-Draft will expire on 6 May 2027.
 
 Copyright Notice
 
@@ -79,6 +79,7 @@ Table of Contents
      2.1.  Terminology and Roles
    3.  Overview
    4.  Trust Anchor Identifiers
+     4.1.  PKIX Distinguished Name
    5.  TLS Extension
      5.1.  Extension Syntax
      5.2.  Relying Party Configuration
@@ -120,12 +121,14 @@ Table of Contents
    12. IANA Considerations
      12.1.  TLS ExtensionType Updates
      12.2.  Media Type Updates
-     12.3.  CertificatePropertyType Registry
+     12.3.  PKIX Registry Updates
+     12.4.  CertificatePropertyType Registry
    13. References
      13.1.  Normative References
      13.2.  Informative References
-   Appendix A.  Trust Anchor ID Pattern Test Vectors
-     A.1.  Invalid IDs or Patterns
+   Appendix A.  ASN.1 Module
+   Appendix B.  Trust Anchor ID Pattern Test Vectors
+     B.1.  Invalid IDs or Patterns
    Acknowledgements
    Authors' Addresses
 
@@ -339,6 +342,37 @@ Table of Contents
 
    opaque TrustAnchorID<1..32>;
 
+4.1.  PKIX Distinguished Name
+
+   Trust anchor IDs can be encoded as a PKIX distinguished name
+   (Section 4.1.2.4 of [RFC5280]).  CAs deployed for ecosystems that
+   name entities with trust anchor IDs can use this representation as
+   the subject or issuer of an X.509 certificate.
+
+   This distinguished name has a single relative distinguished name,
+   which has a single attribute, defined below.
+
+   id-rdna-trustAnchorID OBJECT IDENTIFIER ::= {
+       iso(1) identified-organization(3) dod(6) internet(1) security(5)
+       mechanisms(5) pkix(7) rdna(25) 3 }
+
+   -- The attribute value MUST be a valid trust anchor ID.
+   at-trustAnchorID ATTRIBUTE ::= {
+       TYPE RELATIVE-OID
+       IDENTIFIED BY id-rdna-trustAnchorID
+   }
+
+   The attribute has type id-rdna-trustAnchorID.  The attribute's value
+   is a RELATIVE-OID containing the trust anchor ID's ASN.1
+   representation.  Note that, while a general RELATIVE-OID can be
+   arbitrarily long, Section 4 limits trust anchor IDs to relative OIDs
+   whose contents octets are at most 32 bytes.
+
+   For example, the distinguished name for trust anchor ID 32473.1 would
+   be represented in syntax of [RFC4514] as:
+
+   1.3.6.1.5.5.7.25.3=#0d0481fd5901
+
 5.  TLS Extension
 
 5.1.  Extension Syntax
@@ -392,10 +426,10 @@ Table of Contents
        supported trust anchors
 
    A trust anchor's associated ID MUST be the trust anchor ID which
-   represents it.  In this document, the ID is expected to be configured
-   separately from the trust anchor for compatibility with existing
-   PKIs.  Future certificate profiles MAY define representations where
-   the trust anchor ID is encoded directly in the trust anchor.
+   represents it.  The ID MAY be extracted from the trust anchor, if its
+   PKIX distinguished name is of the form described in Section 4.1.  It
+   MAY also be configured separately from the trust anchor for
+   compatibility with existing PKIs.
 
    Relying parties MAY support trust anchors without associated trust
    anchor IDs, but such trust anchors will not participate in this
@@ -450,7 +484,7 @@ Table of Contents
 
    *  The trust anchor groups known to contain the issuing CA.  The CA
       can be contained in a family of related trust anchor groups, such
-      as in Section 6.1.  To accomodate this, the IDs of the containing
+      as in Section 6.1.  To accommodate this, the IDs of the containing
       groups are described with a list of _trust anchor ID patterns_,
       defined below in Section 5.3.1.  Note these patterns specify the
       IDs of the groups, not their contents.
@@ -614,7 +648,7 @@ Table of Contents
 
    *  32473.123.700 (third component out of range)
 
-   Appendix A provides more extensive test vectors.
+   Appendix B provides more extensive test vectors.
 
 5.4.  Certificate Selection
 
@@ -704,6 +738,12 @@ Table of Contents
    trust_anchors extension, or no match was found, the client returns
    the error to the application.
 
+   If the server's certification path chains to a trust anchor the
+   client trusts, but the client rejected the path for some other reason
+   (e.g., expiry, revocation, a name mismatch, or a relying party
+   constraint on that trust anchor), the client SHOULD NOT select that
+   trust anchor's associated trust anchor ID when retrying.
+
    Clients SHOULD retry at most once per connection attempt.
 
    This mechanism allows the connection to recover from a certificate
@@ -747,7 +787,7 @@ Table of Contents
    *  A set of root CAs (or intermediate CAs, as in Section 9.5)
       operated by a CA operator.
 
-   *  A set of trust anchors common to large set of relying parties.
+   *  A set of trust anchors common to a large set of relying parties.
 
    *  A set of related application-specific trust anchors, such as a
       range of Merkle Tree Certificate landmarks
@@ -791,7 +831,7 @@ Table of Contents
    NOT be redefined, but the following versioning scheme MAY be used to
    define updated groups:
 
-   A versioned sequence of trust anchor groups is identified by a OID
+   A versioned sequence of trust anchor groups is identified by an OID
    arc.  Each group has an ID of this OID arc, with a non-negative
    integer version number component appended.  For example, versioned
    groups using the OID arc 32473.2 would have IDs 32473.2.0, 32473.2.1,
@@ -822,7 +862,7 @@ Table of Contents
    as compatible based on its stale information.  Such signaling errors
    may result in the wrong certificate being selected.
 
-   This can be mitigated in one several ways:
+   This can be mitigated in one of several ways:
 
    *  Only pre-existing certificates are impacted.  Newly-issued
       certificates postdate this version and will have the correct upper
@@ -835,7 +875,7 @@ Table of Contents
       strategy.
 
    *  If the authenticating party's preferences place the correct
-      candidate path (issued by a newer trust anchor) ahead of
+      candidate path (issued by a newer trust anchor) ahead of the
       misinterpreted one (issued by the removed trust anchor), the
       correct candidate will still be chosen.
 
@@ -1065,11 +1105,11 @@ Table of Contents
    extension.
 
    For other connections, the TLS software needs to determine fallback
-   paths.  Although both 1B and 2B lack the trust_anchor_negotiation
+   paths.  Although both 1A and 2A lack the trust_anchor_negotiation
    property, the authenticating party knows that CA2 is more
    ubiquitously trusted among its supported relying parties than CA1.
    It configures its TLS software to use CA2 as the source of the
-   fallback path, and so only path 2B will be used as fallback.
+   fallback path, and so only path 2A will be used as fallback.
 
 7.6.  Representing Multiple Paths
 
@@ -1246,7 +1286,7 @@ Table of Contents
    must degrade service availability by dropping support for some
    relying parties.
 
-   The rest of this section discusses uses cases for trust anchor
+   The rest of this section discusses use cases for trust anchor
    negotiation.
 
 9.1.  Making Use of Newly-Trusted CAs
@@ -1326,12 +1366,12 @@ Table of Contents
 9.4.  Other Root Transitions
 
    The mechanisms in this document can aid PKI transitions beyond key
-   rotation.  For example, a CA operator may generate a postquantum root
-   CA and issue from the classical and postquantum roots concurrently.
-   The authenticating party will then, transparently and with no
-   configuration change, serve both.  As in Section 9.3, newer relying
-   parties can then remove the classical roots, while older relying
-   parties continue to function.
+   rotation.  For example, a CA operator may generate a post-quantum
+   root CA and issue from the classical and post-quantum roots
+   concurrently.  The authenticating party will then, transparently and
+   with no configuration change, serve both.  As in Section 9.3, newer
+   relying parties can then remove the classical roots, while older
+   relying parties continue to function.
 
    This same procedure may also be used to transition between newer,
    more size-efficient signature algorithms, as they are developed.
@@ -1353,11 +1393,11 @@ Table of Contents
 
    More generally, a CA operator provides authenticating parties with
    two certification paths: a longer path ending at a long-lived root
-   and shorter path the other ending at a short-lived root.  Relying
-   parties trust both the long-lived root and the most recent short-
-   lived root.  The authenticating party sends the shorter path when
-   possible, falling back to the longer path when the relying party’s
-   short-lived root is stale.
+   and a shorter path ending at a short-lived root.  Relying parties
+   trust both the long-lived root and the most recent short-lived root.
+   The authenticating party sends the shorter path when possible,
+   falling back to the longer path when the relying party's short-lived
+   root is stale.
 
 9.6.  Conflicting Relying Party Requirements
 
@@ -1665,7 +1705,31 @@ Table of Contents
 
    Change controller:  IETF
 
-12.3.  CertificatePropertyType Registry
+12.3.  PKIX Registry Updates
+
+   IANA is requested to create the following entry in the SMI Security
+   for PKIX Module Identifier registry, defined by [RFC7299]:
+
+           +=========+============================+============+
+           | Decimal | Description                | References |
+           +=========+============================+============+
+           | TBD     | id-mod-trustAnchorIDs-2025 | [this-RFC] |
+           +---------+----------------------------+------------+
+
+                                  Table 2
+
+   IANA is requested to add the following entry to the "SMI Security for
+   PKIX Relative Distinguished Name Attribute" registry [RFC9925]:
+
+             +=========+=======================+============+
+             | Decimal | Description           | References |
+             +=========+=======================+============+
+             | 3       | id-rdna-trustAnchorID | [this-RFC] |
+             +---------+-----------------------+------------+
+
+                                 Table 3
+
+12.4.  CertificatePropertyType Registry
 
    IANA is requested to create the "CertificatePropertyType" registry
    within the "Transport Layer Security (TLS) Extensions" group.  The
@@ -1681,7 +1745,7 @@ Table of Contents
             | 2       | trust_anchor_negotiation | [this-RFC] |
             +---------+--------------------------+------------+
 
-                                  Table 2
+                                  Table 4
 
    New values are allocated according to the following process:
 
@@ -1717,6 +1781,11 @@ Table of Contents
               (CRL) Profile", RFC 5280, DOI 10.17487/RFC5280, May 2008,
               <https://www.rfc-editor.org/rfc/rfc5280>.
 
+   [RFC5912]  Hoffman, P. and J. Schaad, "New ASN.1 Modules for the
+              Public Key Infrastructure Using X.509 (PKIX)", RFC 5912,
+              DOI 10.17487/RFC5912, June 2010,
+              <https://www.rfc-editor.org/rfc/rfc5912>.
+
    [RFC6838]  Freed, N., Klensin, J., and T. Hansen, "Media Type
               Specifications and Registration Procedures", BCP 13,
               RFC 6838, DOI 10.17487/RFC6838, January 2013,
@@ -1727,6 +1796,10 @@ Table of Contents
               Considerations for Internet Protocols", RFC 6973,
               DOI 10.17487/RFC6973, July 2013,
               <https://www.rfc-editor.org/rfc/rfc6973>.
+
+   [RFC7299]  Housley, R., "Object Identifier Registry for the PKIX
+              Working Group", RFC 7299, DOI 10.17487/RFC7299, July 2014,
+              <https://www.rfc-editor.org/rfc/rfc7299>.
 
    [RFC7468]  Josefsson, S. and S. Leonard, "Textual Encodings of PKIX,
               PKCS, and CMS Structures", RFC 7468, DOI 10.17487/RFC7468,
@@ -1760,6 +1833,10 @@ Table of Contents
               Version 1.3", RFC 9846, DOI 10.17487/RFC9846, July 2026,
               <https://www.rfc-editor.org/rfc/rfc9846>.
 
+   [RFC9925]  Benjamin, D., "Unsigned X.509 Certificates", RFC 9925,
+              DOI 10.17487/RFC9925, February 2026,
+              <https://www.rfc-editor.org/rfc/rfc9925>.
+
    [X680]     ITU-T, "Information technology - Abstract Syntax Notation
               One (ASN.1): Specification of basic notation", ISO/
               IEC 8824-1:2021, 2021,
@@ -1787,9 +1864,9 @@ Table of Contents
               Benjamin, D., O'Brien, D., Westerbaan, B., Valenta, L.,
               and F. Valsorda, "Merkle Tree Certificates", Work in
               Progress, Internet-Draft, draft-ietf-plants-merkle-tree-
-              certs-06, 21 September 2026,
+              certs-07, 7 October 2026,
               <https://datatracker.ietf.org/doc/html/draft-ietf-plants-
-              merkle-tree-certs-06>.
+              merkle-tree-certs-07>.
 
    [MOZILLA-ROOTS]
               Mozilla, "Mozilla Included CA Certificate List", 30 August
@@ -1799,6 +1876,11 @@ Table of Contents
               and T. Wright, "Transport Layer Security (TLS)
               Extensions", RFC 4366, DOI 10.17487/RFC4366, April 2006,
               <https://www.rfc-editor.org/rfc/rfc4366>.
+
+   [RFC4514]  Zeilenga, K., Ed., "Lightweight Directory Access Protocol
+              (LDAP): String Representation of Distinguished Names",
+              RFC 4514, DOI 10.17487/RFC4514, June 2006,
+              <https://www.rfc-editor.org/rfc/rfc4514>.
 
    [RFC6962]  Laurie, B., Langley, A., and E. Kasper, "Certificate
               Transparency", RFC 6962, DOI 10.17487/RFC6962, June 2013,
@@ -1813,7 +1895,38 @@ Table of Contents
               errors", March 2025,
               <https://dadrian.io/blog/posts/sct-not-after/>.
 
-Appendix A.  Trust Anchor ID Pattern Test Vectors
+Appendix A.  ASN.1 Module
+
+   This ASN.1 module uses the conventions established by [RFC5912].
+
+   TrustAnchorIDs-2025
+     { iso(1) identified-organization(3) dod(6) internet(1)
+       security(5) mechanisms(5) pkix(7) id-mod(0)
+       id-mod-trustAnchorIDs-2025(TBD) }
+
+   DEFINITIONS IMPLICIT TAGS ::=
+   BEGIN
+
+   IMPORTS
+     ATTRIBUTE
+     FROM PKIX-CommonTypes-2009 -- in [RFC5912]
+       { iso(1) identified-organization(3) dod(6) internet(1)
+         security(5) mechanisms(5) pkix(7) id-mod(0)
+         id-mod-pkixCommon-02(57) } ;
+
+   id-rdna-trustAnchorID OBJECT IDENTIFIER ::= {
+       iso(1) identified-organization(3) dod(6) internet(1) security(5)
+       mechanisms(5) pkix(7) rdna(25) 3 }
+
+   -- The attribute value MUST be a valid trust anchor ID.
+   at-trustAnchorID ATTRIBUTE ::= {
+       TYPE RELATIVE-OID
+       IDENTIFIED BY id-rdna-trustAnchorID
+   }
+
+   END
+
+Appendix B.  Trust Anchor ID Pattern Test Vectors
 
    This section contains test vectors for trust anchor ID patterns
    (Section 5.3.1).  Patterns and IDs are provided in their byte
@@ -1869,7 +1982,7 @@ Appendix A.  Trust Anchor ID Pattern Test Vectors
 
    *  81fd5982808080808080808004 (32473.(2^64+4))
 
-A.1.  Invalid IDs or Patterns
+B.1.  Invalid IDs or Patterns
 
    This section contains test vectors where either the ID or pattern is
    not a valid byte representation.  The procedure in Section 5.3.1 is
