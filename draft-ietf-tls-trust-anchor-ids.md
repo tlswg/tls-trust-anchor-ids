@@ -238,7 +238,9 @@ For example, the distinguished name for trust anchor ID `32473.1` would be repre
 The `trust_anchors` extension is defined using the structures below:
 
 ~~~ tls-presentation
-enum { trust_anchors(TBD), (2^16-1) } ExtensionType;
+enum {
+    trust_anchors(TBD), trust_anchor_retry_support(TBD2), (2^16-1)
+} ExtensionType;
 
 /* Syntax when sent in ClientHello or CertificateRequest: */
 TrustAnchorID RequestedTrustAnchorList<0..2^16-1>;
@@ -257,6 +259,8 @@ When the `trust_anchors` extension is sent in ClientHello or CertificateRequest,
 When the `trust_anchors` extension is sent in Certificate, the `extension_data` MUST be empty. The extension MUST only be sent in the first CertificateEntry. It indicates that the sender sent the certificate because the certificate matched a trust anchor ID sent by the peer. {{strict-certification-paths}} describes this in detail.
 
 When the `trust_anchors` extension is sent in EncryptedExtensions, the `extension_data` is an AvailableTrustAnchorList. It indicates individual trust anchors for which the server has a candidate path, in order of most to least preferred by the server. This list MUST NOT be empty. If the server has no available trust anchors to present, it MUST omit the extension. {{recovery}} describes this in detail.
+
+When the `trust_anchor_retry_support` extension is sent in ClientHello or EncryptedExtensions, the `extension_data` is empty. {{retry-negotiation}} describes how the client and server use this extension.
 
 ## Relying Party Configuration
 
@@ -279,7 +283,7 @@ If the relying party is a client, it is not necessary for the requested trust an
 * The client MAY send a (possibly empty) subset of its trust anchors due to fingerprinting risks (see {{privacy-considerations}}) or size concerns.
 * The client MAY send trust anchors it does not trust. This can reduce fingerprinting if, e.g., default instances of the client send this value, but an individual user has configured their software to distrust the CA.
 
-If the client list is inaccurate, it is possible the server will select an untrusted certificate. The connection will then fail. Clients that send potentially inaccurate lists SHOULD implement the recovery mechanism described in {{recovery}}. The associated IDs of individual trust anchors are used in recovery. Recovery requires a round-trip, so clients SHOULD send as accurate a list as feasible.
+If the client list is inaccurate, the server might select an untrusted certificate. Clients that send potentially inaccurate lists SHOULD implement the recovery mechanism described in {{recovery}}. The associated IDs of individual trust anchors are used in recovery. Recovery requires a round-trip, so clients SHOULD send as accurate a list as feasible.
 
 ## Authenticating Party Configuration
 
@@ -396,7 +400,7 @@ When the authenticating party is a server, {{recovery}} describes an additional 
 
 ## Strict Certification Paths
 
-If, and only if, the authenticating party sends a certification path that matches the relying party's `trust_anchors` extension, the authenticating party MUST send an empty `trust_anchors` extension in the first CertificateEntry of the Certificate message.
+If, and only if, the authenticating party sends a certification path that matches the relying party's `trust_anchors` extension, the authenticating party MUST send an empty `trust_anchors` extension in the first CertificateEntry of the Certificate message. For a replacement Certificate ({{retry-exchange}}), the single ID in TrustAnchorRetry takes the place of the list in the client's `trust_anchors` extension for the purposes of this section.
 
 In this case, the `certificate_list` flexibility described in {{Section 4.5.1 of !RFC9846}} no longer applies. The `certificate_list` MUST contain a complete certification path, correctly ordered and with no extraneous certificates. That is, each certificate MUST certify the one immediately preceding it, and the path's trust anchor MUST certify the final certificate.
 
@@ -411,19 +415,71 @@ When receiving a ClientHello with `trust_anchors`, the server collects all candi
 * Have a trust anchor ID, and
 * Satisfy the conditions in {{Section 4.5.1.2 of !RFC9846}}, with the exception of `certificate_authorities`, and any future extensions that play a similar role
 
-If this collection is non-empty, the server MUST send a `trust_anchors` extension in EncryptedExtensions, containing the corresponding trust anchor IDs in preference order.
+If this collection is non-empty, the server MUST send a `trust_anchors` extension in EncryptedExtensions, containing the corresponding trust anchor IDs in preference order. A server that negotiates in-handshake recovery MAY prefer a smaller initial certification path even if fewer clients can validate it.
 
-If a client requests extra trust anchors or omits trusted ones, it SHOULD implement the following recovery mechanism:
+### Negotiating In-Handshake Recovery {#retry-negotiation}
 
-If the client receives either a connection error or an untrusted certificate, the client looks in the server's EncryptedExtensions for a trust anchor ID that it trusts. If there are multiple, it selects an option based on the server's preference order and its local preferences. It then makes a new connection to the same endpoint, requesting only the selected trust anchor ID in the ClientHello `trust_anchors` extension. If the EncryptedExtensions had no `trust_anchors` extension, or no match was found, the client returns the error to the application.
+A client that supports in-handshake recovery MAY include `trust_anchor_retry_support` along with `trust_anchors` in ClientHello. The server MAY acknowledge the offer by including `trust_anchor_retry_support` along with its non-empty `trust_anchors` list in EncryptedExtensions. It MUST only do so if the client offered both extensions and the server authenticates with an X.509 certificate without selecting a pre-shared key. This mechanism is defined for TLS 1.3 using the TLS record layer over a reliable, ordered transport. Endpoints MUST NOT negotiate it in DTLS or QUIC.
+
+If `trust_anchor_retry_support` has non-empty `extension_data`, the recipient MUST abort with a `decode_error` alert. If the server sends an unsolicited `trust_anchor_retry_support` extension, the client MUST abort with an `unsupported_extension` alert. If the client offered the extension but the server acknowledged it without meeting the other conditions above, the client MUST abort with an `illegal_parameter` alert.
+
+A server that acknowledges the offer MUST wait until it has verified the client's Finished before sending application data or post-handshake messages, including NewSessionTicket and KeyUpdate. If the client receives application data or a post-handshake message before sending its Finished, it MUST abort with an `unexpected_message` alert. An endpoint MUST NOT make a TLS exporter available to its application until its handshake completes.
+
+### TrustAnchorRetry {#retry-exchange}
+
+If the client accepts the initial certification path, it sends its normal authentication messages immediately after the server's Finished. The client can attempt recovery only if it would otherwise abort on a server certificate validation error, including a mismatch with the intended peer identity. In that case, the client defers the certificate alert while it processes the rest of the server's flight. Before sending TrustAnchorRetry, it MUST verify the initial CertificateVerify signature and the server's Finished as specified in {{Section 4.5 of !RFC9846}}. The client handles other TLS errors as specified in {{!RFC9846}}. A fatal alert or transport failure ends the attempt.
+
+When the server accepts Encrypted Client Hello (ECH), the client and server use ClientHelloInner to negotiate recovery. If the client offered ECH as specified in {{Section 6.1 of !RFC9849}} and the server rejected it, the client MUST follow {{Section 6.1.6 of !RFC9849}} and MUST NOT send TrustAnchorRetry on that connection.
+
+If recovery was negotiated, the client looks in the server's EncryptedExtensions for an ID that it is willing to disclose and that identifies an individual trust anchor it trusts for this connection. If one or more IDs match, the client selects one based on the server's preference order and its local preferences. It MUST then send a TrustAnchorRetry handshake message on the same connection requesting only that ID. If recovery was not negotiated or no match was found, the client sends the appropriate certificate alert and reports the certificate error to the application.
 
 If the server's certification path chains to a trust anchor the client trusts, but the client rejected the path for some other reason (e.g., expiry, revocation, a name mismatch, or a relying party constraint on that trust anchor), the client SHOULD NOT select that trust anchor's associated trust anchor ID when retrying.
 
-Clients SHOULD retry at most once per connection attempt.
+~~~ tls-presentation
+enum { trust_anchor_retry(TBD3), (255) } HandshakeType;
 
-This mechanism allows the connection to recover from a certificate selection failure, at additional latency cost.
+struct {
+    TrustAnchorID selected_trust_anchor;
+} TrustAnchorRetry;
+~~~
 
-This mechanism also allows servers to safely send fallback certificates that may not be as ubiquitously acceptable. Without some form of trust anchor negotiation, servers are limited to selecting certification paths that are ubiquitously trusted in all supported clients. This often means sending extra cross-certificates to target the lowest common denominator at a bandwidth cost. If the ClientHello contains `trust_anchors`, the server MAY opportunistically send a less ubiquitous, more bandwidth-efficient path based on local heuristics, with the expectation that the client will retry when the heuristics fail.
+TrustAnchorRetry contains exactly one TrustAnchorID ({{trust-anchor-ids}}). A client that retries MUST send TrustAnchorRetry as its first handshake message after receiving the server's Finished and MUST NOT send a second TrustAnchorRetry. If a client receives TrustAnchorRetry, or if a server receives it without having negotiated recovery or at any other point in the handshake, the recipient MUST abort with an `unexpected_message` alert. The server MUST abort with a `decode_error` alert if the message does not encode exactly one valid TrustAnchorID, or with an `illegal_parameter` alert if the ID was not in its EncryptedExtensions.
+
+When the server receives TrustAnchorRetry, it selects a candidate certification path for the same service from the collection described in {{recovery}}. The path's individual trust anchor ID MUST equal `selected_trust_anchor`. If no such path is available, the server MUST abort with a `handshake_failure` alert. Otherwise, it MUST send a replacement Certificate as specified in {{strict-certification-paths}}, immediately followed by a new CertificateVerify computed with the signing credential authenticated by that Certificate. These two messages complete the server's response.
+
+The client MUST validate the replacement path to the selected trust anchor for the intended peer identity under its normal certificate policies and verify the replacement CertificateVerify. If the first CertificateEntry does not contain the `trust_anchors` extension, the client MUST abort with a `missing_extension` alert. If authentication fails, the client MUST abort with the appropriate TLS alert. Otherwise, it sends its normal authentication messages, including its response to the original CertificateRequest, if any, and its Finished. The client MUST associate the connection and any resumption state with the replacement certificate it authenticated.
+
+The following example shows a handshake in which the client requests a replacement path. Braces enclose messages protected with handshake traffic keys, brackets enclose messages protected with server application traffic keys, and an asterisk marks an optional message.
+
+~~~
+Client                                                Server
+
+ClientHello                   -------->
+                              <--------          ServerHello
+                              <-------- {EncryptedExtensions}
+                              <-------- {CertificateRequest*}
+                              <--------         {Certificate}
+                              <--------   {CertificateVerify}
+                              <--------            {Finished}
+
+{TrustAnchorRetry}            -------->
+                              <--------         [Certificate]
+                              <--------   [CertificateVerify]
+
+{Certificate*}                -------->
+{CertificateVerify*}          -------->
+{Finished}                    -------->
+~~~
+
+### Record Protection and Transcript {#retry-transcript}
+
+The client MUST protect TrustAnchorRetry and its subsequent authentication messages, including its Finished, with keys derived from `client_handshake_traffic_secret`. The server MUST protect the replacement Certificate and CertificateVerify with keys derived from `server_application_traffic_secret_0` and send them with the handshake content type.
+
+Both peers MUST retain the main handshake transcript through the original server Finished, including the rejected Certificate and its CertificateVerify. They append TrustAnchorRetry and the replacement authentication messages to that transcript in the order they are sent ({{Section 4.1 of !RFC9846}}). The server computes the replacement CertificateVerify using the server signature context in {{Section 4.5.2 of !RFC9846}} and the transcript through the replacement Certificate, including TrustAnchorRetry. If certificate compression is used, the transcript includes the CompressedCertificate message as specified in {{!RFC8879}}.
+
+When the client retries, the Handshake Context for its authentication block ({{Section 4.5 of !RFC9846}}) extends through the replacement CertificateVerify. The client computes its Finished over all preceding messages in the main handshake transcript, including any Certificate and CertificateVerify it sent. The server MUST verify the client's Finished over the same transcript.
+
+The key schedule in {{Section 7.1 of !RFC9846}} uses the transcript through the original server Finished to derive the initial application traffic secrets and `exporter_secret`. Both peers retain these secrets across the retry, and record sequence numbers continue from their current values. The transcript used to derive `resumption_secret` includes the retry exchange and the client's Finished.
 
 # Trust Anchor Groups
 
@@ -799,6 +855,8 @@ Trust anchors that do not participate are not revealed by this extension. Howeve
 
 Trust anchor IDs sent in response to the authenticating party can only be observed actively. That is, the authenticating party could vary its list and observe how the client responds, in order to probe for the client's trust anchor list. This is similar to the exposure of trust anchors not participating in this extension, except that the trust anchor can be probed by only knowing the trust anchor ID.
 
+Although TrustAnchorRetry is encrypted, the peer that sent the initial certificate can read the selected trust anchor ID before the client has authenticated the peer. The client MUST apply its disclosure policy when selecting an ID from the server's EncryptedExtensions.
+
 Trust anchor IDs sent unconditionally can be observed passively. This mode is analogous to the `certificate_authorities` extension. Relying parties SHOULD NOT unconditionally advertise trust anchor lists that are unique to an individual user. Rather, unconditionally-advertised lists SHOULD be empty or computed only from the trust anchors common to the relying party's anonymity set ({{Section 3.3 of !RFC6973}}).
 
 Relying parties SHOULD determine which trust anchors participate in this mechanism, and whether to advertise them unconditionally or conditionally, based on their privacy goals.
@@ -829,6 +887,8 @@ PKI-based TLS authentication depends on the relying party's certificate policies
 
 This attack vector is available with or without trust anchor negotiation. The negotiation mechanism described in this document allows certificate selection to reflect a relying party's certificate policies. It does not determine the certificate policies themselves. Relying parties remain responsible for trusting only trustworthy CAs, and untrustworthy CAs remain a security risk when trusted.
 
+When a retry succeeds, the replacement CertificateVerify authenticates the extended handshake transcript. The exporter secret is derived before the retry, so its value does not distinguish which path the client accepted. An application that needs the accepted certificate obtains it from the authenticated connection state.
+
 ### Agility
 
 As with other TLS parameters, negotiation reduces a conflict between availability and security, which allows PKIs to better mitigate security risks to users. When relying parties in an existing TLS ecosystem improve their certificate policies, trust anchor negotiation helps authenticating parties navigate differences between those relying parties and existing relying parties. Each set of requirements may be satisfied without compatibility risk to the other. {{use-cases}} discusses such scenarios in more detail.
@@ -857,11 +917,20 @@ If the attacker targets any clients that enforce Certificate Transparency {{?RFC
 
 ## TLS ExtensionType Updates
 
-IANA is requested to create the following entry in the TLS ExtensionType Values registry, originally created in {{?RFC4366}}:
+IANA is requested to create the following entries in the TLS ExtensionType Values registry, originally created in {{?RFC4366}}:
 
 | Value | Extension Name | TLS 1.3        | DTLS-Only | Recommended | Reference  |
 |-------|----------------|----------------|-----------|-------------|------------|
 | TBD   | trust_anchors  | CH, EE, CR, CT | N         | Y           | [this-RFC] |
+| TBD2  | trust_anchor_retry_support | CH, EE | N       | Y           | [this-RFC] |
+
+## TLS HandshakeType Update
+
+IANA is requested to add the following entry to the TLS HandshakeType registry:
+
+| Value | Description        | DTLS-OK | Reference  | Comment      |
+|-------|--------------------|---------|------------|--------------|
+| TBD3  | trust_anchor_retry | N       | \[this-RFC\] | For TLS 1.3. |
 
 ## Media Type Updates
 
