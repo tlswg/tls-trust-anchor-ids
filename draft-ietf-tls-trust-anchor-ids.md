@@ -524,15 +524,32 @@ opaque TrustAnchorIDPattern<0..2^8-1>;
 TrustAnchorIDPattern TrustAnchorIDPatternList<1..2^16-1>;
 ~~~
 
-## Trust Anchor Negotiation Property
+## Trust Anchor Negotiation Property {#trust-anchor-negotiation-property}
 
 The `trust_anchor_negotiation` property's `data` field MUST be empty.
 
 When a candidate certification path has this property, the authenticating party SHOULD NOT select it as a fallback when the path's issuer cannot be matched against the relying party. When a candidate path lacks this property, the authenticating party MAY use it as a fallback. See also {{certificate-selection}}.
 
-A path without the `trust_anchor_negotiation` property MAY still participate in this protocol and include the `trust_anchor_id` and `trust_anchor_groups` properties. In particular, the authenticating party MAY still choose to condition the path on trust anchor negotiation if it is combining multiple sets of candidate paths, each with their separate determinations about suitable fallbacks. {{acme-example}} gives an example scenario. This could be implemented either with separate local configuration or by modifying the CertificatePropertyList structures when combining the sets.
+A path without the `trust_anchor_negotiation` property MAY still participate in this protocol and include the `trust_anchor_id` and `trust_anchor_groups` properties. In particular, the authenticating party MAY still choose to condition the path on trust anchor negotiation if it is combining multiple sets of candidate paths, each with their separate determinations about suitable fallbacks. This could be implemented either with separate local configuration or by modifying the CertificatePropertyList structures when combining the sets.
 
-{{acme-extension}} discusses how an ACME server might set this property, as well as examples where the authenticating party might override this recommendation.
+ACME servers MUST NOT set this property for stand-alone certificates, and MUST set it otherwise. Additionally, it MUST NOT be set for the main chain unless every chain has it.
+
+ACME clients SHOULD support the following processing modes for ACME server responses, configured per lineage of orders:
+
+* `default`:
+  * If there are configured preferred trust anchors, search the chains the ACME server sent without `trust_anchor_negotiation` for matching chain and select that. Ignore any chains that are not immediately available.
+  * If the previous step did not select a chain, select the main chain. If it has `trust_anchor_negotiation` set, treat the response as malformed.
+  * Forcibly set `trust_anchor_negotiation` for all other chains.
+  * This SHOULD be used as default if not otherwise specified.
+* `alternate`:
+  * Forcibly set `trust_anchor_negotiation` for all chains the ACME server sent.
+* `passthrough`:
+  * Pass through the chain `trust_anchor_negotiation` properties as-is.
+
+The `default`/`alternate` modes are for having the ACME client apply local policy on trust anchors, `passthrough` defers this policy to the webserver/reverse proxy/load balancer.
+
+Note that this property means different things before and after the local policy is applied.
+
 
 ## PEM Representation
 
@@ -589,29 +606,11 @@ The IANA registration for this media type is described in {{media-type-updates}}
 
 The format defined in {{pem-representation}} can be used with ACME's alternate format mechanism (see {{Section 7.4.2 of !RFC8555}}) as follows. When downloading certificates, a supporting client SHOULD include "application/pem-certificate-chain-with-properties" in its HTTP Accept header ({{Section 12.5.1 of !RFC9110}}). When a supporting server sees such a header, it MAY then respond with that format to include a CertificatePropertyList with the certification path. This CertificatePropertyList MAY include `trust_anchor_id` and `trust_anchor_groups` properties for use with this protocol, or other properties defined in another document.
 
-When the ACME server provides multiple paths, e.g. with ACME's alternate certificate chain mechanism (see {{Section 7.4.2 of !RFC8555}}), the ACME server SHOULD include the `trust_anchor_negotiation` property on any paths it expects to gate on trust anchor negotiation. It SHOULD omit the property on any paths which are possible fallbacks when no trust anchors match.
+See {{trust-anchor-negotiation-property} for how ACME server sets the `trust_anchor_negotiation` property.
 
 The authenticating party MAY override this recommendation. In particular, if the authenticating party combines certification paths from two ACME orders, it might only consider some orders as a source for fallback paths.
 
 When a path is gated on trust anchor negotiation, this protocol removes the need for heuristics in determining which path to serve to which relying party.
-
-### Example {#acme-example}
-
-There are two CA operators, CA1 and CA2. The authenticating party is configured to request certificates from ACME servers operated by each of CA1 and CA2.
-
-When the authenticating party requests certificates from CA1, it receives:
-
-* Path 1A chains to an older root CA operated by CA1. It does not set `trust_anchor_negotiation` because CA1 considers this to be a reasonable fallback for legacy relying parties.
-* Path 1B chains to a newer root CA operated by CA1. It sets `trust_anchor_negotiation` because not all relying parties support it yet.
-
-When the authenticating party requests certificates from CA2, it receives:
-
-* Path 2A chains to a root CA operated by CA2. It does not set `trust_anchor_negotiation` because CA2 considers this to be a reasonable fallback for legacy relying parties.
-* Path 2B chains to a more specific intermediate CA. It sets `trust_anchor_negotiation` because not all relying parties preload the intermediate.
-
-All paths include `trust_anchor_id` properties describing their corresponding issuer. The authenticating party's TLS software will consider all four in connections that use the `trust_anchors` extension.
-
-For other connections, the TLS software needs to determine fallback paths. Although both 1A and 2A lack the `trust_anchor_negotiation` property, the authenticating party knows that CA2 is more ubiquitously trusted among its supported relying parties than CA1. It configures its TLS software to use CA2 as the source of the fallback path, and so only path 2A will be used as fallback.
 
 ## Representing Multiple Paths
 
