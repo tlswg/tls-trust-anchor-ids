@@ -281,6 +281,31 @@ If the relying party is a client, it is not necessary for the requested trust an
 
 If the client list is inaccurate, it is possible the server will select an untrusted certificate. The connection will then fail. Clients that send potentially inaccurate lists SHOULD implement the recovery mechanism described in {{recovery}}. The associated IDs of individual trust anchors are used in recovery. Recovery requires a round-trip, so clients SHOULD send as accurate a list as feasible.
 
+### X.509 Trust Anchor IDs extension
+
+The `id-pe-trustAnchorIDs` X.509 extension is defined to carry trust anchor IDs in trust anchors represented as X.509 certificates.
+
+Some relying parties only support configuring trust anchors as X.509 certificates. Using `id-rdna-trustAnchorID` for this purpose might not be possible because:
+
+* It is part of CA name, which is immutable. But trust anchor ID can be assigned to existing CA.
+* For non-standalone certificates, the trust anchor ID to send can differ from what CA name specifies.
+
+For these cases, X.509 extensions in trust anchor MAY carry an extension with `extnID` of `id-pe-trustAnchorIDs` and `extnValue` containing a DER-encoded SET OF TrustAnchorID structures.
+
+~~~ asn.1
+id-pe-trustAnchorIDs OBJECT IDENTIFIER ::=
+    { iso(1) identified-organization(3) dod(6) internet(1)
+      security(5) mechanisms(5) pkix(7) id-pe(1) TBD }
+
+TrustAnchorIDs ::= SET OF RELATIVE-OID
+~~~
+
+Note that DER representations of the values MUST be between 1 and 32 bytes inclusive, as those are raw trust anchor IDs.
+
+When loaded as a trust anchor, relying party SHOULD send the listed trust anchor IDs in the `client_hello` or `certificate_request` extensions. If the certificate does not have `id-pe-trustAnchorIDs` extension, but does have `id-rdna-trustAnchorID` attribute in subject name, those should be sent instead (this is to allow overriding the identifiers from the name).
+
+This extension MAY also appear in CA certificates. In this case, the set MUST be singleton set for the associated ID for this CA as trust anchor.
+
 ## Authenticating Party Configuration
 
 The authenticating party compares the requested trust anchor IDs with its candidate certification paths. To do this, each candidate certification path that participates in this protocol MUST be configured with:
