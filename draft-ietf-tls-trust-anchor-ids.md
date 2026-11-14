@@ -948,6 +948,10 @@ New values are allocated according to the following process:
 * Values in the range 0-65279 are assigned via Specification Required {{!RFC8126}}.
 * Values in the range 65280-65535 are reserved for Private Use {{!RFC8126}}.
 
+The registry has the following note:
+
+> Note: All entries in this registry are intended for TLS 1.3 or later, per {{?RFC9851}}.
+
 --- back
 
 # ASN.1 Module
