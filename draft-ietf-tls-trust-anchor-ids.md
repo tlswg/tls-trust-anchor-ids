@@ -863,6 +863,8 @@ IANA is requested to create the following entry in the TLS ExtensionType Values 
 |-------|----------------|----------------|-----------|-------------|------------|
 | TBD   | trust_anchors  | CH, EE, CR, CT | N         | Y           | [this-RFC] |
 
+The value for the "Comment" column of this entry is "For TLS 1.3 or later".
+
 ## Media Type Updates
 
 IANA is requested to create the following entry in the "Media Types" registry, defined in {{!RFC6838}}:
@@ -925,15 +927,15 @@ IANA is requested to create the following entry in the SMI Security for PKIX Mod
 |---------|-----------------------------|------------|
 | TBD     | id-mod-trustAnchorIDs-2025  | [this-RFC] |
 
-IANA is requested to add the following entry to the "SMI Security for PKIX Relative Distinguished Name Attribute" registry {{!RFC9925}}:
+IANA is requested to update the "References" column of the id-rdna-trustAnchorID entry in the "SMI Security for PKIX Relative Distinguished Name Attribute" registry {{!RFC9925}} as follows:
 
 | Decimal | Description           | References |
 |---------|-----------------------|------------|
 | 3       | id-rdna-trustAnchorID | [this-RFC] |
 
-## CertificatePropertyType Registry
+## TLS CertificatePropertyType Registry
 
-IANA is requested to create the "CertificatePropertyType" registry within the "Transport Layer Security (TLS) Extensions" group. The initial entries in the registry are as follows:
+IANA is requested to create the "TLS CertificatePropertyType" registry within the "Transport Layer Security (TLS) Extensions" group. The initial entries in the registry are as follows:
 
 | Decimal | Description              | References |
 |---------|--------------------------|------------|
@@ -945,6 +947,10 @@ New values are allocated according to the following process:
 
 * Values in the range 0-65279 are assigned via Specification Required {{!RFC8126}}.
 * Values in the range 65280-65535 are reserved for Private Use {{!RFC8126}}.
+
+The registry has the following note:
+
+> Note: All entries in this registry are intended for TLS 1.3 or later, per {{?RFC9851}}.
 
 --- back
 
