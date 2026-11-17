@@ -12,22 +12,22 @@
 <meta content="
        This document defines the TLS Trust Anchors extension, a mechanism for a TLS client or server to select a certificate to present based on the peer's trusted certification authorities. It describes certification authorities more succinctly than the TLS Certificate Authorities extension. 
     " name="description">
-<meta content="xml2rfc 3.34.1" name="generator">
+<meta content="xml2rfc 3.35.0" name="generator">
 <meta content="draft-ietf-tls-trust-anchor-ids-latest" name="ietf.draft">
 <!-- Generator version information:
-  xml2rfc 3.34.1
-    Python 3.14.8
-    ConfigArgParse 1.8.0
+  xml2rfc 3.35.0
+    Python 3.14.10
+    ConfigArgParse 1.9.0
     google-i18n-address 3.1.1
     intervaltree 3.2.1
     Jinja2 3.1.6
     lxml 6.1.1
     natsort 8.4.0
-    platformdirs 4.13.4
+    platformdirs 4.14.3
     pycountry 24.6.1
     PyYAML 6.0.3
     requests 2.33.1
-    wcwidth 0.9.2
+    wcwidth 0.9.4
 -->
 <link href="draft-ietf-tls-trust-anchor-ids.xml" rel="alternate" type="application/rfc+xml">
 <link href="#copyright" rel="license">
@@ -1028,7 +1028,7 @@ svg {
   & :is([stroke="white"], [stroke^="#fff"]) {
     stroke: var(--background-color);
   }
-  & :is([fill="black"], [fill^="#000"], :not([fill])) {
+  & :is([fill="black"], [fill^="#000"], :not([fill], [fill] *)) {
     fill: var(--text-color);
   }
   & :is([fill="white"], [fill^="#fff"]) {
@@ -1043,11 +1043,11 @@ svg {
 <thead><tr>
 <td class="left">Internet-Draft</td>
 <td class="center">TLS Trust Anchor Identifiers</td>
-<td class="right">October 2026</td>
+<td class="right">November 2026</td>
 </tr></thead>
 <tfoot><tr>
 <td class="left">Beck, et al.</td>
-<td class="center">Expires 23 April 2027</td>
+<td class="center">Expires 21 May 2027</td>
 <td class="right">[Page]</td>
 </tr></tfoot>
 </table>
@@ -1060,12 +1060,12 @@ svg {
 <dd class="internet-draft">draft-ietf-tls-trust-anchor-ids-latest</dd>
 <dt class="label-published">Published:</dt>
 <dd class="published">
-<time datetime="2026-10-20" class="published">20 October 2026</time>
+<time datetime="2026-11-17" class="published">17 November 2026</time>
     </dd>
 <dt class="label-intended-status">Intended Status:</dt>
 <dd class="intended-status">Standards Track</dd>
 <dt class="label-expires">Expires:</dt>
-<dd class="expires"><time datetime="2027-04-23">23 April 2027</time></dd>
+<dd class="expires"><time datetime="2027-05-21">21 May 2027</time></dd>
 <dt class="label-authors">Authors:</dt>
 <dd class="authors">
 <div class="author">
@@ -1126,7 +1126,7 @@ svg {
         time. It is inappropriate to use Internet-Drafts as reference
         material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
 <p id="section-boilerplate.1-4">
-        This Internet-Draft will expire on 23 April 2027.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+        This Internet-Draft will expire on 21 May 2027.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="copyright">
@@ -1322,7 +1322,7 @@ svg {
                 <p id="section-toc.1-1.12.2.3.1"><a href="#section-12.3" class="auto internal xref">12.3</a>.  <a href="#name-pkix-registry-updates" class="internal xref">PKIX Registry Updates</a></p>
 </li>
               <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.12.2.4">
-                <p id="section-toc.1-1.12.2.4.1"><a href="#section-12.4" class="auto internal xref">12.4</a>.  <a href="#name-certificatepropertytype-reg" class="internal xref">CertificatePropertyType Registry</a></p>
+                <p id="section-toc.1-1.12.2.4.1"><a href="#section-12.4" class="auto internal xref">12.4</a>.  <a href="#name-tls-certificatepropertytype" class="internal xref">TLS CertificatePropertyType Registry</a></p>
 </li>
             </ul>
 </li>
@@ -2433,6 +2433,7 @@ IKzgi/++xTs=
             </tr>
           </tbody>
         </table>
+<p id="section-12.1-3">The value for the "Comment" column of this entry is "For TLS 1.3 or later".<a href="#section-12.1-3" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="media-type-updates">
@@ -2560,7 +2561,7 @@ IKzgi/++xTs=
             </tr>
           </tbody>
         </table>
-<p id="section-12.3-3">IANA is requested to add the following entry to the "SMI Security for PKIX Relative Distinguished Name Attribute" registry <span>[<a href="#RFC9925" class="cite xref">RFC9925</a>]</span>:<a href="#section-12.3-3" class="pilcrow">¶</a></p>
+<p id="section-12.3-3">IANA is requested to update the "References" column of the id-rdna-trustAnchorID entry in the "SMI Security for PKIX Relative Distinguished Name Attribute" registry <span>[<a href="#RFC9925" class="cite xref">RFC9925</a>]</span> as follows:<a href="#section-12.3-3" class="pilcrow">¶</a></p>
 <table class="center" id="table-3">
           <caption><a href="#table-3" class="selfRef">Table 3</a></caption>
 <thead>
@@ -2580,12 +2581,12 @@ IKzgi/++xTs=
         </table>
 </section>
 </div>
-<div id="certificatepropertytype-registry">
+<div id="tls-certificatepropertytype-registry">
 <section id="section-12.4">
-        <h3 id="name-certificatepropertytype-reg">
-<a href="#section-12.4" class="section-number selfRef">12.4. </a><a href="#name-certificatepropertytype-reg" class="section-name selfRef">CertificatePropertyType Registry</a>
+        <h3 id="name-tls-certificatepropertytype">
+<a href="#section-12.4" class="section-number selfRef">12.4. </a><a href="#name-tls-certificatepropertytype" class="section-name selfRef">TLS CertificatePropertyType Registry</a>
         </h3>
-<p id="section-12.4-1">IANA is requested to create the "CertificatePropertyType" registry within the "Transport Layer Security (TLS) Extensions" group. The initial entries in the registry are as follows:<a href="#section-12.4-1" class="pilcrow">¶</a></p>
+<p id="section-12.4-1">IANA is requested to create the "TLS CertificatePropertyType" registry within the "Transport Layer Security (TLS) Extensions" group. The initial entries in the registry are as follows:<a href="#section-12.4-1" class="pilcrow">¶</a></p>
 <table class="center" id="table-4">
           <caption><a href="#table-4" class="selfRef">Table 4</a></caption>
 <thead>
@@ -2620,6 +2621,12 @@ IKzgi/++xTs=
 </li>
           <li class="normal" id="section-12.4-4.2">
             <p id="section-12.4-4.2.1">Values in the range 65280-65535 are reserved for Private Use <span>[<a href="#RFC8126" class="cite xref">RFC8126</a>]</span>.<a href="#section-12.4-4.2.1" class="pilcrow">¶</a></p>
+</li>
+        </ul>
+<p id="section-12.4-5">The registry has the following note:<a href="#section-12.4-5" class="pilcrow">¶</a></p>
+<ul class="normal ulEmpty">
+<li class="normal ulEmpty" id="section-12.4-6.1">
+            <p id="section-12.4-6.1.1">Note: All entries in this registry are intended for TLS 1.3 or later, per <span>[<a href="#RFC9851" class="cite xref">RFC9851</a>]</span>.<a href="#section-12.4-6.1.1" class="pilcrow">¶</a></p>
 </li>
         </ul>
 </section>
@@ -2728,7 +2735,7 @@ IKzgi/++xTs=
 <dd class="break"></dd>
 <dt id="I-D.ietf-plants-merkle-tree-certs">[I-D.ietf-plants-merkle-tree-certs]</dt>
         <dd>
-<span class="refAuthor">Benjamin, D.</span>, <span class="refAuthor">O'Brien, D.</span>, <span class="refAuthor">Westerbaan, B.</span>, <span class="refAuthor">Valenta, L.</span>, and <span class="refAuthor">F. Valsorda</span>, <span class="refTitle">"Merkle Tree Certificates"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-ietf-plants-merkle-tree-certs-07</span>, <time datetime="2026-10-07" class="refDate">7 October 2026</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-ietf-plants-merkle-tree-certs-07">https://datatracker.ietf.org/doc/html/draft-ietf-plants-merkle-tree-certs-07</a>&gt;</span>. </dd>
+<span class="refAuthor">Benjamin, D.</span>, <span class="refAuthor">O'Brien, D.</span>, <span class="refAuthor">Westerbaan, B.</span>, <span class="refAuthor">Valenta, L.</span>, and <span class="refAuthor">F. Valsorda</span>, <span class="refTitle">"Merkle Tree Certificates"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-ietf-plants-merkle-tree-certs-08</span>, <time datetime="2026-11-01" class="refDate">1 November 2026</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-ietf-plants-merkle-tree-certs-08">https://datatracker.ietf.org/doc/html/draft-ietf-plants-merkle-tree-certs-08</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 <dt id="MOZILLA-ROOTS">[MOZILLA-ROOTS]</dt>
         <dd>
@@ -2749,6 +2756,10 @@ IKzgi/++xTs=
 <dt id="RFC7469">[RFC7469]</dt>
         <dd>
 <span class="refAuthor">Evans, C.</span>, <span class="refAuthor">Palmer, C.</span>, and <span class="refAuthor">R. Sleevi</span>, <span class="refTitle">"Public Key Pinning Extension for HTTP"</span>, <span class="seriesInfo">RFC 7469</span>, <span class="seriesInfo">DOI 10.17487/RFC7469</span>, <time datetime="2015-04" class="refDate">April 2015</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc7469">https://www.rfc-editor.org/rfc/rfc7469</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC9851">[RFC9851]</dt>
+        <dd>
+<span class="refAuthor">Salz, R.</span> and <span class="refAuthor">N. Aviram</span>, <span class="refTitle">"TLS 1.2 is in Feature Freeze"</span>, <span class="seriesInfo">RFC 9851</span>, <span class="seriesInfo">DOI 10.17487/RFC9851</span>, <time datetime="2026-07" class="refDate">July 2026</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc9851">https://www.rfc-editor.org/rfc/rfc9851</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 <dt id="SCTNotAfter">[SCTNotAfter]</dt>
       <dd>
