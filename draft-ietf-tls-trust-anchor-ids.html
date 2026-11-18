@@ -1557,7 +1557,7 @@ at-trustAnchorID ATTRIBUTE ::= {
 <p id="section-5.1-1">The <code>trust_anchors</code> extension is defined using the structures below:<a href="#section-5.1-1" class="pilcrow">¶</a></p>
 <div class="lang-tls-presentation sourcecode" id="section-5.1-2">
 <pre>
-enum { trust_anchors(TBD), (2^16-1) } ExtensionType;
+enum { trust_anchors(51764), (2^16-1) } ExtensionType;
 
 /* Syntax when sent in ClientHello or CertificateRequest: */
 TrustAnchorID RequestedTrustAnchorList&lt;0..2^16-1&gt;;
@@ -2449,7 +2449,7 @@ IKzgi/++xTs=
           </thead>
           <tbody>
             <tr>
-              <td class="text-left" rowspan="1" colspan="1">TBD</td>
+              <td class="text-left" rowspan="1" colspan="1">51764</td>
               <td class="text-left" rowspan="1" colspan="1">trust_anchors</td>
               <td class="text-left" rowspan="1" colspan="1">CH, EE, CR, CT</td>
               <td class="text-left" rowspan="1" colspan="1">N</td>
