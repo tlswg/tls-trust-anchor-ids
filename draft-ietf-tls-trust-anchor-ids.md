@@ -398,9 +398,9 @@ When multiple paths are suitable based on the above criteria, the authenticating
 
 If the authenticating party has multiple candidate paths that each match `trust_anchors` or `certificate_authorities`, as well as other selection criteria, the relying party will likely accept any candidate. The authenticating party can then freely set a preference order. For example, it might:
 
+* Prefer paths with post-quantum keys over legacy ones
 * Prefer paths with faster private keys over slower ones
 * Prefer paths with smaller Certificate messages over larger ones
-* Prefer paths with post-quantum keys over legacy ones
 
 In contrast, an authenticating party sends fallback certificates to support relying parties that do not implement any form of trust anchor negotiation. In this case, it cannot necessarily assume the relying party will accept all otherwise matching paths. Instead of optimizing for performance or post-quantum adoption, the authenticating party is limited to picking a path from some sufficiently ubiquitous trust anchor to maximize the connection success.
 
