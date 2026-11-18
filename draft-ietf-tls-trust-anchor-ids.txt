@@ -1495,9 +1495,9 @@ Table of Contents
 
    2.  Trust anchors whose IDs the relying party sends _conditionally_,
        i.e. only if the server offers them.  For example, the relying
-       party may indicate support for a trust anchor if its ID is listed
-       in the server's HTTPS/SVCB record or trust anchor list in
-       EncryptedExtensions.
+       party might only indicate support for a trust anchor in response
+       to a matching EncryptedExtensions in the recovery flow (see
+       Section 5.6).
 
    3.  Trust anchors whose IDs the relying party sends
        _unconditionally_, i.e. independently of the authenticating
