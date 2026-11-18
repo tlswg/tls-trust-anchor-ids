@@ -14,9 +14,8 @@ import (
 )
 
 const (
-	propertyTrustAnchorID          = 0
-	propertyTrustAnchorGroups      = 1
-	propertyTrustAnchorNegotiation = 2
+	propertyTrustAnchorID     = 0
+	propertyTrustAnchorGroups = 1
 )
 
 type TrustAnchorID []uint64
@@ -155,10 +154,9 @@ type UnknownProperty struct {
 }
 
 type CertificatePropertyList struct {
-	TrustAnchorID          TrustAnchorID
-	TrustAnchorGroups      []TrustAnchorIDPattern
-	TrustAnchorNegotiation bool
-	UnknownProperties      []UnknownProperty
+	TrustAnchorID     TrustAnchorID
+	TrustAnchorGroups []TrustAnchorIDPattern
+	UnknownProperties []UnknownProperty
 }
 
 func (l *CertificatePropertyList) Marshal() ([]byte, error) {
@@ -188,10 +186,6 @@ func (l *CertificatePropertyList) Marshal() ([]byte, error) {
 					}
 				})
 			})
-		}
-		if l.TrustAnchorNegotiation {
-			props.AddUint16(propertyTrustAnchorNegotiation)
-			props.AddUint16LengthPrefixed(func(child *cryptobyte.Builder) {})
 		}
 	})
 	return b.Bytes()
@@ -236,11 +230,6 @@ func parseCertificatePropertyList(in []byte) (*CertificatePropertyList, error) {
 				}
 				out.TrustAnchorGroups = append(out.TrustAnchorGroups, pattern)
 			}
-		case propertyTrustAnchorNegotiation:
-			if !data.Empty() {
-				return nil, errors.New("invalid trust_anchor_negotiation")
-			}
-			out.TrustAnchorNegotiation = true
 		default:
 			out.UnknownProperties = append(out.UnknownProperties, UnknownProperty{
 				Type: propType,
@@ -264,10 +253,6 @@ func printProperties(props *CertificatePropertyList) {
 			fmt.Printf("    %s\n", g)
 		}
 	}
-	if props.TrustAnchorNegotiation {
-		numProps++
-		fmt.Printf("- trust_anchor_negotiation\n")
-	}
 	for _, p := range props.UnknownProperties {
 		numProps++
 		if len(p.Data) == 0 {
@@ -288,7 +273,6 @@ func printExample() {
 			{{Min: 2187, Max: 2187}, {Min: 2, Max: 2}, {Min: 100, Max: 200}},
 			{{Min: 32473, Max: 32473}, {Min: 3, Max: 3}, {Min: 42, MaxIsInfinity: true}, {Min: 100, Max: 200}},
 		},
-		TrustAnchorNegotiation: true,
 	}
 	b, err := props.Marshal()
 	if err != nil {
