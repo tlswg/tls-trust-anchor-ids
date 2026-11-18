@@ -402,7 +402,7 @@ If the authenticating party has multiple candidate paths that each match `trust_
 * Prefer paths with faster private keys over slower ones
 * Prefer paths with smaller Certificate messages over larger ones
 
-In contrast, an authenticating party sends fallback certificates to support relying parties that do not implement any form of trust anchor negotiation. In this case, it cannot necessarily assume the relying party will accept all otherwise matching paths. Instead of optimizing for performance or post-quantum adoption, the authenticating party is limited to picking a path from some sufficiently ubiquitous trust anchor to maximize the connection success.
+In contrast, an authenticating party sends fallback certificates to support relying parties that do not implement any form of trust anchor negotiation. In this case, it cannot necessarily assume the relying party will accept all otherwise matching paths. The authenticating party is instead limited to picking a path from some sufficiently ubiquitous trust anchor to maximize connection success with its supported relying parties.
 
 As discussed in {{introduction}}, finding ubiquitous trust anchors can be challenging as PKIs evolve. However, only legacy relying parties need to be considered in this ubiquity determination. Updated relying parties may continue to evolve without restricting fallback certificate selection.
 
