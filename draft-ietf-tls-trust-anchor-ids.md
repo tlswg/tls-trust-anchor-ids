@@ -800,7 +800,7 @@ When using this extension, a relying party's trust anchors may be divided into t
 
 1. Trust anchors whose IDs the relying party never sends, but still trusts. These are trust anchors that do not participate in this mechanism.
 
-2. Trust anchors whose IDs the relying party sends *conditionally*, i.e. only if the server offers them. For example, the relying party may indicate support for a trust anchor if its ID is listed in the server's HTTPS/SVCB record or trust anchor list in EncryptedExtensions.
+2. Trust anchors whose IDs the relying party sends *conditionally*, i.e. only if the server offers them. For example, the relying party might only indicate support for a trust anchor in response to a matching EncryptedExtensions in the recovery flow (see {{recovery}}).
 
 3. Trust anchors whose IDs the relying party sends *unconditionally*, i.e. independently of the authenticating party's behavior.
 
