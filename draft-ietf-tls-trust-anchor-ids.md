@@ -238,7 +238,7 @@ For example, the distinguished name for trust anchor ID `32473.1` would be repre
 The `trust_anchors` extension is defined using the structures below:
 
 ~~~ tls-presentation
-enum { trust_anchors(TBD), (2^16-1) } ExtensionType;
+enum { trust_anchors(51764), (2^16-1) } ExtensionType;
 
 /* Syntax when sent in ClientHello or CertificateRequest: */
 TrustAnchorID RequestedTrustAnchorList<0..2^16-1>;
@@ -872,7 +872,7 @@ IANA is requested to create the following entry in the TLS ExtensionType Values 
 
 | Value | Extension Name | TLS 1.3        | DTLS-Only | Recommended | Reference  |
 |-------|----------------|----------------|-----------|-------------|------------|
-| TBD   | trust_anchors  | CH, EE, CR, CT | N         | Y           | [this-RFC] |
+| 51764 | trust_anchors  | CH, EE, CR, CT | N         | Y           | [this-RFC] |
 
 The value for the "Comment" column of this entry is "For TLS 1.3 or later".
 
