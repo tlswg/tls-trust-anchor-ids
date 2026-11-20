@@ -548,7 +548,13 @@ The first element MUST be the encoded CertificatePropertyList.
 The second element MUST be an end-entity certificate. Each following element
 MUST contain a certificate that directly certifies the one preceding it. The certificate representing the trust anchor MUST be omitted from the path.
 
-CertificatePropertyLists are encoded using the "CERTIFICATE PROPERTIES" label. The encoded data is a serialized CertificatePropertyList, defined in {{certificate-properties}}.
+CertificatePropertyLists are encoded using the "CERTIFICATE PROPERTIES" label. The encoded data is a serialized CertificatePropertyList, defined in {{certificate-properties}}. This element is required in this format, but the CertificatePropertyList MAY contain no properties if the path has no associated properties. In that case, the corresponding PEM-encoded CertificatePropertyList is as follows:
+
+~~~
+-----BEGIN CERTIFICATE PROPERTIES-----
+AAA=
+-----END CERTIFICATE PROPERTIES-----
+~~~
 
 Certificates are encoded as in {{Section 5.1 of !RFC7468}}, except DER {{X690}} MUST be used.
 
@@ -620,7 +626,7 @@ For connections without trust anchor negotiation, there might be no selection cr
 
 The ACME client honors the ACME server's choice of main resource in each order, so it discards 1B and 2B. Between 1A and 2B, the authenticating party believes CA2 is more ubiquitously trusted among its supported relying parties than CA1. It configures its ACME client to use CA2 as the source of the fallback path. Path 2A is thus chosen as fallback.
 
-## Representing Multiple Paths
+## PEM Credential Lists
 
 While ACME represents each certification path separately, applications might combine multiple certification paths in one file as part of local configuration. For example:
 
@@ -628,15 +634,7 @@ While ACME represents each certification path separately, applications might com
 
 * A deployment might combine the paths from multiple ACME orders in a single file. The TLS server might then be configured to load its full certificate configuration from the file.
 
-This section extends the PEM representation defined in {{pem-representation}} for such cases.
-
-A list of certification paths is represented in PEM by concatenating their corresponding PEM representations. Each path MUST begin with a CertificatePropertyList, which signals a new path to the decoder. If the path has no properties configured, the corresponding PEM-encoded CertificatePropertyList is as follows:
-
-~~~
------BEGIN CERTIFICATE PROPERTIES-----
-AAA=
------END CERTIFICATE PROPERTIES-----
-~~~
+This section defines a *PEM credential list* format for such cases. A PEM credential list contains a concatenated list of certification paths, each represented as in {{pem-representation}}. Each path MUST begin with a CertificatePropertyList, which signals a new path to the decoder.
 
 Depending on the application, the order of paths MAY be significant or MAY be ignored. For example:
 
