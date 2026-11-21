@@ -5,12 +5,12 @@
 Transport Layer Security                                         B. Beck
 Internet-Draft                                                   OpenSSL
 Intended status: Standards Track                             D. Benjamin
-Expires: 22 May 2027                                          Google LLC
+Expires: 25 May 2027                                          Google LLC
                                                               D. O'Brien
                                                                         
                                                               K. Nekritz
                                                                     Meta
-                                                        18 November 2026
+                                                        21 November 2026
 
 
                       TLS Trust Anchor Identifiers
@@ -56,7 +56,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 22 May 2027.
+   This Internet-Draft will expire on 25 May 2027.
 
 Copyright Notice
 
@@ -97,7 +97,7 @@ Table of Contents
      7.3.  PEM Representation
      7.4.  ACME Extension
        7.4.1.  Example
-     7.5.  Representing Multiple Paths
+     7.5.  PEM Credential Lists
    8.  Implementation Considerations
    9.  Use Cases
      9.1.  Making Use of Newly-Trusted CAs
@@ -1001,7 +1001,15 @@ Table of Contents
 
    CertificatePropertyLists are encoded using the "CERTIFICATE
    PROPERTIES" label.  The encoded data is a serialized
-   CertificatePropertyList, defined in Section 7.
+   CertificatePropertyList, defined in Section 7.  This element is
+   required in this format, but the CertificatePropertyList MAY contain
+   no properties if the path has no associated properties.  In that
+   case, the corresponding PEM-encoded CertificatePropertyList is as
+   follows:
+
+   -----BEGIN CERTIFICATE PROPERTIES-----
+   AAA=
+   -----END CERTIFICATE PROPERTIES-----
 
    Certificates are encoded as in Section 5.1 of [RFC7468], except DER
    [X690] MUST be used.
@@ -1135,7 +1143,7 @@ Table of Contents
    client to use CA2 as the source of the fallback path.  Path 2A is
    thus chosen as fallback.
 
-7.5.  Representing Multiple Paths
+7.5.  PEM Credential Lists
 
    While ACME represents each certification path separately,
    applications might combine multiple certification paths in one file
@@ -1149,18 +1157,10 @@ Table of Contents
       a single file.  The TLS server might then be configured to load
       its full certificate configuration from the file.
 
-   This section extends the PEM representation defined in Section 7.3
-   for such cases.
-
-   A list of certification paths is represented in PEM by concatenating
-   their corresponding PEM representations.  Each path MUST begin with a
-   CertificatePropertyList, which signals a new path to the decoder.  If
-   the path has no properties configured, the corresponding PEM-encoded
-   CertificatePropertyList is as follows:
-
-   -----BEGIN CERTIFICATE PROPERTIES-----
-   AAA=
-   -----END CERTIFICATE PROPERTIES-----
+   This section defines a _PEM credential list_ format for such cases.
+   A PEM credential list contains a concatenated list of certification
+   paths, each represented as in Section 7.3.  Each path MUST begin with
+   a CertificatePropertyList, which signals a new path to the decoder.
 
    Depending on the application, the order of paths MAY be significant
    or MAY be ignored.  For example:
