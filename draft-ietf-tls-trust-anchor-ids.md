@@ -547,7 +547,7 @@ TrustAnchorIDPattern TrustAnchorIDPatternList<1..2^16-1>;
 
 * Certificate signature algorithms are expressed as AlgorithmIdentifiers, while TLS uses SignatureScheme values. A TLS implementation that performs this check cannot map an AlgorithmIdentifier it does not recognize. In some cases, the mapping may not be possible without knowledge of the trust anchor's public key.
 
-* Some signature algorithms can be assume supported by any relying party that trusts the trust anchor, e.g. because it is the signature algorithm used by the root CA. These algorithms would otherwise not need to participate in this mechanism.
+* Some signature algorithms can be assumed supported by any relying party that trusts the trust anchor, e.g. because it is the signature algorithm used by the root CA. These algorithms would otherwise not need to participate in this mechanism.
 
 The `signature_algorithms` property aids in implementing this check. Its `data` field contains a SignatureSchemeListOrEmpty structure, defined below. Its value is the list of signature algorithms used in the certification path, expressed as TLS SignatureScheme codepoints ({{Section 4.3.3 of !RFC9846}}).
 
