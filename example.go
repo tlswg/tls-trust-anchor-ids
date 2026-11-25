@@ -3,6 +3,7 @@
 package main
 
 import (
+	"crypto/tls"
 	"encoding/pem"
 	"errors"
 	"fmt"
@@ -14,8 +15,9 @@ import (
 )
 
 const (
-	propertyTrustAnchorID     = 0
-	propertyTrustAnchorGroups = 1
+	propertyTrustAnchorID       = 0
+	propertyTrustAnchorGroups   = 1
+	propertySignatureAlgorithms = 3
 )
 
 type TrustAnchorID []uint64
@@ -154,9 +156,10 @@ type UnknownProperty struct {
 }
 
 type CertificatePropertyList struct {
-	TrustAnchorID     TrustAnchorID
-	TrustAnchorGroups []TrustAnchorIDPattern
-	UnknownProperties []UnknownProperty
+	TrustAnchorID       TrustAnchorID
+	TrustAnchorGroups   []TrustAnchorIDPattern
+	SignatureAlgorithms *[]uint16
+	UnknownProperties   []UnknownProperty
 }
 
 func (l *CertificatePropertyList) Marshal() ([]byte, error) {
@@ -183,6 +186,16 @@ func (l *CertificatePropertyList) Marshal() ([]byte, error) {
 						list.AddUint8LengthPrefixed(func(pattern *cryptobyte.Builder) {
 							addTrustAnchorIDPattern(pattern, p)
 						})
+					}
+				})
+			})
+		}
+		if l.SignatureAlgorithms != nil {
+			props.AddUint16(propertySignatureAlgorithms)
+			props.AddUint16LengthPrefixed(func(child *cryptobyte.Builder) {
+				child.AddUint16LengthPrefixed(func(list *cryptobyte.Builder) {
+					for _, s := range *l.SignatureAlgorithms {
+						list.AddUint16(s)
 					}
 				})
 			})
@@ -230,6 +243,20 @@ func parseCertificatePropertyList(in []byte) (*CertificatePropertyList, error) {
 				}
 				out.TrustAnchorGroups = append(out.TrustAnchorGroups, pattern)
 			}
+		case propertySignatureAlgorithms:
+			var list cryptobyte.String
+			if !data.ReadUint16LengthPrefixed(&list) || !data.Empty() {
+				return nil, errors.New("invalid signature_algorithms")
+			}
+			var sigAlgs []uint16
+			for !list.Empty() {
+				var sigAlg uint16
+				if !list.ReadUint16(&sigAlg) {
+					return nil, errors.New("invalid signature_algorithms")
+				}
+				sigAlgs = append(sigAlgs, sigAlg)
+			}
+			out.SignatureAlgorithms = &sigAlgs
 		default:
 			out.UnknownProperties = append(out.UnknownProperties, UnknownProperty{
 				Type: propType,
@@ -253,6 +280,17 @@ func printProperties(props *CertificatePropertyList) {
 			fmt.Printf("    %s\n", g)
 		}
 	}
+	if props.SignatureAlgorithms != nil {
+		numProps++
+		if len(*props.SignatureAlgorithms) == 0 {
+			fmt.Printf("- signature_algorithms: (empty)\n")
+		} else {
+			fmt.Printf("- signature_algorithms:\n")
+			for _, s := range *props.SignatureAlgorithms {
+				fmt.Printf("    0x%04x\n", s)
+			}
+		}
+	}
 	for _, p := range props.UnknownProperties {
 		numProps++
 		if len(p.Data) == 0 {
@@ -273,6 +311,7 @@ func printExample() {
 			{{Min: 2187, Max: 2187}, {Min: 2, Max: 2}, {Min: 100, Max: 200}},
 			{{Min: 32473, Max: 32473}, {Min: 3, Max: 3}, {Min: 42, MaxIsInfinity: true}, {Min: 100, Max: 200}},
 		},
+		SignatureAlgorithms: &[]uint16{uint16(tls.ECDSAWithP256AndSHA256)},
 	}
 	b, err := props.Marshal()
 	if err != nil {
