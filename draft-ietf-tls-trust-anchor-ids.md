@@ -557,7 +557,7 @@ SignatureScheme SignatureSchemeListOrEmpty<0..2^16-2>;
 
 This list MAY omit any signature algorithms that can be assumed supported by any relying parties that support the path's trust anchor. It MAY have length zero if all algorithms would be omitted.
 
-If the property is present and the authenticating party performs the above check, the authenticating party SHOULD compare the values in the property against the relying party's list, instead of decoding the certificate itself. When doing so, the authenticating party MUST accept unrecognized SignatureScheme values in the property and compare them opaquely against SignatureScheme values in relying party extension. If the property specifies a zero-length list, the check succeeds vacuously.
+If the property is present and the authenticating party that implements this document performs the above check, the authenticating party MUST compare the values in the property against the relying party's list, instead of decoding the certificate itself. When doing so, the authenticating party MUST accept unrecognized SignatureScheme values in the property and compare them opaquely against SignatureScheme values in relying party extension. If the property specifies a zero-length list, the check succeeds vacuously.
 
 This property does not impact the CertificateVerify signature in TLS itself. It also does not, on its own, instruct the TLS implementation to perform the above check. If the TLS implementation would otherwise select a certificate independent of the `signature_algorithms_cert` extension, it continues to do so in the presence of this property.
 
