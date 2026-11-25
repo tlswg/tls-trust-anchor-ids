@@ -390,6 +390,8 @@ This document extends TLS certificate selection ({{Section 4.5.1.2 of !RFC9846}}
 
 * If no certification paths satisfy either extension, the authenticating party MAY return a `handshake_failure` alert, or send some fallback certificate, without considering `trust_anchors` or `certificate_authorities`.
 
+* If checking certificate signature algorithms, the authenticating party SHOULD incorporate the updates described in {{signature-algorithms-property}}.
+
 When the authenticating party is a server, {{recovery}} describes an additional requirement for servers that implement this protocol.
 
 ### Ordering Candidates
@@ -502,6 +504,8 @@ A CertificatePropertyList is defined using the TLS presentation language ({{Sect
 enum {
     trust_anchor_id(0),
     trust_anchor_groups(1),
+    /* 2 is reserved by older versions of this protocol */
+    signature_algorithms(3),
     (2^16-1)
 } CertificatePropertyType;
 
@@ -519,6 +523,7 @@ This document defines three properties:
 
 * `trust_anchor_id`, defined in {{trust-anchor-id-property}}
 * `trust_anchor_groups`, defined in {{trust-anchor-groups-property}}
+* `signature_algorithms`, defined in {{signature-algorithms-property}}
 
 Future documents MAY define other properties for use with other mechanisms. Such a document MUST define the format of the `data` field and how authenticating parties interpret the property. Authenticating parties MUST ignore properties with unrecognized CertificatePropertyType values.
 
@@ -535,6 +540,26 @@ opaque TrustAnchorIDPattern<0..2^8-1>;
 
 TrustAnchorIDPattern TrustAnchorIDPatternList<1..2^16-1>;
 ~~~
+
+## Signature Algorithms Property
+
+{{Section 4.5.1.2 of !RFC9846}} expects TLS authenticating parties to compare signatures in certificates against the relying party's `signature_algorithms_cert` extension, or its `signature_algorithms` extension if not present. However:
+
+* Certificate signature algorithms are expressed as AlgorithmIdentifiers, while TLS uses SignatureScheme values. A TLS implementation that performs this check cannot map an AlgorithmIdentifier it does not recognize. In some cases, the mapping may not be possible without knowledge of the trust anchor's public key.
+
+* Some signature algorithms can be assume supported by any relying party that trusts the trust anchor, e.g. because it is the signature algorithm used by the root CA. These algorithms would otherwise not need to participate in this mechanism.
+
+The `signature_algorithms` property aids in implementing this check. Its `data` field contains a SignatureSchemeListOrEmpty structure, defined below. Its value is the list of signature algorithms used in the certification path, expressed as TLS SignatureScheme codepoints ({{Section 4.3.3 of !RFC9846}}).
+
+~~~
+SignatureScheme SignatureSchemeListOrEmpty<0..2^16-2>;
+~~~
+
+This list MAY omit any signature algorithms that can be assumed supported by any relying parties that support the path's trust anchor. It MAY have length zero if all algorithms would be omitted.
+
+If the property is present and the authenticating party performs the above check, the authenticating party SHOULD compare the values in the property against the relying party's list, instead of decoding the certificate itself. When doing so, the authenticating party MUST accept unrecognized SignatureScheme values in the property and compare them opaquely against SignatureScheme values in relying party extension. If the property specifies a zero-length list, the check succeeds vacuously.
+
+This property does not impact the CertificateVerify signature in TLS itself. It also does not, on its own, instruct the TLS implementation to perform the above check. If the TLS implementation would otherwise select a certificate independent of the `signature_algorithms_cert` extension, it continues to do so in the presence of this property.
 
 ## PEM Representation
 
@@ -564,10 +589,11 @@ The following is an example file with a certification path containing an end-ent
 * A `trust_anchor_groups` property with two patterns:
   * `2187.2.{100-200}`
   * `32473.3.{42-}.{100-200}`
+* A `signature_algorithms` property with a single signature algorithm, `ecdsa_p256_sha256`
 
 ~~~
 -----BEGIN CERTIFICATE PROPERTIES-----
-ACYAAAAEgf1ZAQABABoAGAmRC5ELAgJkgUgNgf1Zgf1ZAwMqgGSBSA==
+AC4AAAAEgf1ZAQABABoAGAmRC5ELAgJkgUgNgf1Zgf1ZAwMqgGSBSAADAAQAAgQD
 -----END CERTIFICATE PROPERTIES-----
 -----BEGIN CERTIFICATE-----
 MIIBVzCB/6ADAgECAgkAh7Uv5X8pplkwCgYIKoZIzj0EAwIwGjEYMBYGA1UEAwwP
@@ -652,7 +678,7 @@ The following example file contains two certification paths:
 
 ~~~
 -----BEGIN CERTIFICATE PROPERTIES-----
-ACYAAAAEgf1ZAQABABoAGAmRC5ELAgJkgUgNgf1Zgf1ZAwMqgGSBSA==
+AC4AAAAEgf1ZAQABABoAGAmRC5ELAgJkgUgNgf1Zgf1ZAwMqgGSBSAADAAQAAgQD
 -----END CERTIFICATE PROPERTIES-----
 -----BEGIN CERTIFICATE-----
 MIIBVzCB/6ADAgECAgkAh7Uv5X8pplkwCgYIKoZIzj0EAwIwGjEYMBYGA1UEAwwP
@@ -946,10 +972,12 @@ IANA is requested to update the "References" column of the id-rdna-trustAnchorID
 
 IANA is requested to create the "TLS CertificatePropertyType" registry within the "Transport Layer Security (TLS) Extensions" group. The initial entries in the registry are as follows:
 
-| Decimal | Description              | References |
-|---------|--------------------------|------------|
-| 0       | trust_anchor_id          | [this-RFC] |
-| 1       | trust_anchor_groups      | [this-RFC] |
+| Decimal | Description          | References |
+|---------|----------------------|------------|
+| 0       | trust_anchor_id      | [this-RFC] |
+| 1       | trust_anchor_groups  | [this-RFC] |
+| 2       | Reserved             | [this-RFC] |
+| 3       | signature_algorithms | [this-RFC] |
 
 New values are allocated according to the following process:
 
