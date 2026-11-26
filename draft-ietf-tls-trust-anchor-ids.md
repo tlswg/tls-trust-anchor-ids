@@ -502,6 +502,7 @@ A CertificatePropertyList is defined using the TLS presentation language ({{Sect
 enum {
     trust_anchor_id(0),
     trust_anchor_groups(1),
+    /* 2 is reserved by older versions of this protocol */
     (2^16-1)
 } CertificatePropertyType;
 
@@ -946,10 +947,13 @@ IANA is requested to update the "References" column of the id-rdna-trustAnchorID
 
 IANA is requested to create the "TLS CertificatePropertyType" registry within the "Transport Layer Security (TLS) Extensions" group. The initial entries in the registry are as follows:
 
-| Decimal | Description              | References |
-|---------|--------------------------|------------|
-| 0       | trust_anchor_id          | [this-RFC] |
-| 1       | trust_anchor_groups      | [this-RFC] |
+| Decimal     | Description              | References |
+|-------------|--------------------------|------------|
+| 0           | trust_anchor_id          | [this-RFC] |
+| 1           | trust_anchor_groups      | [this-RFC] |
+| 2           | Reserved                 | [this-RFC] |
+| 3-65279     | Unassigned               |            |
+| 65280-65535 | Reserved for Private Use | [this-RFC] |
 
 New values are allocated according to the following process:
 
