@@ -814,6 +814,8 @@ Relying parties SHOULD determine which trust anchors participate in this mechani
 
 Additionally, a relying party that computes the `trust_anchors` extension based on prior state may allow observers to correlate across connections. Relying parties SHOULD NOT maintain such state across connections that are intended to be uncorrelated.
 
+The serialization order of the requested trust anchor list can introduce a correlation signal if it varies between clients but persists across connections. Relying parties SHOULD mitigate this by serializing the IDs in a canonical order.
+
 ## Authenticating Parties
 
 If the authenticating party is a server, the `trust_anchors` extension in EncryptedExtensions enumerates the trust anchors for the server's available certification paths. (See {{recovery}}.) This assumes these trust anchors are not sensitive. Servers SHOULD NOT use this mechanism to negotiate certification paths with sensitive trust anchors.
