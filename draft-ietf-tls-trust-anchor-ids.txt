@@ -5,12 +5,12 @@
 Transport Layer Security                                         B. Beck
 Internet-Draft                                                   OpenSSL
 Intended status: Standards Track                             D. Benjamin
-Expires: 25 May 2027                                          Google LLC
+Expires: 31 May 2027                                          Google LLC
                                                               D. O'Brien
                                                                         
                                                               K. Nekritz
                                                                     Meta
-                                                        21 November 2026
+                                                        27 November 2026
 
 
                       TLS Trust Anchor Identifiers
@@ -56,7 +56,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 25 May 2027.
+   This Internet-Draft will expire on 31 May 2027.
 
 Copyright Notice
 
@@ -936,6 +936,7 @@ Table of Contents
    enum {
        trust_anchor_id(0),
        trust_anchor_groups(1),
+       /* 2 is reserved by older versions of this protocol */
        (2^16-1)
    } CertificatePropertyType;
 
@@ -1770,15 +1771,21 @@ Table of Contents
    registry within the "Transport Layer Security (TLS) Extensions"
    group.  The initial entries in the registry are as follows:
 
-              +=========+=====================+============+
-              | Decimal | Description         | References |
-              +=========+=====================+============+
-              | 0       | trust_anchor_id     | [this-RFC] |
-              +---------+---------------------+------------+
-              | 1       | trust_anchor_groups | [this-RFC] |
-              +---------+---------------------+------------+
+          +=============+==========================+============+
+          | Decimal     | Description              | References |
+          +=============+==========================+============+
+          | 0           | trust_anchor_id          | [this-RFC] |
+          +-------------+--------------------------+------------+
+          | 1           | trust_anchor_groups      | [this-RFC] |
+          +-------------+--------------------------+------------+
+          | 2           | Reserved                 | [this-RFC] |
+          +-------------+--------------------------+------------+
+          | 3-65279     | Unassigned               |            |
+          +-------------+--------------------------+------------+
+          | 65280-65535 | Reserved for Private Use | [this-RFC] |
+          +-------------+--------------------------+------------+
 
-                                 Table 4
+                                  Table 4
 
    New values are allocated according to the following process:
 
